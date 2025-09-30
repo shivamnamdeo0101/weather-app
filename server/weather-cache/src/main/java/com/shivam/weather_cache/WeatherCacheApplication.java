@@ -1,0 +1,13 @@
+package com.shivam.weather_cache;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class WeatherCacheApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(WeatherCacheApplication.class, args);
+	}
+
+}

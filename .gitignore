@@ -1,0 +1,27 @@
+# -------------------------
+# Frontend (Next.js)
+# -------------------------
+/client/node_modules
+/client/.next
+/client/out
+/client/.vercel
+/client/.env*
+/client/coverage
+
+# -------------------------
+# Backend (Maven / Java)
+# -------------------------
+/server/**/target/
+/server/**/.idea
+/server/**/.vscode
+/server/**/.classpath
+/server/**/.project
+/server/**/.settings
+/server/**/.springBeans
+/server/**/.sts4-cache
+
+# OS files
+.DS_Store
+
+# Logs
+*.log
