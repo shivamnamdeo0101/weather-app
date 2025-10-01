@@ -28,3 +28,10 @@
 
 #vscode
 .vscode/
+
+#intellij
+.idea/
+*.iml
+out/
+*.iws
+*.ipr
