@@ -14,6 +14,6 @@ public class ForecastItemDTO {
     private List<WeatherDTO> weather;
     private WindDTO wind;
 
-    // Add this field to store predictions per forecast item
+    //predictions per forecast item
     private List<String> predictions;
 }
