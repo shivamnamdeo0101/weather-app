@@ -19,9 +19,12 @@
 /server/**/.settings
 /server/**/.springBeans
 /server/**/.sts4-cache
+/server/**/.env
 
 # OS files
 .DS_Store
+
+#env
 
 # Logs
 *.log
