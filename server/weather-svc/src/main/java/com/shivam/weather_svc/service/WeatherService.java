@@ -2,10 +2,12 @@ package com.shivam.weather_svc.service;
 
 import com.shivam.weather_svc.dto.*;
 
+import com.shivam.weather_svc.exception.ExternalApiException;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
@@ -37,6 +39,7 @@ public class WeatherService {
             String url = apiUrl + "?q=" + cityName + "&cnt=10&units=metric&appid=" + apiKey;
             ForecastResponseDTO response = restTemplate.getForObject(url, ForecastResponseDTO.class);
 
+
             if (response == null || response.getList() == null) {
                 return Collections.emptyList();
             }
@@ -48,10 +51,15 @@ public class WeatherService {
 
             return response.getList();
 
+        }catch (HttpClientErrorException e) {
+            log.error("HTTP Error when calling weather API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new ExternalApiException(e.getMessage());
         } catch (Exception e) {
-            log.error("Error fetching weather data: {}", e.getMessage());
-            return Collections.emptyList();
+            log.error("Unexpected error fetching weather data for city {}: {}", cityName, e.getMessage());
+        }finally {
+            log.info("Completed fetching weather data for city: {}", cityName);
         }
+        return Collections.emptyList();
     }
 
     /**

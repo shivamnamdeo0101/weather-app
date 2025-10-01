@@ -16,6 +16,8 @@ public class AppConstants {
         public static final String FORECAST_NOT_FOUND = "No forecast available for city: ";
         public static final String VALIDATION_FAILED = "Validation failed: ";
         public static final String INTERNAL_SERVER_ERROR = "Internal Server Error: ";
+        public static final String CITY_NOT_FOUND = "City not found";
+        public static final String OPENWEATHER_API_UNAUTHORIZED = "Unauthorized on GET request for openweather api";
     }
 
     // ===========================
