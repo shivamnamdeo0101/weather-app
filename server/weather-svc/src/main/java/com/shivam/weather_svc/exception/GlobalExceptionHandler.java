@@ -1,10 +1,8 @@
 package com.shivam.weather_svc.exception;
 
 import com.shivam.weather_svc.dto.CustomResponse;
-import com.shivam.weather_svc.utils.AppConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
