@@ -27,6 +27,7 @@ public class WeatherService {
 
     private final WeatherPredictionService predictionService;
 
+
     public WeatherService(WeatherPredictionService predictionService) {
         this.predictionService = predictionService;
     }

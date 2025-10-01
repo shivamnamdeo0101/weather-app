@@ -2,6 +2,7 @@ package com.shivam.weather_svc.controller;
 
 import com.shivam.weather_svc.dto.CustomResponse;
 import com.shivam.weather_svc.dto.ForecastItemDTO;
+import com.shivam.weather_svc.service.SlidingWindowRateLimiterService;
 import com.shivam.weather_svc.service.WeatherService;
 import com.shivam.weather_svc.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,9 +28,12 @@ import java.util.List;
 public class WeatherController {
 
     private final WeatherService weatherService;
+    private final SlidingWindowRateLimiterService rateLimiter;
 
-    public WeatherController(WeatherService weatherService) {
+    public WeatherController(WeatherService weatherService,
+                             SlidingWindowRateLimiterService rateLimiter) {
         this.weatherService = weatherService;
+        this.rateLimiter = rateLimiter;
     }
 
     /**
@@ -57,6 +62,13 @@ public class WeatherController {
     @GetMapping("/forecast")
     public ResponseEntity<CustomResponse<List<ForecastItemDTO>>> getForecast(@RequestParam String city) {
         log.info("Fetching forecast for city: {}", city);
+
+        //Rate limiting
+        if (!rateLimiter.tryConsume()) {
+            log.warn("Rate limit exceeded for city: {}", city);
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(new CustomResponse<>(false, AppConstants.Messages.TOO_MANY_REQUEST, null));
+        }
 
         List<ForecastItemDTO> forecast = weatherService.getThreeHourForecast(city);
 

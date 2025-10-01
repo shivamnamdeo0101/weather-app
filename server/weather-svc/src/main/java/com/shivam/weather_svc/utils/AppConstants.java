@@ -18,6 +18,7 @@ public class AppConstants {
         public static final String INTERNAL_SERVER_ERROR = "Internal Server Error: ";
         public static final String CITY_NOT_FOUND = "City not found";
         public static final String OPENWEATHER_API_UNAUTHORIZED = "Unauthorized on GET request for openweather api";
+        public static final String TOO_MANY_REQUEST= "Too many request! Try after 60 seconds";
     }
 
     // ===========================
