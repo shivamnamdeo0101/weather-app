@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ExternalApiException.class)
     public ResponseEntity<CustomResponse<Object>> handleExternalApiException(ExternalApiException ex) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.status(ex.getStatus())
                 .body(new CustomResponse<>(false,ex.getMessage(),null));
     }
 
