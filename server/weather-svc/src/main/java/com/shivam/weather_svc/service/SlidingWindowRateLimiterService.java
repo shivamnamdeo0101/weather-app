@@ -29,11 +29,11 @@ public class SlidingWindowRateLimiterService {
      *
      * @return true if request is allowed, false if rate limit exceeded
      */
-    public boolean tryConsume() {
-        long now = Instant.now().getEpochSecond();
 
-        // Remove timestamps older than the window
-        while (!requestTimestamps.isEmpty() && now - requestTimestamps.peekFirst() >= windowSizeSeconds) {
+    public synchronized boolean tryConsume() {
+        long now = Instant.now().toEpochMilli();
+
+        while (!requestTimestamps.isEmpty() && now - requestTimestamps.peekFirst() >= windowSizeSeconds * 1000) {
             requestTimestamps.pollFirst();
         }
 
@@ -41,7 +41,8 @@ public class SlidingWindowRateLimiterService {
             requestTimestamps.addLast(now);
             return true;
         } else {
-            return false; // rate limit exceeded
+            return false;
         }
     }
+
 }
