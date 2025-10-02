@@ -15,15 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-/**
- * REST controller to expose weather forecast APIs.
- * Provides endpoints to fetch 3-hourly forecast data for a city.
- */
 @RestController
-@RequestMapping("/weather")
+@RequestMapping("/api/weather-svc")
 @Slf4j
 public class WeatherController {
 
@@ -36,54 +33,69 @@ public class WeatherController {
         this.rateLimiter = rateLimiter;
     }
 
-    /**
-     * Retrieves 3-hour weather forecast for a specific city.
-     *
-     * Example request: /weather/forecast?city=London
-     *
-     * @param city the name of the city
-     * @return standardized API response containing the forecast list
-     */
     @Operation(
-            summary = "Get 3-hour weather forecast for a city",
-            description = "Fetches 3-hour weather forecast data for the specified city."
+            summary = "Get 3-hour weather forecast for a city (reactive)",
+            description = "Fetches 3-hour weather forecast data for the specified city using non-blocking WebClient."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = AppConstants.Messages.FORECAST_SUCCESS,
+            @ApiResponse(
+                    responseCode = "200",
+                    description = AppConstants.Messages.FORECAST_SUCCESS,
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = CustomResponse.class))),
-            @ApiResponse(responseCode = "401", description = AppConstants.Messages.OPENWEATHER_API_UNAUTHORIZED,
-                    content = @Content),
-            @ApiResponse(responseCode = "404", description = AppConstants.Messages.CITY_NOT_FOUND,
-                    content = @Content),
-            @ApiResponse(responseCode = "500", description = AppConstants.Messages.INTERNAL_SERVER_ERROR,
-                    content = @Content)
+                            schema = @Schema(implementation = ForecastItemDTO.class))
+            ),
+            @ApiResponse(responseCode = "401", description = AppConstants.Messages.OPENWEATHER_API_UNAUTHORIZED),
+            @ApiResponse(responseCode = "404", description = AppConstants.Messages.CITY_NOT_FOUND),
+            @ApiResponse(responseCode = "429", description = AppConstants.Messages.TOO_MANY_REQUEST),
+            @ApiResponse(responseCode = "500", description = AppConstants.Messages.INTERNAL_SERVER_ERROR)
     })
     @GetMapping("/forecast")
-    public ResponseEntity<CustomResponse<List<ForecastItemDTO>>> getForecast(@RequestParam String city) {
-        log.info("Fetching forecast for city: {}", city);
+    public Mono<ResponseEntity<CustomResponse<List<ForecastItemDTO>>>> getForecastReactive(
+            @RequestParam String city) {
 
-        //Rate limiting
+        log.info("Fetching reactive forecast for city: {}", city);
+
+        // ✅ Rate limiting
         if (!rateLimiter.tryConsume()) {
             log.warn("Rate limit exceeded for city: {}", city);
-            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
-                    .body(new CustomResponse<>(false, AppConstants.Messages.TOO_MANY_REQUEST, null));
-        }
-
-        List<ForecastItemDTO> forecast = weatherService.getThreeHourForecast(city);
-
-        if (forecast == null || forecast.isEmpty()) {
-            log.warn("No forecast data found for city: {}", city);
-            return ResponseEntity.ok(
-                    new CustomResponse<>(true, AppConstants.Messages.FORECAST_NOT_FOUND + city, null)
+            return Mono.just(
+                    ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                            .body(new CustomResponse<>(false, AppConstants.Messages.TOO_MANY_REQUEST, null))
             );
         }
 
-        log.info("Forecast data for {}: {}", city, forecast);
-        log.info("Forecast retrieved successfully for city: {}", city);
+        // ✅ Non-blocking call
+        return weatherService.getThreeHourForecastReactive(city)
+                .map(forecast -> {
+                    if (forecast == null || forecast.isEmpty()) {
+                        log.warn("No forecast data found for city: {}", city);
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(new CustomResponse<List<ForecastItemDTO>>( // 👈 Explicit generic
+                                        false,
+                                        AppConstants.Messages.FORECAST_NOT_FOUND + city,
+                                        null
+                                ));
+                    }
+                    log.info("Reactive forecast retrieved successfully for city: {}", city);
+                    return ResponseEntity.ok(
+                            new CustomResponse<List<ForecastItemDTO>>( // 👈 Explicit generic
+                                    true,
+                                    AppConstants.Messages.FORECAST_SUCCESS,
+                                    forecast
+                            )
+                    );
+                })
+                .onErrorResume(e -> {
+                    log.error("Error while fetching forecast reactively for {}: {}", city, e.getMessage());
+                    return Mono.just(
+                            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                    .body(new CustomResponse<List<ForecastItemDTO>>( // 👈 Explicit generic
+                                            false,
+                                            e.getMessage(),
+                                            null
+                                    ))
+                    );
+                });
 
-        return ResponseEntity.ok(
-                new CustomResponse<>(true, AppConstants.Messages.FORECAST_SUCCESS, forecast)
-        );
     }
 }

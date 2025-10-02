@@ -5,10 +5,13 @@ import com.shivam.weather_svc.dto.ForecastResponseDTO;
 import com.shivam.weather_svc.exception.ExternalApiException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,41 +29,33 @@ public class WeatherService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     private final WeatherPredictionService predictionService;
+    private final WebClient webClient = WebClient.create(); // for reactive calls
+
 
 
     public WeatherService(WeatherPredictionService predictionService) {
         this.predictionService = predictionService;
     }
 
-    public List<ForecastItemDTO> getThreeHourForecast(String cityName) {
-        try {
-            log.info("Fetching weather data for city: {}", cityName);
-            String url = apiUrl + "?q=" + cityName + "&cnt=10&units=metric&appid=" + apiKey;
+    public Mono<List<ForecastItemDTO>> getThreeHourForecastReactive(String cityName) {
+        String url = apiUrl + "?q=" + cityName + "&cnt=10&units=metric&appid=" + apiKey;
 
-            ForecastResponseDTO response = restTemplate.getForObject(url, ForecastResponseDTO.class);
-
-            if (response == null || response.getList() == null) {
-                return Collections.emptyList();
-            }
-
-            // Add predictions using the dedicated business logic service
-            for (ForecastItemDTO item : response.getList()) {
-                item.setPredictions(predictionService.generatePredictions(item));
-            }
-
-            return response.getList();
-
-        } catch (HttpClientErrorException e) {
-            log.error("HTTP Error when calling weather API: {} - {}", e.getStatusCode(), e.getResponseBodyAsString());
-            // Map API response code to HttpStatus
-            HttpStatusCode status = e.getStatusCode();
-            String message = "Weather API call failed: " + e.getMessage();
-            throw new ExternalApiException(message, status);
-        } catch (Exception e) {
-            log.error("Unexpected error fetching weather data for city {}: {}", cityName, e.getMessage());
-        } finally {
-            log.info("Completed fetching weather data for city: {}", cityName);
-        }
-        return Collections.emptyList();
+        return webClient.get()
+                .uri(url)
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<ForecastResponseDTO>() {})
+                .map(response -> {
+                    if (response == null || response.getList() == null) {
+                        return Collections.<ForecastItemDTO>emptyList();
+                    }
+                    response.getList()
+                            .forEach(item -> item.setPredictions(predictionService.generatePredictions(item)));
+                    return response.getList();
+                })
+                .onErrorMap(e -> {
+                    log.error("Reactive weather API call failed for city {}: {}", cityName, e.getMessage());
+                    return new ExternalApiException("Weather API failed", null);
+                });
     }
+
 }
