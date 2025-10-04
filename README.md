@@ -122,5 +122,3 @@ API_KEY=<open-weather-api-key>
 * Build and run containers using `docker-compose` or `podman-compose`.
 
 ---
-
-Do you want me to also **add a short diagram for the Docker Compose structure** in the README for visual clarity?
