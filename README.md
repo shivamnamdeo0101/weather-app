@@ -1,5 +1,3 @@
-Here’s a **clean, concise, and professional README** for your weather microservices project:
-
 ---
 
 # Weather App Microservices
