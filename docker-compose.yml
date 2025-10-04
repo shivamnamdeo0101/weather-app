@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  # 1. weather-app (Frontend/Entry Point - Client)
+#  weather-app:
+#    build: ./client
+#    container_name: weather-app-container
+#    ports:
+#      - "80:80"
+#    depends_on:
+#      - weather-cache
+#    restart: unless-stopped
+
+  # 2. weather-cache (Spring Boot App with Caching Logic)
+  weather-cache:
+    build: ./server/weather-cache
+    container_name: weather-cache-container
+    ports:
+      - "8081:8081"
+    # Ensure this .env file contains: REDIS_HOST=redis-db and the password/username
+    env_file:
+      - ./server/weather-cache/.env
+    restart: unless-stopped
+    depends_on:
+      - weather-svc
+      - redis-db
+
+  # 3. weather-svc (Backend API Service)
+  weather-svc:
+    build: ./server/weather-svc
+    container_name: weather-svc-container
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./server/weather-svc/.env
+    restart: unless-stopped
+
+  # ===============================================
+  # 4. redis-db (Local Redis Cache Instance)
+  # ===============================================
+  redis-db:
+    image: redis:7.2.5-alpine
+    container_name: redis-db-container
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    # 🔑 CRITICAL FIX: Configures Redis server to use the exact password from your .env file
+    # The command enables AOF persistence and sets the required password.
+    command: redis-server --requirepass 0trdM3mluTs4CTTipn83YJMnXBoNJx3A --appendonly yes
+
+# ===============================================
+# TOP LEVEL VOLUMES
+# ===============================================
+volumes:
+  redis-data:

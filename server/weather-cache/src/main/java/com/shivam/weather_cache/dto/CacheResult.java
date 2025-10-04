@@ -1,10 +1,11 @@
 package com.shivam.weather_cache.dto;
 
+import lombok.Data;
 import lombok.Getter;
 
 import java.util.Map;
 
-@Getter
+@Data
 public class CacheResult {
     private final Map<String, Object> data;
     private final boolean cacheHit;
