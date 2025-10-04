@@ -23,7 +23,7 @@ import java.util.List;
  * Provides endpoints to fetch 3-hourly forecast data for a city.
  */
 @RestController
-@RequestMapping("/weather")
+@RequestMapping("/api/weather-svc")
 @Slf4j
 public class WeatherController {
 
