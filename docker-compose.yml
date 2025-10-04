@@ -41,12 +41,16 @@ services:
   redis-db:
     image: redis:7.2.5-alpine
     container_name: redis-db-container
+    ports:
+      - "6379:6379"
+    env_file:
+      - ./server/weather-svc/.env
     volumes:
       - redis-data:/data
     restart: unless-stopped
     # 🔑 CRITICAL FIX: Configures Redis server to use the exact password from your .env file
     # The command enables AOF persistence and sets the required password.
-    command: redis-server --requirepass 0trdM3mluTs4CTTipn83YJMnXBoNJx3A --appendonly yes
+#    command: redis-server --requirepass 0trdM3mluTs4CTTipn83YJMnXBoNJx3A --appendonly yes
 
 # ===============================================
 # TOP LEVEL VOLUMES
