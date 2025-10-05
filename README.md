@@ -213,6 +213,8 @@ WEATHER_API_KEY=d2************63e
 WEATHER_API_URL=http://api.openweathermap.org/data/2.5/forecast
 RATE_LIMITER_MAX_REQ_PER_MIN=10
 RATE_LIMITER_MAX_WINDOW_SIZE_IN_SEC=10
+WEATHER_API_UNITS=metric
+WEATHER_API_CNT=24
 ```
 
 ---
