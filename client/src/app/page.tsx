@@ -1,103 +1,147 @@
-import Image from "next/image";
+'use client';
+
+import React, { useState, useCallback, useMemo } from 'react';
+import { WeatherData } from '@/types/weather';
+import { WeatherApiService, WeatherError } from '@/services/weatherApi';
+import SearchBar from '@/components/SearchBar';
+import TemperatureList from '@/components/TemperatureList';
+import PredictionsList from '@/components/PredictionsList';
+import { Cloud, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [weatherData, setWeatherData] = useState<WeatherData[]>([]);
+  const [currentCity, setCurrentCity] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleSearch = useCallback(async (city: string) => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await WeatherApiService.getForecast(city);
+      
+      if (response.success && response.data) {
+        setWeatherData(response.data);
+        setCurrentCity(city);
+      } else {
+        setError(response.message || 'Failed to fetch weather data');
+      }
+    } catch (err) {
+      if (err instanceof WeatherError) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred. Please try again.');
+      }
+      setWeatherData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const hasPredictions = useMemo(() => {
+    return weatherData.some(item => item.predictions && item.predictions.length > 0);
+  }, [weatherData]);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Cloud className="h-8 w-8 text-blue-400" />
+            <h1 className="text-4xl font-bold gradient-text">
+              Weather Forecast
+            </h1>
+          </div>
+          <p className="text-gray-400 text-lg">
+            Get detailed weather forecasts and predictions for any city
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        {/* Search Bar */}
+        <div className="mb-8">
+          <SearchBar 
+            onSearch={handleSearch} 
+            isLoading={isLoading}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="max-w-4xl mx-auto mb-8">
+            <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4 flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-red-300 font-medium">Error</p>
+                <p className="text-red-200 text-sm">{error}</p>
+              </div>
+              <button
+                onClick={clearError}
+                className="text-red-400 hover:text-red-300 transition-colors"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gray-800 rounded-lg p-8 text-center">
+              <Loader2 className="h-12 w-12 text-blue-400 animate-spin mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-white mb-2">
+                Loading Weather Data
+              </h3>
+              <p className="text-gray-400">
+                Fetching forecast for {currentCity || 'your city'}...
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Weather Data Display */}
+        {!isLoading && weatherData.length > 0 && (
+          <div className="space-y-8">
+            {/* Temperature List */}
+            <TemperatureList 
+              weatherData={weatherData} 
+              city={currentCity} 
+            />
+
+            {/* Predictions List */}
+            {hasPredictions && (
+              <PredictionsList weatherData={weatherData} />
+            )}
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && weatherData.length === 0 && !error && (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gray-800 rounded-lg p-12 text-center">
+              <Cloud className="h-16 w-16 text-gray-400 mx-auto mb-6" />
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Welcome to Weather Forecast
+              </h3>
+              <p className="text-gray-400 text-lg mb-6">
+                Enter a city name above to get detailed weather forecasts and predictions
+              </p>
+              <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
+                <span>• Real-time weather data</span>
+                <span>• 5-day forecasts</span>
+                <span>• Smart predictions</span>
+                <span>• Detailed analytics</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
