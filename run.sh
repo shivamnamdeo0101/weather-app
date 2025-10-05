@@ -28,3 +28,7 @@ eval "$IMAGE_PRUNE_CMD"
 
 echo "🚀 Starting containers..."
 $COMPOSE_CMD up --build -d
+
+echo "✅ All services are up and running!"
+
+
