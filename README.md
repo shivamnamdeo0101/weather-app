@@ -276,6 +276,3 @@ curl --location 'https://api.openweathermap.org/data/2.5/forecast?q=banaras&appi
 * Build and run containers using `docker-compose` or `podman-compose`. ✅ 
 
 ---
-
-```
-```
