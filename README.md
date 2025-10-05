@@ -175,7 +175,7 @@ curl --location 'https://api.openweathermap.org/data/2.5/forecast?q=banaras&appi
 
 **Notes:**
 
-* `cnt=10` → returns 10 forecast blocks (~1.25 days)
+* `cnt=8` → returns total forecast blocks to be retured cnt=8 (return 8 forecast blocks forecast blocks per 3 hours window size)
 * `units=metric` → temperature in °C, wind speed in m/s
 * `/actuator/health` → checks service status
 
