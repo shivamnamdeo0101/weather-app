@@ -22,7 +22,7 @@ public class AppConstants {
     // Messages
     // ===========================
     public final class Messages {
-        private ErrorMessages() {}
+        private Messages() {}
         public static final String VALIDATION_ERROR = "Validation error";
         public static final String INTERNAL_SERVER = "Internal server error";
         public static final String WEATHER_SERVICE_ERROR = "Weather service error";
