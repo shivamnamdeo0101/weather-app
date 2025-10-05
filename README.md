@@ -55,6 +55,60 @@ end
 
 ---
 
+---
+
+## 🏆 Best Practices
+
+- **Rate Limiter:**  
+  Implemented in `weather-svc` to allow **60 requests per minute per client**.  
+  - Excess requests are rejected with `429 Too Many Requests` ✅  
+  - Ensures backend stability and prevents overload.  
+  - Designed to be extendable for configurable limits per endpoint or user type.
+
+- **Facade / Cache-Aside Design Pattern:**  
+  `weather-cache` uses the **Cache-Aside pattern** to reduce direct calls to the backend service (`weather-svc`).  
+  - On cache hit: returns cached data immediately, reducing backend load.  
+  - On cache miss: fetches fresh data from `weather-svc`, stores it in cache, then returns it.  
+  - This offloads `weather-svc`, improves response time, and optimizes system performance. ✅  
+  - Can be extended to multi-level caching (e.g., global + regional caches).
+
+- **Cache Eviction Strategy (Strategy Pattern):**  
+  Uses a combination of **LRU, LFU, and TTL** strategies:  
+  - **Hot Keys:** Most active cities in the last 6 minutes → LFU (least frequently used items are kept longer).  
+  - **Cold Keys:** Less active cities in the last 6 minutes → LRU (least recently used items are evicted first).  
+  - **Normal Keys:** TTL (time-to-live) of 5 minutes for standard entries. ✅  
+  - A scheduler runs **every 1 minute** to evaluate and adjust eviction strategies automatically.  
+  - This ensures optimal cache utilization and prioritizes frequently accessed cities.  
+
+- **Inflight Request Pattern:**  
+  Handles multiple simultaneous requests for the same city within 1 minute:  
+  - Only **one request** is sent to `weather-svc`.  
+  - Other requests for the same city wait for the response and then receive the same data.  
+  - Implemented using **queue + ConcurrentHashMap** to track inflight requests.  
+  - Reduces redundant backend calls and avoids hitting rate limits.  
+
+- **Exception Handling:**  
+  Comprehensive error handling ensures proper responses for different scenarios:  
+    | HTTP Status | Scenario                          | Notes                                        |
+    |------------|----------------------------------|------------------------------------------------|
+    | 429        | Too Many Requests                | Triggered by the rate limiter ✅               |
+    | 502        | Service Down                     | Returned when `weather-svc` is unreachable; can be handled with retry or fallback mechanisms |
+    | 404        | City Not Found                   | Returned when an invalid city is requested ✅  |
+    | 400        | Bad Request                       | Triggered for malformed or invalid query parameters |
+
+
+- **Cross-Origin Policy:**  
+  The cache service only accepts requests from the **frontend host**.  
+  - Prevents unauthorized access from other origins.  
+  - Can be extended to allow dynamic frontend origins with strict CORS rules.  
+
+- **Other Enhancements / Future Considerations:**  
+  - Add **analytics on cache hit/miss ratio** to monitor performance.  
+  - Support **regional hotkeys & edge caching** for frequently accessed regions.  
+  - Implement **alerting** for service downtime or rate-limit breaches.  
+  - Enhance **logging and monitoring** for better observability and troubleshooting.  
+
+
 ## 🛠️ Setup & Run
 
 1. Clone the repository:
