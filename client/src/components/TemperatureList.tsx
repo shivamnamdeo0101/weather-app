@@ -2,7 +2,10 @@
 
 import React, { memo, useMemo } from 'react';
 import { WeatherData } from '@/types/weather';
-import { Thermometer, Calendar, Droplets, Wind } from 'lucide-react';
+import TemperatureDayHeader from './TemperatureDayHeader';
+import TemperatureItemCard from './TemperatureItemCard';
+import { useFormattedForecastDate } from '@/hooks/useFormattedForecastDate';
+import { useWeatherEmoji } from '@/hooks/useWeatherEmoji';
 
 interface TemperatureListProps {
   weatherData: WeatherData[];
@@ -10,40 +13,8 @@ interface TemperatureListProps {
 }
 
 const TemperatureList = memo<TemperatureListProps>(({ weatherData, city }) => {
-  const formatDate = useMemo(() => {
-    return (dateString: string) => {
-      const date = new Date(dateString);
-      return {
-        date: date.toLocaleDateString('en-US', { 
-          weekday: 'short', 
-          month: 'short', 
-          day: 'numeric' 
-        }),
-        time: date.toLocaleTimeString('en-US', { 
-          hour: '2-digit', 
-          minute: '2-digit',
-          hour12: true 
-        })
-      };
-    };
-  }, []);
-
-  const getWeatherIcon = useMemo(() => {
-    return (iconCode: string) => {
-      const iconMap: Record<string, string> = {
-        '01d': '☀️', '01n': '🌙',
-        '02d': '⛅', '02n': '☁️',
-        '03d': '☁️', '03n': '☁️',
-        '04d': '☁️', '04n': '☁️',
-        '09d': '🌧️', '09n': '🌧️',
-        '10d': '🌦️', '10n': '🌧️',
-        '11d': '⛈️', '11n': '⛈️',
-        '13d': '❄️', '13n': '❄️',
-        '50d': '🌫️', '50n': '🌫️'
-      };
-      return iconMap[iconCode] || '🌤️';
-    };
-  }, []);
+  const formatDate = useFormattedForecastDate();
+  const getWeatherIcon = useWeatherEmoji();
 
   const groupedData = useMemo(() => {
     const groups: { [key: string]: WeatherData[] } = {};
@@ -56,13 +27,11 @@ const TemperatureList = memo<TemperatureListProps>(({ weatherData, city }) => {
       groups[date].push(item);
     });
 
-    return Object.entries(groups).map(([date, items]) => {
-      const sortedItems = [...items].sort((a, b) => new Date(a.dt_txt).getTime() - new Date(b.dt_txt).getTime());
-      return {
-        date,
-        items: sortedItems
-      };
-    });
+    // Preserve backend order
+    return Object.entries(groups).map(([date, items]) => ({
+      date,
+      items,
+    }));
   }, [weatherData]);
 
   if (!weatherData.length) {
@@ -83,17 +52,7 @@ const TemperatureList = memo<TemperatureListProps>(({ weatherData, city }) => {
       <div className="space-y-6">
         {groupedData.map(({ date, items }) => (
           <div key={date} className="bg-gray-800 rounded-lg p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Calendar className="h-5 w-5 text-blue-400" />
-              <h3 className="text-lg font-semibold text-white">
-                {new Date(date).toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </h3>
-            </div>
+            <TemperatureDayHeader date={date} />
             
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {items.map((item, index) => {
@@ -101,64 +60,19 @@ const TemperatureList = memo<TemperatureListProps>(({ weatherData, city }) => {
                 const weatherIcon = getWeatherIcon(item.weather[0].icon);
                 
                 return (
-                  <div 
+                  <TemperatureItemCard
                     key={`${item.dt_txt}-${index}`}
-                    className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors duration-200"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl">{weatherIcon}</span>
-                        <div>
-                          <p className="text-sm text-gray-300">{formattedDate}</p>
-                          <p className="text-xs text-gray-400">{time}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-white">
-                          {Math.round(item.main.temp)}°C
-                        </p>
-                        <p className="text-sm text-gray-300">
-                          Feels like {Math.round(item.main.feels_like)}°C
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <Thermometer className="h-4 w-4 text-orange-400" />
-                          <span className="text-gray-300">Range:</span>
-                        </div>
-                        <span className="text-white">
-                          {Math.round(item.main.temp_min)}° - {Math.round(item.main.temp_max)}°
-                        </span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <Droplets className="h-4 w-4 text-blue-400" />
-                          <span className="text-gray-300">Humidity:</span>
-                        </div>
-                        <span className="text-white">{item.main.humidity}%</span>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm">
-                        <div className="flex items-center gap-1">
-                          <Wind className="h-4 w-4 text-gray-400" />
-                          <span className="text-gray-300">Wind:</span>
-                        </div>
-                        <span className="text-white">
-                          {item.wind.speed} m/s
-                        </span>
-                      </div>
-
-                      <div className="pt-2 border-t border-gray-600">
-                        <p className="text-sm text-gray-300 capitalize">
-                          {item.weather[0].description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                    emoji={weatherIcon}
+                    formattedDate={formattedDate}
+                    time={time}
+                    temp={item.main.temp}
+                    feelsLike={item.main.feels_like}
+                    tempMin={item.main.temp_min}
+                    tempMax={item.main.temp_max}
+                    humidity={item.main.humidity}
+                    windSpeed={item.wind.speed}
+                    description={item.weather[0].description}
+                  />
                 );
               })}
             </div>

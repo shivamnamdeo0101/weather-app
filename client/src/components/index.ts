@@ -19,3 +19,5 @@ export { default as PredictionsSection } from './PredictionsSection';
 // Legacy components (kept for backward compatibility)
 export { default as TemperatureList } from './TemperatureList';
 export { default as PredictionsList } from './PredictionsList';
+export { default as TemperatureDayHeader } from './TemperatureDayHeader';
+export { default as TemperatureItemCard } from './TemperatureItemCard';
