@@ -86,7 +86,7 @@ yarn install
 yarn run dev
 ```
 
-3. Start services using Docker Compose / Podman Compose:
+3.(Optional If Already did ./run.sh) Start services using Docker Compose / Podman Compose:
 
 ```bash
 Container UP
