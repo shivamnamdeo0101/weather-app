@@ -4,7 +4,6 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 ## 🧩 Architecture Overview
 <img width="895" height="563" alt="image" src="https://github.com/user-attachments/assets/acbf69d1-9f37-4df4-bc8f-95a3aa410104" />
 
-
 ````
 plantuml
 @startuml
@@ -32,8 +31,6 @@ end
 @enduml
 ````
 
----
-
 ## 🚀 Services
 
 | Service         | Port | Description                                |
@@ -43,7 +40,6 @@ end
 | `redis-db`      | 6379 | Local Redis cache                          |
 | `weather-app`   | 3001 | Frontend entry point                       |
 
----
 
 ## ⚡ Features
 
@@ -52,7 +48,6 @@ end
 * **Dockerized services** for easy deployment.
 * **Environment variables** managed via `.env` files for easy configuration.
 
----
 
 ## 🏆 Best Practices
 ### Backend
