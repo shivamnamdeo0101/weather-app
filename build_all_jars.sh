@@ -1,6 +1,7 @@
 #!/bin/bash
 #File name build_all_jars.sh
 
+#Exit directly on error
 set -e
 
 # Base directory

@@ -1,5 +1,7 @@
 #!/bin/bash
 #File name run.sh
+
+# Exit immediately for any error
 set -e
 
 echo "🧱 Building all JARs first..."
