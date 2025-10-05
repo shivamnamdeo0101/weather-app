@@ -1,4 +1,6 @@
 #!/bin/bash
+#File name build_all_jars.sh
+
 set -e
 
 # Base directory
