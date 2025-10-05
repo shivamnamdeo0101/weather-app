@@ -278,8 +278,4 @@ curl --location 'https://api.openweathermap.org/data/2.5/forecast?q=banaras&appi
 ---
 
 ```
-
-This is **one copy-paste-ready block** for your README including **all setup, environment variables, architecture, and cURL commands**.  
-
-Do you want me to also add a **“Quick Test Example Responses” table** at the end for clarity?
 ```
