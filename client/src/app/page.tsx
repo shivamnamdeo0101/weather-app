@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback } from 'react';
 import { WeatherData } from '@/types/weather';
 import { WeatherApiService, WeatherError } from '@/services/weatherApi';
 import SearchBar from '@/components/SearchBar';
-import TemperatureList from '@/components/TemperatureList';
-import PredictionsList from '@/components/PredictionsList';
+import UnifiedWeatherCard from '@/components/UnifiedWeatherCard';
 import { Cloud, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function Home() {
@@ -39,9 +38,6 @@ export default function Home() {
     }
   }, []);
 
-  const hasPredictions = useMemo(() => {
-    return weatherData.some(item => item.predictions && item.predictions.length > 0);
-  }, [weatherData]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -107,18 +103,10 @@ export default function Home() {
 
         {/* Weather Data Display */}
         {!isLoading && weatherData.length > 0 && (
-          <div className="space-y-8">
-            {/* Temperature List */}
-            <TemperatureList 
-              weatherData={weatherData} 
-              city={currentCity} 
-            />
-
-            {/* Predictions List */}
-            {hasPredictions && (
-              <PredictionsList weatherData={weatherData} />
-            )}
-          </div>
+          <UnifiedWeatherCard 
+            weatherData={weatherData} 
+            city={currentCity} 
+          />
         )}
 
         {/* Empty State */}
