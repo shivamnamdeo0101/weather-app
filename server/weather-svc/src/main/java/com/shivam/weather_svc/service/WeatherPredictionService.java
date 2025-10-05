@@ -2,6 +2,7 @@ package com.shivam.weather_svc.service;
 
 import com.shivam.weather_svc.dto.ForecastItemDTO;
 import com.shivam.weather_svc.dto.WeatherDTO;
+import com.shivam.weather_svc.utils.AppConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -23,22 +24,22 @@ public class WeatherPredictionService {
 
         // Analyze weather conditions (Rain, Thunderstorm)
         for (WeatherDTO weather : item.getWeather()) {
-            if ("Rain".equalsIgnoreCase(weather.getMain())) {
-                predictions.add("Carry umbrella");
+            if (AppConstants.Weather.Conditions.RAIN.equalsIgnoreCase(weather.getMain())) {
+                predictions.add(AppConstants.Weather.Predictions.CARRY_UMBRELLA);
             }
-            if ("Thunderstorm".equalsIgnoreCase(weather.getMain())) {
-                predictions.add("Don't step out! A Storm is brewing!");
+            if (AppConstants.Weather.Conditions.THUNDERSTORM.equalsIgnoreCase(weather.getMain())) {
+                predictions.add(AppConstants.Weather.Predictions.STORM_WARNING);
             }
         }
 
-        // Check if temperature exceeds 40°C
-        if (item.getMain().getTemp_max() > 40) {
-            predictions.add("Use sunscreen lotion");
+        // Check if temperature exceeds configured max
+        if (item.getMain().getTemp_max() > AppConstants.Weather.MAX_TEMP_THRESHOLD) {
+            predictions.add(AppConstants.Weather.Predictions.USE_SUNSCREEN);
         }
 
-        // Check if wind speed exceeds 10 mph
-        if (item.getWind().getSpeed() > 10) {
-            predictions.add("It's too windy, watch out!");
+        // Check if wind speed exceeds configured max
+        if (item.getWind().getSpeed() > AppConstants.Weather.MAX_WIND_SPEED) {
+            predictions.add(AppConstants.Weather.Predictions.TOO_WINDY);
         }
 
         return predictions;

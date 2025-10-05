@@ -35,7 +35,7 @@ public class WeatherService {
     public List<ForecastItemDTO> getThreeHourForecast(String cityName) {
         try {
             log.info("Fetching weather data for city: {}", cityName);
-            String url = apiUrl + "?q=" + cityName + "&cnt=10&units=metric&appid=" + apiKey;
+            String url = apiUrl + "?q=" + cityName + "&cnt=8&units=metric&appid=" + apiKey;
 
             ForecastResponseDTO response = restTemplate.getForObject(url, ForecastResponseDTO.class);
 
