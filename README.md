@@ -191,9 +191,9 @@ docker-compose down -v
 
 ---
 
-## ⚙️ Environment Variables ✅ 
+## ⚙️ Environment Variables 
 
-* **weather-cache/.env**
+* **weather-cache/.env** ✅ 
 
 ```text
 WEATHER_SVC_URL=http://weather-svc:8080/api/weather-svc/forecast
@@ -206,7 +206,7 @@ REDIS_PASSWORD=0tr***NJx3A
 SPRING_PROFILES_ACTIVE=prod
 ```
 
-* **weather-svc/.env**
+* **weather-svc/.env** ✅ 
 
 ```text
 WEATHER_API_KEY=d2************63e
@@ -217,9 +217,9 @@ RATE_LIMITER_MAX_WINDOW_SIZE_IN_SEC=10
 
 ---
 
-## 🧪 API Testing (cURL Commands) ✅ 
+## 🧪 API Testing (cURL Commands) 
 
-### 1️⃣ Weather Cache Service (`localhost:8081`)
+### 1️⃣ Weather Cache Service (`localhost:8081`) ✅ 
 
 **Fetch forecast via cache:**
 
@@ -237,7 +237,7 @@ curl --location 'http://localhost:8081/actuator/health'
 
 ---
 
-### 2️⃣ Weather Service (`localhost:8080`)
+### 2️⃣ Weather Service (`localhost:8080`) ✅ 
 
 **Fetch forecast directly:**
 
@@ -270,10 +270,10 @@ curl --location 'https://api.openweathermap.org/data/2.5/forecast?q=banaras&appi
 
 ---
 
-## 📦 Docker Images ✅ 
+## 📦 Docker Images 
 
-* `openjdk:21-jdk-slim` or `amazoncorretto:21` recommended for lightweight runtime.
-* Build and run containers using `docker-compose` or `podman-compose`.
+* `openjdk:21-jdk-slim` or `amazoncorretto:21` recommended for lightweight runtime. ✅ 
+* Build and run containers using `docker-compose` or `podman-compose`. ✅ 
 
 ---
 
