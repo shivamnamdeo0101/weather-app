@@ -20,12 +20,11 @@ export function useGroupedForecast(weatherData: WeatherData[]): GroupedForecastI
       groups[date].push(item);
     });
 
-    return Object.entries(groups).map(([date, items]) => {
-      const sortedItems = [...items].sort(
-        (a, b) => new Date(a.dt_txt).getTime() - new Date(b.dt_txt).getTime()
-      );
-      return { date, items: sortedItems };
-    });
+    // Preserve the original order from backend for both dates and items
+    return Object.entries(groups).map(([date, items]) => ({
+      date,
+      items,
+    }));
   }, [weatherData]);
 }
 

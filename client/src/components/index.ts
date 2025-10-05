@@ -13,6 +13,8 @@ export { default as WeatherDetails } from './WeatherDetails';
 export { default as WeatherTimeSlot } from './WeatherTimeSlot';
 export { default as DayHeader } from './DayHeader';
 export { default as ForecastHeader } from './ForecastHeader';
+export { default as TimeSlotHeader } from './TimeSlotHeader';
+export { default as PredictionsSection } from './PredictionsSection';
 
 // Legacy components (kept for backward compatibility)
 export { default as TemperatureList } from './TemperatureList';
