@@ -1,6 +1,5 @@
 # Weather App Microservices
-A lightweight microservices setup to fetch and cache weather forecasts for cities, using **Spring Boot**, **Redis**, and **Open Weather API**.
-
+This project provides a high-performance, cache-enabled weather forecasting system. It uses **Spring Boot** for backend APIs, Redis for caching frequently accessed data, and the **OpenWeather API** for real-time weather information. Built with microservices architecture, it implements **rate limiting, cache-aside pattern, and LRU/LFU strategies** for optimal efficiency and scalability.
 
 ## 🧩 Architecture Overview
 <img width="895" height="563" alt="image" src="https://github.com/user-attachments/assets/acbf69d1-9f37-4df4-bc8f-95a3aa410104" />
