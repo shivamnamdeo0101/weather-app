@@ -1,4 +1,3 @@
-Got it! Here’s the **entire README** in **one code block** you can copy at once:
 # Weather App Microservices
 A lightweight microservices setup to fetch and cache weather forecasts for cities, using **Spring Boot**, **Redis**, and **Open Weather API**.
 
