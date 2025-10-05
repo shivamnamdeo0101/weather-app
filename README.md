@@ -46,7 +46,7 @@ end
 | `weather-cache` | 8081 | Spring Boot caching service (Redis-backed) |
 | `weather-svc`   | 8080 | Backend API service fetching weather data  |
 | `redis-db`      | 6379 | Local Redis cache                          |
-| `weather-app`   | 80   | (Optional) Frontend entry point            |
+| `weather-app`   | 3001 |Frontend entry point                        |
 
 ---
 
@@ -71,22 +71,40 @@ cd weather-app
 2. Build JARs for backend services:
 
 ```bash
-./build_all_jars.sh
+
+For BE Run
+in root folder /weather-app/
+chmod +x run.sh
+chmod +x build_all_jars.sh
+
+./run.sh
+
+For FE run
+in client folder /weather-app/client/
+npm install -g yarn
+yarn install
+yarn run dev
 ```
 
 3. Start services using Docker Compose / Podman Compose:
 
 ```bash
+Container UP
 podman-compose up --build
 # or
 docker-compose up --build
+-----------------------------
+Container Down
+podman-compose down -v
+# or
+docker-compose down -v
 ```
 
 4. Access services:
 
 * `weather-svc`: `http://localhost:8080`
 * `weather-cache`: `http://localhost:8081`
-* `weather-app` (if enabled): `http://localhost`
+* `weather-app`: `http://localhost:3001`
 
 ---
 
