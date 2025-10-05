@@ -4,8 +4,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shivam.weather_cache.dto.CacheResult;
 import com.shivam.weather_cache.exception.WeatherServiceException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.log;
+import org.slf4j.logFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -19,10 +20,9 @@ import org.springframework.web.client.RestTemplate;
 import java.util.Map;
 
 @Service
+@Slf4j
 public class WeatherCacheService {
-
-    private static final Logger logger = LoggerFactory.getLogger(WeatherCacheService.class);
-
+    
     @Autowired
     private GenericRedisService redisService;
 
@@ -43,17 +43,17 @@ public class WeatherCacheService {
 
     public CacheResult getWeather(String city) {
         String key = "weather:" + city.toLowerCase();
-        logger.info("Fetching weather for city: {}", city);
+        log.info("Fetching weather for city: {}", city);
 
         // Check cache
         Object cached = redisService.get(key);
         if (cached != null) {
             Map<String, Object> map = objectMapper.convertValue(cached, new TypeReference<Map<String,Object>>() {});
-            logger.info("Cache HIT for city: {}", city);
+            log.info("Cache HIT for city: {}", city);
             return new CacheResult(map, true); // HIT
         }
 
-        logger.info("Cache MISS for city: {}. Calling Weather SVC at {}", city, svcUrl);
+        log.info("Cache MISS for city: {}. Calling Weather SVC at {}", city, svcUrl);
 
         try {
             String url = svcUrl + "?city=" + city;
@@ -69,23 +69,23 @@ public class WeatherCacheService {
                 throw new WeatherServiceException("Weather SVC returned empty data for city: " + city);
             }
 
-            logger.info("Received weather data from Weather SVC for city: {}", city);
+            log.info("Received weather data from Weather SVC for city: {}", city);
 
             // Save in Redis with TTL
             redisService.saveWithTTL(key, freshData, cacheTTL);
-            logger.info("Saved weather data in Redis for city: {} with TTL: {} seconds", city, cacheTTL);
+            log.info("Saved weather data in Redis for city: {} with TTL: {} seconds", city, cacheTTL);
 
             return new CacheResult(freshData, false); // MISS
 
         } catch (HttpStatusCodeException httpEx) {
-            logger.error("HTTP error fetching weather data for {}. Status: {}, Response: {}",
+            log.error("HTTP error fetching weather data for {}. Status: {}, Response: {}",
                     city, httpEx.getStatusCode(), httpEx.getResponseBodyAsString(), httpEx);
             throw new WeatherServiceException("HTTP error fetching weather for city: " + city, httpEx);
         } catch (RestClientException rcEx) {
-            logger.error("RestClientException fetching weather data for city: {}", city, rcEx);
+            log.error("RestClientException fetching weather data for city: {}", city, rcEx);
             throw new WeatherServiceException("Error calling Weather SVC for city: " + city, rcEx);
         } catch (Exception ex) {
-            logger.error("Unexpected exception fetching weather data for city: {}", city, ex);
+            log.error("Unexpected exception fetching weather data for city: {}", city, ex);
             throw new WeatherServiceException("Unexpected error fetching weather data for city: " + city, ex);
         }
     }
