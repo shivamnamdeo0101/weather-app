@@ -2,17 +2,20 @@ version: "3.9"
 
 services:
   # 1. weather-app (Frontend/Entry Point - Client)
-#  weather-app:
-#    image: weather-client:latest
-#    build:
-#      context: ./server/weather-cache
-#      dockerfile: Dockerfile
-#    container_name: weather-app-container
-#    ports:
-#      - "80:80"
-#    depends_on:
-#      - weather-cache
-#    restart: unless-stopped
+  # weather-app:
+  #   image: weather-client:latest
+  #   build:
+  #     context: ./client
+  #     dockerfile: Dockerfile
+  #   container_name: weather-app-container
+  #   ports:
+  #     - "3000:3000"  # host:container (Next.js runs on 3000 inside)
+  #   depends_on:
+  #     - weather-cache
+  #   environment:
+  #     - NODE_ENV=production
+  #     - NEXT_TELEMETRY_DISABLED=1
+  #   restart: unless-stopped
 
   # 2. weather-cache (Spring Boot App with Caching Logic)
   weather-cache:
@@ -59,7 +62,7 @@ services:
     restart: unless-stopped
     # 🔑 CRITICAL FIX: Configures Redis server to use the exact password from your .env file
     # The command enables AOF persistence and sets the required password.
-#    command: redis-server --requirepass 0trdM3mluTs4CTTipn83YJMnXBoNJx3A --appendonly yes
+    # command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
 
 # ===============================================
 # TOP LEVEL VOLUMES
