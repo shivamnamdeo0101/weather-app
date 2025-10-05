@@ -55,6 +55,7 @@ end
 ---
 
 ## 🏆 Best Practices
+### Backend
 
 - **Rate Limiter:**  ✅  
   Implemented in `weather-svc` to allow **60 requests per minute per client**.  
@@ -104,6 +105,49 @@ end
   - Support **regional hotkeys & edge caching** for frequently accessed regions.  
   - Implement **alerting** for service downtime or rate-limit breaches.  
   - Enhance **logging and monitoring** for better observability and troubleshooting.  
+
+
+## Frontend
+
+- **App Router and File-Based Structure (Next.js 15)**
+  - Uses `app/` directory with `layout.tsx` and `page.tsx` for clear route and layout composition.
+  - Co-locates UI, hooks, and types under `src/` for discoverability.
+
+- **Separation of Concerns**
+  - `services/weatherApi.ts` isolates network logic and error mapping from UI.
+  - `components/` are presentational and stateless where possible; `hooks/` hold view logic.
+
+- **Typed Contracts and Safety**
+  - Central `types/weather.ts` defines request/response shapes.
+  - Strict TypeScript settings (`"strict": true`) to catch issues early.
+
+- **Declarative Data Flow with Custom Hooks**
+  - `useWeatherSearch` manages async state (loading/error/data/city) with a simple API for pages.
+  - `useGroupedForecast`, `useFormattedForecastDate`, `useWeatherEmoji` encapsulate formatting and grouping logic.
+
+- **Memoization and Rendering Performance**
+  - `React.memo` for pure components (`UnifiedWeatherCard`, `PredictionBadge`, etc.).
+  - `useMemo`/`useCallback` to stabilize derived values and handlers, reducing unnecessary re-renders.
+
+- **Composable, Small Components**
+  - UI is decomposed into focused pieces (`AppHeader`, `SearchBar`, `WeatherTimeSlot`, `WeatherDetails`, etc.) for reuse and testability.
+
+- **Explicit Loading and Error States**
+  - Dedicated components (`LoadingState`, `ErrorAlert`, `EmptyState`) improve UX and readability.
+
+- **Resilient Networking**
+  - Centralized response handling with typed `WeatherError`.
+  - Uses `AbortSignal.timeout(10000)` to avoid hanging requests and provide user feedback.
+
+- **Styling Consistency**
+  - Tailwind CSS with design tokens via CSS variables in `globals.css`.
+  - Utility-first classes keep styles close to markup, reducing CSS drift.
+
+- **Accessibility and Semantics**
+  - Interactive controls are proper `button`/`form` elements; labels, icons, and focusable elements adhere to expected semantics.
+
+- **Keying and List Stability**
+  - Stable keys combining timestamps and indices for dynamic lists to prevent UI glitches.
 
 
 ## 🛠️ Setup & Run
