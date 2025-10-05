@@ -95,16 +95,33 @@ docker-compose up --build
 * **weather-cache/.env**
 
 ```text
+# Connects to the 'weather-svc' container within the Docker network
+WEATHER_SVC_URL=http://weather-svc:8080/api/weather-svc/forecast
+
+# Connects to the 'redis-db' service container
 REDIS_HOST=redis-db
 REDIS_PORT=6379
-REDIS_PASSWORD=<your-password>
+REDIS_COMMAND_TIMEOUT=5
+REDIS_TTL=300
+
+# Uses the specified credentials for the local Redis instance (if configured)
+REDIS_USERNAME=default
+REDIS_PASSWORD=0tr***NJx3A
+
+# Sets the Spring profile
 SPRING_PROFILES_ACTIVE=prod
 ```
 
 * **weather-svc/.env**
 
 ```text
-API_KEY=<open-weather-api-key>
+# Weather API config
+WEATHER_API_KEY=d2************63e
+WEATHER_API_URL=http://api.openweathermap.org/data/2.5/forecast
+# Rate Limiter configuration
+RATE_LIMITER_MAX_REQ_PER_MIN=10
+RATE_LIMITER_MAX_WINDOW_SIZE_IN_SEC=10
+
 ```
 
 ---
