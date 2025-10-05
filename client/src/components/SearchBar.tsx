@@ -32,7 +32,7 @@ const SearchBar = memo<SearchBarProps>(({ onSearch, isLoading, disabled = false 
           {isLoading ? (
             <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
           ) : (
-            <Search className="h-5 w-5 text-gray-400" />
+            <Search className="h-5 w-5 text-gray-400 cursor-pointer hover:text-gray-600" />
           )}
         </div>
         <input
