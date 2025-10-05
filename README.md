@@ -104,48 +104,48 @@ end
 
 ## Frontend
 
-- **App Router and File-Based Structure (Next.js 15)**
+- **App Router and File-Based Structure (Next.js 15)** ✅ 
   - Uses `app/` directory with `layout.tsx` and `page.tsx` for clear route and layout composition.
   - Co-locates UI, hooks, and types under `src/` for discoverability.
 
-- **Separation of Concerns**
+- **Separation of Concerns** ✅ 
   - `services/weatherApi.ts` isolates network logic and error mapping from UI.
   - `components/` are presentational and stateless where possible; `hooks/` hold view logic.
 
-- **Typed Contracts and Safety**
+- **Typed Contracts and Safety** ✅ 
   - Central `types/weather.ts` defines request/response shapes.
   - Strict TypeScript settings (`"strict": true`) to catch issues early.
 
-- **Declarative Data Flow with Custom Hooks**
+- **Declarative Data Flow with Custom Hooks** ✅ 
   - `useWeatherSearch` manages async state (loading/error/data/city) with a simple API for pages.
   - `useGroupedForecast`, `useFormattedForecastDate`, `useWeatherEmoji` encapsulate formatting and grouping logic.
 
-- **Memoization and Rendering Performance**
+- **Memoization and Rendering Performance** ✅ 
   - `React.memo` for pure components (`UnifiedWeatherCard`, `PredictionBadge`, etc.).
   - `useMemo`/`useCallback` to stabilize derived values and handlers, reducing unnecessary re-renders.
 
-- **Composable, Small Components**
+- **Composable, Small Components** ✅ 
   - UI is decomposed into focused pieces (`AppHeader`, `SearchBar`, `WeatherTimeSlot`, `WeatherDetails`, etc.) for reuse and testability.
 
-- **Explicit Loading and Error States**
+- **Explicit Loading and Error States** ✅ 
   - Dedicated components (`LoadingState`, `ErrorAlert`, `EmptyState`) improve UX and readability.
 
-- **Resilient Networking**
-  - Centralized response handling with typed `WeatherError`.
+- **Resilient Networking** ✅ 
+  - Centralized response handling with typed `WeatherError`. ✅ 
   - Uses `AbortSignal.timeout(10000)` to avoid hanging requests and provide user feedback.
 
-- **Styling Consistency**
-  - Tailwind CSS with design tokens via CSS variables in `globals.css`.
+- **Styling Consistency** ✅ 
+  - Tailwind CSS with design tokens via CSS variables in `globals.css`. ✅ 
   - Utility-first classes keep styles close to markup, reducing CSS drift.
 
-- **Accessibility and Semantics**
+- **Accessibility and Semantics** ✅ 
   - Interactive controls are proper `button`/`form` elements; labels, icons, and focusable elements adhere to expected semantics.
 
-- **Keying and List Stability**
+- **Keying and List Stability** ✅ 
   - Stable keys combining timestamps and indices for dynamic lists to prevent UI glitches.
 
 
-## 🛠️ Setup & Run
+## 🛠️ Setup & Run ✅ 
 
 1. Clone the repository:
 
@@ -169,7 +169,7 @@ yarn install
 yarn run dev
 ```
 
-3. (Optional) Start services using Docker Compose / Podman Compose:
+3. (Optional) Start services using Docker Compose / Podman Compose: ✅ 
 
 ```bash
 # Container UP
@@ -183,7 +183,7 @@ podman-compose down -v
 docker-compose down -v
 ```
 
-4. Access services:
+4. Access services: ✅ 
 
 * `weather-svc`: `http://localhost:8080`
 * `weather-cache`: `http://localhost:8081`
@@ -191,7 +191,7 @@ docker-compose down -v
 
 ---
 
-## ⚙️ Environment Variables
+## ⚙️ Environment Variables ✅ 
 
 * **weather-cache/.env**
 
@@ -217,7 +217,7 @@ RATE_LIMITER_MAX_WINDOW_SIZE_IN_SEC=10
 
 ---
 
-## 🧪 API Testing (cURL Commands)
+## 🧪 API Testing (cURL Commands) ✅ 
 
 ### 1️⃣ Weather Cache Service (`localhost:8081`)
 
@@ -256,7 +256,7 @@ curl --location 'http://localhost:8080/actuator/health'
 
 ---
 
-### 3️⃣ OpenWeather API (External)
+### 3️⃣ OpenWeather API (External) ✅ 
 
 ```bash
 curl --location 'https://api.openweathermap.org/data/2.5/forecast?q=banaras&appid=YOUR_API_KEY&cnt=10&units=metric'
@@ -270,7 +270,7 @@ curl --location 'https://api.openweathermap.org/data/2.5/forecast?q=banaras&appi
 
 ---
 
-## 📦 Docker Images
+## 📦 Docker Images ✅ 
 
 * `openjdk:21-jdk-slim` or `amazoncorretto:21` recommended for lightweight runtime.
 * Build and run containers using `docker-compose` or `podman-compose`.
