@@ -64,7 +64,7 @@ end
   - Designed to be extendable for configurable limits per endpoint or user type.
 
 - **Facade / Cache-Aside Design Pattern:**   ✅ 
-  `weather-cache` uses the **Cache-Aside pattern** to reduce direct calls to the backend service (`weather-svc`).  
+  `weather-cache` uses the **Cache-Aside pattern** to reduce direct calls to the backend service (`weather-svc`) / (`weather-api`).  
   - On cache hit: returns cached data immediately, reducing backend load.  
   - On cache miss: fetches fresh data from `weather-svc`, stores it in cache, then returns it.  
   - This offloads `weather-svc`, improves response time, and optimizes system performance. 
