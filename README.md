@@ -55,8 +55,6 @@ end
 
 ---
 
----
-
 ## 🏆 Best Practices
 
 - **Rate Limiter:**  ✅  
