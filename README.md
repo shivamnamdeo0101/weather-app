@@ -72,7 +72,7 @@ end
 
 - **Cache Eviction Strategy (Strategy Pattern):**  
   Uses a combination of **LRU, LFU, and TTL** strategies:  
-  - **Hot Keys:** Most active cities in the last 6 minutes → LFU (least frequently used items are kept longer).  
+  - **Hot Keys:** Most active cities in the last 6 minutes → LFU (least frequently used items are kept longer with refresh data in redis so BE call will reduce and increase availability of the latest data).  
   - **Cold Keys:** Less active cities in the last 6 minutes → LRU (least recently used items are evicted first).  
   - **Normal Keys:** TTL (time-to-live) of 5 minutes for standard entries.✅   
   - A scheduler runs **every 1 minute** to evaluate and adjust eviction strategies automatically.  
