@@ -173,9 +173,9 @@ yarn run dev
 
 ```bash
 # Container UP
-podman-compose up --build
+podman-compose up --build -d
 # or
-docker-compose up --build
+docker-compose up --build -d
 
 # Container Down
 podman-compose down -v
