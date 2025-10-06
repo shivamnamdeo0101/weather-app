@@ -47,7 +47,7 @@ end
 
 | **Frontend**                                           | **Backend**                                           | **DevOps / Infrastructure**                                           |
 | ------------------------------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------- |
-| **Framework:** Next.js 15 (App Router)                 | **Framework:** Spring Boot (Java 21)                  | **Containerization:** Docker / Podman                                 |
+| **Framework:** Next.js                                 | **Framework:** Spring Boot (Java 21)                  | **Containerization:** Docker / Podman                                 |
 | **Language:** TypeScript                               | **Services:** `weather-cache`, `weather-svc`          | **Orchestration:** Docker Compose / Podman Compose                    |
 | **UI Styling:** Tailwind CSS                           | **Database:** Redis (for caching)                     | **Monitoring:** Spring Boot Actuator                                  |
 | **State Management:** React Hooks + Memoization        | **External API:** OpenWeather API                     | **Environment Management:** `.env` files per service                  |
