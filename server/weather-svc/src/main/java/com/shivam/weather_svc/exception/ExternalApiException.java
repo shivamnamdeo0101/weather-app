@@ -1,11 +1,10 @@
 package com.shivam.weather_svc.exception;
 
-
 import lombok.Getter;
 import org.springframework.http.HttpStatusCode;
 
 /**
- * Thrown when an external API call fails.
+ * Custom exception representing external API call failures or network issues.
  */
 @Getter
 public class ExternalApiException extends RuntimeException {
@@ -15,5 +14,4 @@ public class ExternalApiException extends RuntimeException {
         super(message);
         this.status = status;
     }
-
 }
