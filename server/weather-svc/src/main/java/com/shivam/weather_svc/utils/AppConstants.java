@@ -11,16 +11,17 @@ public class AppConstants {
     // ===========================
     // API Response Messages
     // ===========================
-    public final class Messages {
-        private Messages() {}
-        public static final String FORECAST_SUCCESS = "Forecast retrieved successfully";
-        public static final String FORECAST_NOT_FOUND = "No forecast available for city: ";
-        public static final String VALIDATION_FAILED = "Validation failed: ";
-        public static final String INTERNAL_SERVER_ERROR = "Internal Server Error: ";
-        public static final String CITY_NOT_FOUND = "City not found";
-        public static final String OPENWEATHER_API_UNAUTHORIZED = "Unauthorized on GET request for openweather api";
-        public static final String TOO_MANY_REQUEST= "Too many request! Try after 60 seconds";
+    public static class Messages {
+        public static final String FORECAST_SUCCESS = "Weather forecast retrieved successfully.";
+        public static final String FORECAST_NOT_FOUND = "No forecast data found for ";
+        public static final String TOO_MANY_REQUEST = "Too many requests. Please wait before retrying.";
+        public static final String CITY_NOT_FOUND = "City not found:";
+        public static final String OPENWEATHER_API_UNAUTHORIZED = "Unauthorized access to OpenWeather API.";
+        public static final String SERVICE_UNAVAILABLE = "Weather service is temporarily unavailable. Please try again later.";
+        public static final String INTERNAL_SERVER_ERROR = "Internal server error occurred.";
+        public static final String BAD_REQUEST = "Invalid input provided.";
     }
+
 
     // ===========================
     // JSON Response Keys

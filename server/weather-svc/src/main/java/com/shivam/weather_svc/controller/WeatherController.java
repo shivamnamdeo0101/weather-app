@@ -19,8 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * REST controller to expose weather forecast APIs.
- * Provides endpoints to fetch 3-hourly forecast data for a city.
+ * REST controller exposing weather forecast APIs.
  */
 @RestController
 @RequestMapping("/api/weather-svc")
@@ -30,16 +29,13 @@ public class WeatherController {
     private final WeatherService weatherService;
     private final SlidingWindowRateLimiterService rateLimiter;
 
-    public WeatherController(WeatherService weatherService,
-                             SlidingWindowRateLimiterService rateLimiter) {
+    public WeatherController(WeatherService weatherService, SlidingWindowRateLimiterService rateLimiter) {
         this.weatherService = weatherService;
         this.rateLimiter = rateLimiter;
     }
 
     /**
      * Retrieves 3-hour weather forecast for a specific city.
-     *
-     * Example request: /weather/forecast?city=London
      *
      * @param city the name of the city
      * @return standardized API response containing the forecast list
@@ -52,20 +48,24 @@ public class WeatherController {
             @ApiResponse(responseCode = "200", description = AppConstants.Messages.FORECAST_SUCCESS,
                     content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
                             schema = @Schema(implementation = CustomResponse.class))),
-            @ApiResponse(responseCode = "401", description = AppConstants.Messages.OPENWEATHER_API_UNAUTHORIZED,
-                    content = @Content),
-            @ApiResponse(responseCode = "404", description = AppConstants.Messages.CITY_NOT_FOUND,
-                    content = @Content),
-            @ApiResponse(responseCode = "500", description = AppConstants.Messages.INTERNAL_SERVER_ERROR,
-                    content = @Content)
+            @ApiResponse(responseCode = "400", description = AppConstants.Messages.BAD_REQUEST, content = @Content),
+            @ApiResponse(responseCode = "401", description = AppConstants.Messages.OPENWEATHER_API_UNAUTHORIZED, content = @Content),
+            @ApiResponse(responseCode = "404", description = AppConstants.Messages.CITY_NOT_FOUND, content = @Content),
+            @ApiResponse(responseCode = "429", description = AppConstants.Messages.TOO_MANY_REQUEST, content = @Content),
+            @ApiResponse(responseCode = "502", description = AppConstants.Messages.SERVICE_UNAVAILABLE, content = @Content),
+            @ApiResponse(responseCode = "500", description = AppConstants.Messages.INTERNAL_SERVER_ERROR, content = @Content)
     })
     @GetMapping("/forecast")
     public ResponseEntity<CustomResponse<List<ForecastItemDTO>>> getForecast(@RequestParam String city) {
-        log.info("Fetching forecast for city: {}", city);
+        log.info("Incoming request for weather forecast: city={}", city);
 
-        //Rate limiting
+        if (city == null || city.trim().isEmpty()) {
+            throw new IllegalArgumentException("City name cannot be empty.");
+        }
+
+        // Rate limiting
         if (!rateLimiter.tryConsume()) {
-            log.warn("Rate limit exceeded for city: {}", city);
+            log.warn("Rate limit exceeded for forecast API request");
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
                     .body(new CustomResponse<>(false, AppConstants.Messages.TOO_MANY_REQUEST, null));
         }
@@ -74,14 +74,11 @@ public class WeatherController {
 
         if (forecast == null || forecast.isEmpty()) {
             log.warn("No forecast data found for city: {}", city);
-            return ResponseEntity.ok(
-                    new CustomResponse<>(true, AppConstants.Messages.FORECAST_NOT_FOUND + city, null)
-            );
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CustomResponse<>(false, AppConstants.Messages.CITY_NOT_FOUND + " " + city, null));
         }
 
-        log.info("Forecast data for {}: {}", city, forecast);
         log.info("Forecast retrieved successfully for city: {}", city);
-
         return ResponseEntity.ok(
                 new CustomResponse<>(true, AppConstants.Messages.FORECAST_SUCCESS, forecast)
         );
