@@ -52,7 +52,7 @@ end
 | **UI Styling:** Tailwind CSS                           | **Database:** Redis (for caching)                     | **Monitoring:** Spring Boot Actuator                                  |
 | **State Management:** React Hooks + Memoization        | **External API:** OpenWeather API                     | **Environment Management:** `.env` files per service                  |
 | **Networking:** Fetch API with `AbortSignal.timeout()` | **Patterns:** Cache-Aside, Strategy, Inflight Request | **Build Tools:** Maven, Shell scripts (`run.sh`, `build_all_jars.sh`) |
-| **Type Safety:** TypeScript strict mode                | **Rate Limiting:** Sliding Window (60 req/min)        | **Base Image:** `openjdk:21-jdk-slim` / `amazoncorretto:21`           |
+| **Type Safety:** TypeScript strict mode                | **Rate Limiting:** Sliding Window (60 req/min)        | **Base Image:** `amazoncorretto:21`                                   |
 | **Routing:** App Router (`layout.tsx`, `page.tsx`)     | **Error Handling:** Custom 400/404/429/502/200 for OK | **Cache Strategy:** LRU, LFU, TTL combined                            |
 
 
