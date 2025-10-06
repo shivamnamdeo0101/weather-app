@@ -2,20 +2,20 @@ version: "3.9"
 
 services:
   # 1. weather-app (Frontend/Entry Point - Client)
-  # weather-app:
-  #   image: weather-client:latest
-  #   build:
-  #     context: ./client
-  #     dockerfile: Dockerfile
-  #   container_name: weather-app-container
-  #   ports:
-  #     - "3000:3000"  # host:container (Next.js runs on 3000 inside)
-  #   depends_on:
-  #     - weather-cache
-  #   environment:
-  #     - NODE_ENV=production
-  #     - NEXT_TELEMETRY_DISABLED=1
-  #   restart: unless-stopped
+  weather-app:
+    image: weather-client:latest
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: weather-app-container
+    ports:
+      - "3000:3000"  # host:container (Next.js runs on 3000 inside)
+    depends_on:
+      - weather-cache
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+    restart: unless-stopped
 
   # 2. weather-cache (Spring Boot App with Caching Logic)
   weather-cache:
