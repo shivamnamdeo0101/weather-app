@@ -1,43 +1,51 @@
-# ---------- Base Builder Stage ----------
-  FROM node:22-bookworm-slim AS builder
+# -----------------------------
+# 1. Use official Node.js LTS image
+# -----------------------------
+FROM node:20-alpine AS builder
 
-  WORKDIR /app
-  
-  # Copy dependency files first (cache optimization)
-  COPY package*.json ./
-  COPY tsconfig.json next.config.ts postcss.config.mjs eslint.config.mjs next-env.d.ts ./
-  
-  # Install deps (with devDependencies for build)
-  RUN npm ci --no-audit --no-fund
-  
-  # Copy app source
-  COPY src ./src
-  COPY public ./public
-  
-  # Disable telemetry
-  ENV NEXT_TELEMETRY_DISABLED=1
-  ENV NODE_ENV=production
-  
-  # Build the app
-  RUN npm run build
-  
-  # ---------- Runner Stage ----------
-  FROM node:22-bookworm-slim AS runner
-  
-  WORKDIR /app
-  
-  # Copy only the built output and production deps
-  COPY --from=builder /app/node_modules ./node_modules
-  COPY --from=builder /app/package*.json ./
-  COPY --from=builder /app/.next ./.next
-  COPY --from=builder /app/public ./public
-  COPY --from=builder /app/next.config.ts ./
-  
-  # Disable telemetry
-  ENV NEXT_TELEMETRY_DISABLED=1
-  ENV NODE_ENV=production
-  
-  EXPOSE 3000
-  
-  CMD ["npm", "start"]
-  
+# -----------------------------
+# 2. Set working directory inside the container
+# -----------------------------
+WORKDIR /app
+
+# -----------------------------
+# 3. Copy package.json and lockfile first (for caching)
+# -----------------------------
+COPY package.json package-lock.json* yarn.lock* ./
+
+# -----------------------------
+# 4. Install dependencies
+# -----------------------------
+RUN npm install
+
+# -----------------------------
+# 5. Copy the rest of the application code
+# -----------------------------
+COPY . .
+
+# -----------------------------
+# 6. Build the Next.js app
+# -----------------------------
+RUN npm run build
+
+# -----------------------------
+# 7. Production image
+# -----------------------------
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Copy only necessary files for production
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/public ./public
+
+# Set environment variable
+ENV NODE_ENV production
+
+# Expose the default Next.js port
+EXPOSE 3001
+
+# Start the Next.js app
+CMD ["npm", "start"]
