@@ -1,5 +1,16 @@
-# Weather App
+# 🌤 Weather App
 This project provides a high-performance, cache-enabled weather forecasting system. It uses **Spring Boot** for backend APIs, Redis for caching frequently accessed data, and the **OpenWeather API** for real-time weather information. Built with microservices architecture, it implements **rate limiting, cache-aside pattern, and LRU/LFU strategies** for optimal efficiency and scalability.
+
+# 💡Features
+
+- 🔍 Search weather by city
+- 📅 View 5-day forecast
+- ⏰ See hourly updates
+- 🌡️ Temperature in °C
+- ☁️ Weather condition: clear, cloudy, or rain
+- 💨 Check wind speed & humidity
+- ⚠️ Receive friendly error messages
+- 📱 Fully mobile-responsive
 
 ## 🧩 Architecture Overview
 <img width="895" height="563" alt="image" src="https://github.com/user-attachments/assets/acbf69d1-9f37-4df4-bc8f-95a3aa410104" />
@@ -31,6 +42,19 @@ end
 @enduml
 ````
 
+## ⚙️ Tech Stack
+
+| **Frontend**                                           | **Backend**                                           | **DevOps / Infrastructure**                                           |
+| ------------------------------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------- |
+| **Framework:** Next.js 15 (App Router)                 | **Framework:** Spring Boot (Java 21)                  | **Containerization:** Docker / Podman                                 |
+| **Language:** TypeScript                               | **Services:** `weather-cache`, `weather-svc`          | **Orchestration:** Docker Compose / Podman Compose                    |
+| **UI Styling:** Tailwind CSS                           | **Database:** Redis (for caching)                     | **Monitoring:** Spring Boot Actuator                                  |
+| **State Management:** React Hooks + Memoization        | **External API:** OpenWeather API                     | **Environment Management:** `.env` files per service                  |
+| **Networking:** Fetch API with `AbortSignal.timeout()` | **Patterns:** Cache-Aside, Strategy, Inflight Request | **Build Tools:** Maven, Shell scripts (`run.sh`, `build_all_jars.sh`) |
+| **Type Safety:** TypeScript strict mode                | **Rate Limiting:** Token Bucket (60 req/min)          | **Base Image:** `openjdk:21-jdk-slim` / `amazoncorretto:21`           |
+| **Routing:** App Router (`layout.tsx`, `page.tsx`)     | **Error Handling:** Custom 400/404/429/502 responses  | **Cache Strategy:** LRU, LFU, TTL combined                            |
+
+
 ## 🚀 Services
 
 | Service         | Port | Description                                |
@@ -40,13 +64,6 @@ end
 | `redis-db`      | 6379 | Local Redis cache                          |
 | `weather-app`   | 3001 | Frontend entry point                       |
 
-
-## ⚡ Features
-
-* **Cache-first approach**: Returns cached data if available; fetches from API only on cache miss.
-* **Redis-based caching** for improved performance.
-* **Dockerized services** for easy deployment.
-* **Environment variables** managed via `.env` files for easy configuration.
 
 
 ## 🏆 Best Practices
