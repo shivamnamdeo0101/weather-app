@@ -1,0 +1,45 @@
+@startuml
+title Weather Forecast Request Flow (with Rate Limiter + Status Codes)
+
+actor User
+participant "Weather App" as app
+participant "Weather-Cache" as cache
+participant "Weather-SVC" as svc
+participant "Rate Limiter" as limiter
+participant "Open Weather API" as api
+
+User -> app: Request weather forecast
+app -> cache: Query cached data
+
+alt CACHE HIT
+    cache -> app: Return cached data (HTTP 200)
+    app -> User: Display forecast
+else CACHE MISS
+    cache -> svc: Request fresh data
+    svc -> limiter: Validate request quota (60 req/min per client)
+
+    alt WITHIN LIMIT
+        limiter -> svc: Allow request (HTTP 200)
+        svc -> api: Fetch latest weather
+        api -> svc: Return weather data (HTTP 200)
+        svc -> cache: Store data in cache (TTL = 5 min)
+        cache -> app: Return updated data (HTTP 200)
+        app -> User: Display forecast
+    else RATE LIMIT EXCEEDED
+        limiter -> svc: Reject request (HTTP 429)
+        svc -> app: Return error (429 Too Many Requests)
+        app -> User: Show rate limit warning
+    end
+
+    alt INVALID CITY
+        svc -> app: Return error (HTTP 404 City Not Found)
+        app -> User: Display not found message
+    else SERVICE DOWN
+        svc -> app: Return error (HTTP 502 Bad Gateway)
+        app -> User: Show fallback message
+    else BAD REQUEST
+        svc -> app: Return error (HTTP 400 Bad Request)
+        app -> User: Display invalid input message
+    end
+end
+@enduml

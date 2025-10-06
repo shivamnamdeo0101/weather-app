@@ -1,0 +1,26 @@
+@startuml
+title Cache Maintenance (Refresh-or-Evict Strategy)
+
+participant "Eviction Scheduler" as scheduler
+participant "Eviction Strategy (Refresh/Delete + TTL)" as strategy
+participant "Weather-Cache" as cache
+participant "Weather-SVC" as svc
+participant "Open Weather API" as api
+
+scheduler -> strategy: Evaluate cache usage (every 1 min)
+strategy -> cache: Analyze access frequency & recency
+
+alt HOT KEYS (Active <6 min)
+    strategy -> cache: Delete old data
+    strategy -> svc: Fetch fresh data from API
+    svc -> api: Fetch latest weather
+    api -> svc: Return data
+    svc -> cache: Store refreshed data (TTL = 5 min)
+else COLD KEYS (Inactive >6 min)
+    strategy -> cache: Delete from cache (evict)
+else NORMAL KEYS
+    strategy -> cache: Maintain TTL = 5 min
+end
+
+scheduler -> cache: Repeat evaluation every 1 min
+@enduml
