@@ -114,9 +114,7 @@ end
   - Can be extended to allow dynamic frontend origins with strict CORS rules.  
 
 - **Other Enhancements / Future Considerations:**  
-  - Add **analytics on cache hit/miss ratio** to monitor performance.  
   - Support **regional hotkeys & edge caching** for frequently accessed regions.  
-  - Implement **alerting** for service downtime or rate-limit breaches.  
   - Enhance **logging and monitoring** for better observability and troubleshooting.  
 
 
