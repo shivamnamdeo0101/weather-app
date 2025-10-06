@@ -13,8 +13,11 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 - 📱 Fully mobile-responsive
 - 👀 Prediction / Advice for the user
 
-## 🧩 Architecture Overview
-<img width="976" height="631" alt="SequnceDig" src="https://github.com/user-attachments/assets/8a2b2784-7182-44ef-8fbd-2f00efc24724" />
+## 🧩 Sequnce Diagrams
+<img width="1256" height="988" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/876623bf-5c40-4e31-bc79-98e0015e2995" />
+<img width="626" height="289" alt="SequnceDig-Cache_Maintenance__Refresh_or_Evict_Strategy_" src="https://github.com/user-attachments/assets/66c079ec-8bd6-4ff0-a5ef-beee1f210d63" />
+
+
 
 
 ````
