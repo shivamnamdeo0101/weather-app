@@ -11,6 +11,7 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 - 💨 Check wind speed & humidity
 - ⚠️ Receive friendly error messages
 - 📱 Fully mobile-responsive
+- Prediction / Advice for the user
 
 ## 🧩 Architecture Overview
 <img width="895" height="563" alt="image" src="https://github.com/user-attachments/assets/acbf69d1-9f37-4df4-bc8f-95a3aa410104" />
