@@ -65,7 +65,7 @@ public class WeatherCacheController {
         // Examples allowed: "New York", "St. Louis" (dot not allowed here), "San-Francisco" (hyphen allowed)
         String pattern = "^[A-Za-z\\s-]+$";
         if (!trimmed.matches(pattern)) {
-            throw new BadRequestException("City must contain only English letters");
+            throw new BadRequestException("City must contain only English letters, spaces or hyphens");
         }
 
     CacheResult result = cacheService.getWeather(trimmed);
