@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import com.shivam.weather_cache.utils.CityUtils;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -56,23 +57,15 @@ public class WeatherCacheController {
             throw new BadRequestException("City parameter is required");
         }
 
-        String trimmed = city.trim();
-        if (trimmed.isEmpty()) {
-            throw new BadRequestException("City cannot be empty");
-        }
+    String trimmed = CityUtils.validateAndTrimCity(city);
 
-        // Only allow English letters (A-Z, a-z), spaces and hyphens. Prevents non-English characters.
-        // Examples allowed: "New York", "St. Louis" (dot not allowed here), "San-Francisco" (hyphen allowed)
-        String pattern = "^[A-Za-z\\s-]+$";
-        if (!trimmed.matches(pattern)) {
-            throw new BadRequestException("City must contain only English letters, spaces or hyphens");
-        }
-
-    CacheResult result = cacheService.getWeather(trimmed);
+        CacheResult result = cacheService.getWeather(trimmed);
         String headerValue = result.isCacheHit() ? "HIT" : "MISS";
 
         return ResponseEntity.ok()
                 .header("X-Cache", headerValue)
                 .body(result.getData());
     }
+
+    
 }
