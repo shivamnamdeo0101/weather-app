@@ -1,8 +1,7 @@
-package com.shivam.weather_svc.service;
+package com.shivam.weather_svc.utils;
 
 import com.shivam.weather_svc.dto.ForecastItemDTO;
 import com.shivam.weather_svc.dto.WeatherDTO;
-import com.shivam.weather_svc.utils.AppConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +10,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-public class WeatherPredictionService {
+public class WeatherPrediction {
 
     /**
      * Generates weather-based predictions/recommendations for a given forecast item.

@@ -2,7 +2,7 @@ package com.shivam.weather_svc.controller;
 
 import com.shivam.weather_svc.dto.CustomResponse;
 import com.shivam.weather_svc.dto.ForecastItemDTO;
-import com.shivam.weather_svc.service.SlidingWindowRateLimiterService;
+import com.shivam.weather_svc.utils.SlidingWindowRateLimiter;
 import com.shivam.weather_svc.service.WeatherService;
 import com.shivam.weather_svc.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,11 +26,11 @@ import java.util.List;
 @Slf4j
 public class WeatherController {
 
-    private final WeatherService weatherService;
-    private final SlidingWindowRateLimiterService rateLimiter;
+    private final WeatherService WeatherService;
+    private final SlidingWindowRateLimiter rateLimiter;
 
-    public WeatherController(WeatherService weatherService, SlidingWindowRateLimiterService rateLimiter) {
-        this.weatherService = weatherService;
+    public WeatherController(WeatherService WeatherService, SlidingWindowRateLimiter rateLimiter) {
+        this.WeatherService = WeatherService;
         this.rateLimiter = rateLimiter;
     }
 
@@ -70,7 +70,7 @@ public class WeatherController {
                     .body(new CustomResponse<>(false, AppConstants.Messages.TOO_MANY_REQUEST, null));
         }
 
-        List<ForecastItemDTO> forecast = weatherService.getThreeHourForecast(city);
+        List<ForecastItemDTO> forecast = WeatherService.getThreeHourForecast(city);
 
         if (forecast == null || forecast.isEmpty()) {
             log.warn("No forecast data found for city: {}", city);
