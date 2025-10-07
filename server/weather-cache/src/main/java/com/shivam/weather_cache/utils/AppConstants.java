@@ -1,4 +1,5 @@
 package com.shivam.weather_cache.utils;
+
 import lombok.experimental.UtilityClass;
 
 /**
@@ -19,20 +20,33 @@ public class AppConstants {
     }
 
     // ===========================
-    // Messages
+    // Messages (Grouped by HTTP Status)
     // ===========================
     public final class Messages {
         private Messages() {}
 
-        // API Response Messages
-        public static final String FORECAST_SUCCESS = "Weather forecast retrieved successfully.";
-        public static final String FORECAST_NOT_FOUND = "No forecast data found for ";
-        public static final String TOO_MANY_REQUEST = "Too many requests. Please wait before retrying.";
-        public static final String CITY_NOT_FOUND = "City not found:";
-        public static final String OPENWEATHER_API_UNAUTHORIZED = "Unauthorized access to OpenWeather API.";
-        public static final String SERVICE_UNAVAILABLE = "Weather service is temporarily unavailable. Please try again later.";
-        public static final String INTERNAL_SERVER_ERROR = "Internal server error occurred.";
-        public static final String BAD_REQUEST = "Invalid input provided.";
+        // --- 2XX SUCCESS ---
+        public final class Success {
+            private Success() {}
+            public static final String FORECAST_SUCCESS = "Weather forecast retrieved successfully.";
+        }
+
+        // --- 4XX CLIENT ERRORS ---
+        public final class ClientError {
+            private ClientError() {}
+            public static final String BAD_REQUEST = "Invalid input provided."; // 400
+            public static final String OPENWEATHER_API_UNAUTHORIZED = "Unauthorized access to OpenWeather API."; // 401
+            public static final String CITY_NOT_FOUND = "City not found:"; // 404 (For specific application logic/messages)
+            public static final String FORECAST_NOT_FOUND = "No forecast data found for "; // 404 (Specific to forecast data availability)
+            public static final String TOO_MANY_REQUEST = "Too many requests. Please wait before retrying."; // 429
+        }
+
+        // --- 5XX SERVER ERRORS ---
+        public final class ServerError {
+            private ServerError() {}
+            public static final String SERVICE_UNAVAILABLE = "Weather service is temporarily unavailable. Please try again later."; // 502 / 503
+            public static final String INTERNAL_SERVER_ERROR = "Internal server error occurred."; // 500
+        }
     }
 
     // ===========================

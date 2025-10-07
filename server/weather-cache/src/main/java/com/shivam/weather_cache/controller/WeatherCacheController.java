@@ -1,31 +1,19 @@
+
 package com.shivam.weather_cache.controller;
 
 import com.shivam.weather_cache.dto.CacheResult;
-// NOTE: CustomResponse.java is assumed to exist for this to compile
-// import com.shivam.weather_cache.dto.CustomResponse;
-// NOTE: BadRequestException, AppConstants, CityUtils are assumed to exist
-// import com.shivam.weather_cache.exception.BadRequestException;
-import com.shivam.weather_cache.dto.CustomResponse;
+import com.shivam.weather_cache.exception.BadRequestException;
 import com.shivam.weather_cache.service.WeatherCacheService;
-// import com.shivam.weather_cache.utils.AppConstants;
-// import com.shivam.weather_cache.utils.CityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-// Dummy classes for compilation purposes
-class BadRequestException extends RuntimeException { public BadRequestException(String msg) { super(msg); } }
-class AppConstants {
-    public static class Headers { public static final String CACHE_HIT = "HIT"; public static final String CACHE_MISS = "MISS"; public static final String X_CACHE = "X-Cache"; }
-    public static class Messages { public static final String FORECAST_SUCCESS = "Forecast fetched successfully"; }
-}
-class CityUtils { public static String validateAndTrimCity(String city) { return city.trim(); } }
 
 @RestController
 @RequestMapping("/api/weather-cache")
@@ -65,23 +53,33 @@ public class WeatherCacheController {
                             examples = @ExampleObject(value = "{\"success\":false,\"message\":\"Internal server error\",\"data\":null}")))
     })
     @GetMapping("/forecast")
-    public ResponseEntity<CustomResponse<Object>> getWeather(@RequestParam(name = "city", required = true) String city) {
-
-
-        //Param can not be null (redundant due to required=true but kept for logic flow)
+    public ResponseEntity<java.util.Map<String, Object>> getWeather(@RequestParam(name = "city", required = true) String city) {
         if (city == null) {
             throw new BadRequestException("City parameter is required");
         }
 
-        //Validate city patterns
-        String trimmed = CityUtils.validateAndTrimCity(city);
+        String trimmed = getTrimmed(city);
 
         CacheResult result = cacheService.getWeather(trimmed);
-        String headerValue = result.isCacheHit() ? AppConstants.Headers.CACHE_HIT : AppConstants.Headers.CACHE_MISS;
+        String headerValue = result.isCacheHit() ? "HIT" : "MISS";
 
         return ResponseEntity.ok()
-                .header(AppConstants.Headers.X_CACHE, headerValue)
-                .body(new CustomResponse<>(true, AppConstants.Messages.FORECAST_SUCCESS, result.getData()));
+                .header("X-Cache", headerValue)
+                .body(result.getData());
     }
 
+    private static @NotNull String getTrimmed(String city) {
+        String trimmed = city.trim();
+        if (trimmed.isEmpty()) {
+            throw new BadRequestException("City cannot be empty");
+        }
+
+        // Only allow English letters (A-Z, a-z), spaces and hyphens. Prevents non-English characters.
+        // Examples allowed: "New York", "St. Louis" (dot not allowed here), "San-Francisco" (hyphen allowed)
+        String pattern = "^[A-Za-z\\s-]+$";
+        if (!trimmed.matches(pattern)) {
+            throw new BadRequestException("City must contain only English letters, spaces or hyphens");
+        }
+        return trimmed;
+    }
 }

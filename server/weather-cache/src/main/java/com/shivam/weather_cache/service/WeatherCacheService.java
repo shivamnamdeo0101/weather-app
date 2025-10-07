@@ -5,16 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shivam.weather_cache.dto.CacheResult;
 import com.shivam.weather_cache.exception.WeatherServiceException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpServerErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.client.*;
 
 import java.util.Map;
 
@@ -23,7 +18,7 @@ import java.util.Map;
 public class WeatherCacheService {
 
     @Autowired
-    private GenericRedisService redisService; // Assumed service for Redis operations
+    private GenericRedisService redisService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -46,16 +41,17 @@ public class WeatherCacheService {
         }
 
         String key = "weather:" + city.toLowerCase();
+        log.info("Fetching weather for city: {}", city);
 
-        // 1️⃣ Check cache first (fresh data)
         Object cached = redisService.get(key);
         if (cached != null) {
             Map<String, Object> cachedMap = objectMapper.convertValue(cached, new TypeReference<>() {});
-            log.info("Cache HIT (fresh) for city: {}", city);
+            log.info("Cache HIT for city: {}", city);
             return new CacheResult(cachedMap, true);
         }
 
-        // 2️⃣ Call Weather SVC
+        log.info("Cache MISS for city: {}. Calling Weather SVC: {}", city, svcUrl);
+
         try {
             String url = svcUrl + "?city=" + city;
             ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -64,53 +60,46 @@ public class WeatherCacheService {
 
             Map<String, Object> data = response.getBody();
             if (data == null || data.isEmpty()) {
-                throw new WeatherServiceException("No data found for city: " + city, HttpStatus.NO_CONTENT);
+                throw new WeatherServiceException("Weather SVC returned empty data for " + city, HttpStatus.NO_CONTENT);
             }
 
-            // 3️⃣ Cache MISS: Save and return fresh data
             redisService.saveWithTTL(key, data, cacheTTL);
-            log.info("Cache MISS. Saved weather data for {} with TTL {}s", city, cacheTTL);
+            log.info("Saved weather data in Redis for {} with TTL: {}s", city, cacheTTL);
+
             return new CacheResult(data, false);
 
-        } catch (HttpServerErrorException serverEx) {
-            // 5xx errors (e.g., 500, 502, 503): Try to serve stale cache
-            log.error("Weather SVC 5xx error ({}): {}", serverEx.getStatusCode().value(), serverEx.getResponseBodyAsString());
-
-            // 🆕 STALE CACHE LOGIC: Attempt to retrieve and serve stale data
-            // Assuming get(key, true) retrieves the data even if its TTL has expired
-            Object stale = redisService.get(key);
-            if (stale != null) {
-                Map<String, Object> staleMap = objectMapper.convertValue(stale, new TypeReference<>() {});
-                log.warn("Weather SVC error, serving STALE cache for city: {}", city);
-                return new CacheResult(staleMap, true);
+        } catch (HttpStatusCodeException httpEx) {
+            HttpStatus status;
+            try {
+                status = HttpStatus.valueOf(httpEx.getStatusCode().value());
+            } catch (IllegalArgumentException e) {
+                status = HttpStatus.INTERNAL_SERVER_ERROR;
             }
-            // 🔚 END STALE CACHE LOGIC
 
-            throw new WeatherServiceException(
-                    "Weather service temporarily unavailable. Please try again later.",
-                    serverEx,
-                    HttpStatus.BAD_GATEWAY // Maps to 502
-            );
+            String msg = switch (status) {
+                case NOT_FOUND -> "City not found: " + city;
+                case TOO_MANY_REQUESTS -> "Weather SVC rate limit exceeded. Try again later.";
+                case BAD_REQUEST -> "Invalid city name or request format.";
+                case BAD_GATEWAY, SERVICE_UNAVAILABLE -> handleServiceUnavailable(city, key);
+                default -> "Unexpected HTTP error (" + status.value() + ") from Weather SVC.";
+            };
 
-        } catch (ResourceAccessException raEx) {
-            // Network / connection refused: Try to serve stale cache
-            log.error("Weather SVC unreachable: {}", raEx.getMessage());
+            throw new WeatherServiceException(msg, httpEx, status);
 
-            // 🆕 STALE CACHE LOGIC: Attempt to retrieve and serve stale data
-            Object stale = redisService.get(key);
-            if (stale != null) {
-                Map<String, Object> staleMap = objectMapper.convertValue(stale, new TypeReference<>() {});
-                log.warn("Weather SVC unreachable, serving STALE cache for city: {}", city);
-                return new CacheResult(staleMap, true);
-            }
-            // 🔚 END STALE CACHE LOGIC
+        } catch (RestClientException rcEx) {
+            throw new WeatherServiceException("Error communicating with Weather SVC for " + city, rcEx, HttpStatus.BAD_GATEWAY);
 
-            throw new WeatherServiceException(
-                    "Weather service temporarily unreachable. Please try again later.",
-                    raEx,
-                    HttpStatus.BAD_GATEWAY // Maps to 502
-            );
+        } catch (Exception ex) {
+            throw new WeatherServiceException("Unexpected error fetching weather for " + city, ex, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    private String handleServiceUnavailable(String city, String key) {
+        Object stale = redisService.get(key);
+        if (stale != null) {
+            log.warn("Weather SVC down. Returning stale cache for {}", city);
+            return "Weather SVC temporarily unavailable. Returning last known data.";
+        }
+        return "Weather SVC temporarily unavailable. Please retry later.";
+    }
 }
