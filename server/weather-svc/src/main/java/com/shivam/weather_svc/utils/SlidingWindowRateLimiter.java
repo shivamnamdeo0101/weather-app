@@ -1,4 +1,4 @@
-package com.shivam.weather_svc.service;
+package com.shivam.weather_svc.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  */
 @Service
 @Slf4j
-public class SlidingWindowRateLimiterService {
+public class SlidingWindowRateLimiter {
 
     @Value("${rate_limiter_max_req_per_min}")
     private int maxRequestsPerMinute;
