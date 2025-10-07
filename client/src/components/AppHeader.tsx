@@ -10,17 +10,17 @@ interface AppHeaderProps {
 
 export default function AppHeader({ title = 'Weather Forecast', subtitle = 'Get detailed weather forecasts and predictions for any city' }: AppHeaderProps) {
   return (
-    <div className="text-center mb-12">
-      <div className="flex items-center justify-center gap-3 mb-4">
-        <Cloud className="h-8 w-8 text-blue-400" />
-        <h1 className="text-4xl font-bold gradient-text">
+    <header className="text-center mb-12 px-4 sm:px-0" role="banner">
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+        <Cloud className="h-10 w-10 sm:h-8 sm:w-8 text-blue-400 flex-shrink-0" />
+        <h1 className="text-2xl sm:text-4xl font-bold gradient-text leading-tight break-words">
           {title}
         </h1>
       </div>
-      <p className="text-gray-400 text-lg">
+      <p className="text-gray-400 text-sm sm:text-lg max-w-xl mx-auto px-2">
         {subtitle}
       </p>
-    </div>
+    </header>
   );
 }
 

@@ -35,4 +35,14 @@ public class AppConstants {
         public static final String BAD_REQUEST = "Invalid input provided.";
     }
 
+    // ===========================
+    // Headers
+    // ===========================
+    public final class Headers {
+        private Headers() {}
+        public static final String X_CACHE = "X-Cache";
+        public static final String CACHE_HIT = "HIT";
+        public static final String CACHE_MISS = "MISS";
+    }
+
 }
