@@ -3,6 +3,7 @@ package com.shivam.weather_cache.scheduler;
 import com.shivam.weather_cache.dto.CacheResult;
 import com.shivam.weather_cache.service.GenericRedisServiceImpl;
 import com.shivam.weather_cache.service.WeatherCacheService;
+import com.shivam.weather_cache.utils.DateTimeUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -39,7 +40,7 @@ public class WeatherCacheSchedulerImpl {
     @Scheduled(fixedRate = 5 * 1000L)
     public void refreshCache() {
         try {
-            Set<String> keys = redisService.getAllKeys("*:data");
+            Set<String> keys = redisService.getAllKeys("weather:*:data");
 
             if (keys == null || keys.isEmpty()) {
                 log.debug("No cached cities to process.");
@@ -47,7 +48,7 @@ public class WeatherCacheSchedulerImpl {
             }
 
             long now = Instant.now().toEpochMilli();
-
+            log.info("⏱ Scheduler triggered at {}", DateTimeUtils.formatEpochMilli(now));
             for (String dataKey : keys) {
                 String cityKey = dataKey.replace(":data", "");
                 Map<Object, Object> meta = safeMeta(redisService.getMeta(cityKey));
@@ -77,9 +78,9 @@ public class WeatherCacheSchedulerImpl {
     private void handleRefresh(String cityKey, Map<Object, Object> meta, long now,
                                long lastRefresh, long interval, String level) {
         if (now - lastRefresh >= interval) {
-            log.info("{}, hits : {}, last access : {}",cityKey,interval, lastRefresh);
+            log.info("Meta data {} for {} ",meta,cityKey);
             log.info("{} Refreshing weather data for '{}'", level, cityKey);
-            String city = cityKey.replace(":data", "");
+            String city = cityKey.split(":")[1];
             CacheResult result = cacheService.getWeather(city);
             log.info("Weather data refreshed for {} : {}", city, result);
         }
