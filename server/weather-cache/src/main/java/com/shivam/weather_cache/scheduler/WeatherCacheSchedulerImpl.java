@@ -35,7 +35,8 @@ public class WeatherCacheSchedulerImpl {
      * - Refreshes "hot" or "medium" cities as needed.
      * - Removes stale cities.
      */
-    @Scheduled(fixedRate = 5 * 60 * 1000L)
+    //@Scheduled(fixedRate = 5 * 60 * 1000L)
+    @Scheduled(fixedRate = 5 * 1000L)
     public void refreshCache() {
         try {
             Set<String> keys = redisService.getAllKeys("*:data");

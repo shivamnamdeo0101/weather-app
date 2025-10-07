@@ -64,47 +64,38 @@ public class GenericRedisServiceImpl implements GenericRedisService {
      * Get data along with metadata and update hits/lastAccess atomically. => For FE/USER Call
      * we need to increment meta data
      */
-    public Map<String, Object> getWithMeta(String key) {
-        Map<String, Object> result = new HashMap<>();
-
+    @Override
+    public Object getAndUpdateMeta(String key) {
         try {
-            redisTemplate.execute(new SessionCallback<Object>() {
-                @Override
-                public Object execute(@NotNull RedisOperations operations) throws DataAccessException {
-                    operations.multi(); // start transaction
+            // 1️⃣ Get the cached value first
+            ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
+            Object value = valueOps.get(key + ":data");
 
-                    // Typed operations
-                    ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
-                    HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
+            if (value != null) {
+                // 2️⃣ Update metadata atomically (no need to return anything)
+                redisTemplate.execute(new SessionCallback<Object>() {
+                    @Override
+                    public Object execute(@NotNull RedisOperations operations) throws DataAccessException {
+                        operations.multi();
 
-                    // Get data
-                    Object value = valueOps.get(key + ":data");
-
-                    if (value != null) {
-                        // Increment hits
+                        HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
                         hashOps.increment(key + ":meta", "hits", 1);
-
-                        // Update lastAccess
                         hashOps.put(key + ":meta", "lastAccess", Instant.now().toEpochMilli());
+
+                        return operations.exec();
                     }
+                });
+            }
 
-                    // Get metadata
-                    Map<String, Object> meta = hashOps.entries(key + ":meta");
+            return value;
 
-                    result.put("value", value);
-                    result.put("meta", meta.isEmpty() ? null : meta);
-
-                    return operations.exec(); // execute transaction
-                }
-            });
         } catch (Exception ex) {
-            log.error("❌ Error in getWithMeta for key '{}'", key, ex);
-            result.put("value", null);
-            result.put("meta", null);
+            log.error("❌ Error in getAndUpdateMeta for key '{}'", key, ex);
+            return null;
         }
-
-        return result;
     }
+
+
 
     // Update last refresh timestamp atomically
     public void updateLastRefresh(String key, long timestamp) {
@@ -158,7 +149,6 @@ public class GenericRedisServiceImpl implements GenericRedisService {
             return Collections.emptyMap();
         }
     }
-
 
 
 

@@ -53,7 +53,7 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
 
         // 1️⃣ Try to fetch from Redis cache
         try {
-            Object cached = redisService.getData(key);
+            Object cached = redisService.getAndUpdateMeta(key);
             if (cached != null) {
                 Map<String, Object> cachedMap = objectMapper.convertValue(cached, new TypeReference<>() {});
                 log.info("Cache HIT for city: {}", city);

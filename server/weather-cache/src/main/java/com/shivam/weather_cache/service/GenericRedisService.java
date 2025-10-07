@@ -18,7 +18,8 @@ public interface GenericRedisService {
      * @param key The primary key.
      * @return A map containing "value" and "meta" (which is another Map). Returns null if the key is not found.
      */
-    Map<String, Object> getWithMeta(String key);
+    Object getAndUpdateMeta(String key);
+
 
     /**
      * Retrieves only the cached value for a key without updating metadata.
