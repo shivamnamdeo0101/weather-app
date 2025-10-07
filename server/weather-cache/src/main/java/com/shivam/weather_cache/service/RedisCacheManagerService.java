@@ -2,6 +2,7 @@ package com.shivam.weather_cache.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -13,6 +14,9 @@ public class RedisCacheManagerService {
 
     private final GenericRedisService redisService;
     private static final String WEATHER_KEY_PREFIX = "weather:";
+
+    @Value("${spring.redis.ttl}")
+    private long cacheTTL;
 
     public Set<String> getAllCityKeys() {
         return redisService.getAllKeys(WEATHER_KEY_PREFIX + "*:data");
@@ -37,9 +41,9 @@ public class RedisCacheManagerService {
         return redisService.getData(cityKey);
     }
 
-    public boolean refreshCityDataAndMeta(String cityKey,Object value, long ttlSeconds) {
+    public boolean refreshCityDataAndMeta(String cityKey,Object value) {
         try {
-            redisService.saveWithMeta(cityKey,value,ttlSeconds);
+            redisService.saveWithMeta(cityKey,value,cacheTTL);
             return true;
         } catch (Exception ex) {
             log.error("❌ Failed to update lastRefresh for '{}'", cityKey, ex);

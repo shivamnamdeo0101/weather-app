@@ -14,13 +14,13 @@ import java.util.Set;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/weather-cache/redis")
+@RequestMapping("/api/weather-cache/redis/keys")
 public class RedisCacheController {
 
     private final RedisCacheManagerService cacheService;
 
     /** 🔍 Get all city keys */
-    @GetMapping("/keys")
+    @GetMapping("/")
     public ResponseEntity<CustomResponse<Set<String>>> getAllKeys() {
         Set<String> keys = cacheService.getAllCityKeys();
         return ResponseEntity.ok(
@@ -33,7 +33,7 @@ public class RedisCacheController {
     }
 
     /** 🗑️ Delete both data and meta by key */
-    @DeleteMapping("/keys")
+    @DeleteMapping("/")
     public ResponseEntity<CustomResponse<String>> deleteKey(@RequestParam String key) {
         boolean deleted = cacheService.deleteCityCache(key);
         return ResponseEntity.ok(
@@ -47,7 +47,7 @@ public class RedisCacheController {
     }
 
     /** 📋 Get metadata (hits, lastAccess, etc.) */
-    @GetMapping("/keys/meta")
+    @GetMapping("/meta")
     public ResponseEntity<CustomResponse<Map<Object, Object>>> getMeta(@RequestParam String key) {
         Map<Object, Object> meta = cacheService.getCityMetadata(key);
         return ResponseEntity.ok(
@@ -60,7 +60,7 @@ public class RedisCacheController {
     }
 
     /** 🌦️ Get cached city data */
-    @GetMapping("/keys/data")
+    @GetMapping("/data")
     public ResponseEntity<CustomResponse<Object>> getData(@RequestParam String key) {
         Object rawData = cacheService.getCityData(key);
 
@@ -106,18 +106,17 @@ public class RedisCacheController {
     @PutMapping("/refresh")
     public ResponseEntity<CustomResponse<String>> refresh(
             @RequestParam String key,
-            @RequestParam long ttlSeconds,
             @RequestBody Map<String, Object> payload // Accept any JSON
     ) {
 
-        boolean updated = cacheService.refreshCityDataAndMeta(key,payload,ttlSeconds);
+        boolean updated = cacheService.refreshCityDataAndMeta(key,payload);
 
         return ResponseEntity.ok(
                 CustomResponse.<String>builder()
                         .success(updated)
                         .message(updated
-                                ? "lastRefresh updated for " + key
-                                : "Failed to update lastRefresh for " + key)
+                                ? "Refresh done for " + key
+                                : "Failed to update refresh for " + key)
                         .data(updated ? "Updated successfully" : null)
                         .build()
         );
