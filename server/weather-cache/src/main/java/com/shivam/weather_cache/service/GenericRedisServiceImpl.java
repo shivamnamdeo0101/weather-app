@@ -8,10 +8,7 @@ import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -24,35 +21,23 @@ public class GenericRedisServiceImpl implements GenericRedisService {
         this.redisTemplate = redisTemplate;
     }
 
-    /**
-     * Save data along with metadata (hits, lastAccess) atomically.
-     * TTL applied to both data and meta.
-     */
+    @Override
     public void saveWithMeta(String key, Object value, long ttlSeconds) {
         try {
             redisTemplate.execute(new SessionCallback<Object>() {
                 @Override
                 public Object execute(@NotNull RedisOperations operations) throws DataAccessException {
-                    operations.multi(); // start transaction
-
-                    // Typed operations to avoid unchecked warnings
+                    operations.multi();
                     ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
                     HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 
-                    // Save the actual value
                     valueOps.set(key + ":data", value);
-
-                    // Increment hits atomically
                     hashOps.increment(key + ":meta", "hits", 1);
-
-                    // Update lastAccess timestamp
                     hashOps.put(key + ":meta", "lastAccess", Instant.now().toEpochMilli());
 
-                    // Set TTL for both data and meta
                     redisTemplate.expire(key + ":data", java.time.Duration.ofSeconds(ttlSeconds));
                     redisTemplate.expire(key + ":meta", java.time.Duration.ofSeconds(ttlSeconds));
-
-                    return operations.exec(); // execute all commands atomically
+                    return operations.exec();
                 }
             });
         } catch (Exception ex) {
@@ -60,103 +45,78 @@ public class GenericRedisServiceImpl implements GenericRedisService {
         }
     }
 
-    /**
-     * Get data along with metadata and update hits/lastAccess atomically. => For FE/USER Call
-     * we need to increment meta data
-     */
     @Override
     public Object getAndUpdateMeta(String key) {
         try {
-            // 1️⃣ Get the cached value first
             ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
             Object value = valueOps.get(key + ":data");
 
             if (value != null) {
-                // 2️⃣ Update metadata atomically (no need to return anything)
                 redisTemplate.execute(new SessionCallback<Object>() {
                     @Override
                     public Object execute(@NotNull RedisOperations operations) throws DataAccessException {
                         operations.multi();
-
                         HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
                         hashOps.increment(key + ":meta", "hits", 1);
                         hashOps.put(key + ":meta", "lastAccess", Instant.now().toEpochMilli());
-
                         return operations.exec();
                     }
                 });
             }
-
             return value;
-
         } catch (Exception ex) {
             log.error("❌ Error in getAndUpdateMeta for key '{}'", key, ex);
             return null;
         }
     }
 
-
-
-    // Update last refresh timestamp atomically
-    public void updateLastRefresh(String key, long timestamp) {
-        try {
-            HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
-            hashOps.put(key + ":meta", "lastRefresh", timestamp);
-        } catch (Exception ex) {
-            log.error("❌ Error updating lastRefresh for key '{}'", key, ex);
-        }
-    }
-
-    // Get all keys matching a pattern
-    public Set<String> getAllKeys(String pattern) {
-        try {
-            return redisTemplate.keys(pattern);
-        } catch (Exception ex) {
-            log.error("❌ Error getting keys with pattern '{}'", pattern, ex);
-            return null;
-        }
-    }
-
-    /**
-     * Get only the data for a key, without touching metadata.
-     */
+    @Override
     public Object getData(String key) {
         try {
-            ValueOperations<String, Object> valueOps = redisTemplate.opsForValue();
-            return valueOps.get(key + ":data");
+            return redisTemplate.opsForValue().get(key + ":data");
         } catch (Exception ex) {
             log.error("❌ Error in getData for key '{}'", key, ex);
             return null;
         }
     }
 
-    /**
-     * Get only the metadata for a key, without touching hits or lastAccess.
-     */
+    @Override
     public Map<Object, Object> getMeta(String key) {
         try {
             HashOperations<String, Object, Object> hashOps = redisTemplate.opsForHash();
             Map<Object, Object> metaData = hashOps.entries(key + ":meta");
-
-            if (metaData.isEmpty()) {
-                log.warn("⚠️ No metadata found for key '{}'", key);
-                return Collections.emptyMap();
-            }
-            return metaData;
-
+            return metaData.isEmpty() ? Collections.emptyMap() : metaData;
         } catch (Exception ex) {
-            log.error("❌ Error in getMeta for key '{}': {}", key, ex.getMessage(), ex);
+            log.error("❌ Error in getMeta for key '{}'", key, ex);
             return Collections.emptyMap();
         }
     }
 
+    @Override
+    public Set<String> getAllKeys(String pattern) {
+        try {
+            return redisTemplate.keys(pattern);
+        } catch (Exception ex) {
+            log.error("❌ Error getting keys for pattern '{}'", pattern, ex);
+            return Collections.emptySet();
+        }
+    }
 
+    @Override
+    public void updateLastRefresh(String key, long timestamp) {
+        try {
+            redisTemplate.opsForHash().put(key + ":meta", "lastRefresh", timestamp);
+        } catch (Exception ex) {
+            log.error("❌ Error updating lastRefresh for key '{}'", key, ex);
+        }
+    }
 
-    // Delete a city key (data + meta)
+    @Override
     public void deleteKey(String key) {
         try {
             redisTemplate.delete(key + ":data");
             redisTemplate.delete(key + ":meta");
+
         } catch (Exception ex) {
             log.error("❌ Error deleting key '{}'", key, ex);
         }
