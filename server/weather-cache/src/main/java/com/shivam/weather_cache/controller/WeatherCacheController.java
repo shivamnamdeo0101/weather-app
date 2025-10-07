@@ -3,7 +3,7 @@ package com.shivam.weather_cache.controller;
 
 import com.shivam.weather_cache.dto.CacheResult;
 import com.shivam.weather_cache.exception.BadRequestException;
-import com.shivam.weather_cache.service.WeatherCacheService;
+import com.shivam.weather_cache.service.WeatherCacheServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/weather-cache")
 public class WeatherCacheController {
-    private final WeatherCacheService cacheService;
+    private final WeatherCacheServiceImpl cacheService;
 
-    public WeatherCacheController(WeatherCacheService cacheService) {
+    public WeatherCacheController(WeatherCacheServiceImpl cacheService) {
         this.cacheService = cacheService;
     }
 

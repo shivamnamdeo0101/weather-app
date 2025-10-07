@@ -1,23 +1,27 @@
 package com.shivam.weather_cache.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
+/**
+ * GenericRedisService defines basic Redis operations for storing
+ * and retrieving key-value data with optional TTL (time-to-live).
+ *
+ * <p>This interface allows for reusability and easy mocking in unit tests.</p>
+ */
+public interface GenericRedisService {
 
-import java.time.Duration;
+    /**
+     * Saves a value in Redis with a specified TTL.
+     *
+     * @param key     the Redis key
+     * @param value   the value to store
+     * @param seconds the time-to-live in seconds
+     */
+    void saveWithTTL(String key, Object value, long seconds);
 
-@Service
-public class GenericRedisService {
-
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
-
-    public void saveWithTTL(String key, Object value, long seconds) {
-        redisTemplate.opsForValue().set(key, value, Duration.ofSeconds(seconds));
-    }
-
-    public Object get(String key) {
-        return redisTemplate.opsForValue().get(key);
-    }
+    /**
+     * Retrieves a value from Redis by key.
+     *
+     * @param key the Redis key
+     * @return the stored object, or null if not found
+     */
+    Object get(String key);
 }
-
