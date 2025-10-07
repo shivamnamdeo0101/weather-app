@@ -15,15 +15,20 @@ interface WeatherDetailsProps {
 }
 
 const WeatherDetails = memo<WeatherDetailsProps>(({ 
-  temp, 
-  feelsLike, 
+  temp: _temp, 
+  feelsLike: _feelsLike, 
   tempMin, 
   tempMax, 
   humidity, 
   windSpeed, 
   description,
   className = '' 
-}) => {
+}: Readonly<WeatherDetailsProps>) => {
+  // mark intentionally unused values to satisfy linter
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _useTemp = _temp;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _useFeels = _feelsLike;
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center justify-between text-sm">
