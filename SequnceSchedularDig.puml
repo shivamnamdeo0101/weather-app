@@ -6,26 +6,28 @@ participant "Cache Service (CRUD/Refresh/Evict APIs)" as service
 participant "Weather Cache (Redis)" as cache
 participant "Open Weather API" as api
 
-scheduler -> service: Fetch all city cache metadata (hits, lastAccess, lastRefresh) every 5 min
-service -> cache: Read metadata for all cities
+scheduler -> service: Fetch all city metadata (hits, lastAccess) every 5 min
+service -> cache: Read meta+data for all cities
 
-scheduler -> scheduler: Loop over each city
-alt HOT Cities (hits ≥ 50)
-    scheduler -> service: Refresh city if last access < 30 min
-    scheduler -> api: Fetch latest weather data
-    api -> scheduler: Return weather data
-    scheduler -> service: Update cache (TTL=5min, LFU)
-    service -> cache: Store refreshed data
-else if MEDIUM Cities (20 ≤ hits < 50)
-    scheduler -> service: Refresh city if last access < 1 hour
-    scheduler -> api: Fetch latest weather data
-    api -> scheduler: Return weather data
-    scheduler -> service: Update cache (TTL=15min)
-    service -> cache: Store refreshed data
-else LOW/Inactive Cities (hits < 20)
-    scheduler -> service: Evict city if (last access access)) or age > 1 hour
-    service -> cache: Evict city (LRU)
+loop
+    scheduler -> scheduler: Loop over each city
+
+    alt HOT Cities (hits ≥ 50)
+        scheduler -> api: Fetch latest weather data
+        api -> scheduler: Return data
+        scheduler -> service: Refresh & update cache (TTL=5min, LFU)
+        service -> cache: Store refreshed data
+    else if MEDIUM Cities (20 ≤ hits < 50)
+        scheduler -> api: Fetch latest weather data
+        api -> scheduler: Return data
+        scheduler -> service: Refresh & update cache (TTL=15min)
+        service -> cache: Store refreshed data
+    else LOW/Inactive Cities (hits < 20)
+        scheduler -> service: Evict city if age > 1 hour
+        service -> cache: Evict city (LRU)
+    end
+scheduler -> scheduler: Repeat evaluation every 5 min
+
 end
 
-scheduler -> scheduler: Repeat evaluation every 5 min
 @enduml
