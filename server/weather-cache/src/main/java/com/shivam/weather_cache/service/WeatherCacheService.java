@@ -75,8 +75,22 @@ public class WeatherCacheService {
             } catch (IllegalArgumentException e) {
                 status = HttpStatus.INTERNAL_SERVER_ERROR;
             }
+            // Try to extract a friendly message from upstream response body, if present
+            String upstreamBody = httpEx.getResponseBodyAsString();
+            String upstreamMsg = null;
+            if (upstreamBody != null && !upstreamBody.isBlank()) {
+                try {
+                    Map<String, Object> map = objectMapper.readValue(upstreamBody, new TypeReference<>() {});
+                    Object m = map.get("message");
+                    if (m != null) {
+                        upstreamMsg = String.valueOf(m);
+                    }
+                } catch (Exception ignore) {
+                    // ignore parse errors, fall back to default messages
+                }
+            }
 
-            String msg = switch (status) {
+            String msg = upstreamMsg != null ? upstreamMsg : switch (status) {
                 case NOT_FOUND -> "City not found: " + city;
                 case TOO_MANY_REQUESTS -> "Weather SVC rate limit exceeded. Try again later.";
                 case BAD_REQUEST -> "Invalid city name or request format.";

@@ -18,8 +18,12 @@ public class GlobalExceptionHandler {
     // 1️⃣ Weather SVC errors (429, 404, 502/503)
     @ExceptionHandler(WeatherServiceException.class)
     public ResponseEntity<CustomResponse<Object>> handleWeatherServiceException(WeatherServiceException ex) {
-        log.error("Weather Service Exception: {}", ex.getMessage(), ex);
         HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        if (status.is4xxClientError()) {
+            log.warn("Weather Service client error ({}): {}", status.value(), ex.getMessage());
+        } else {
+            log.error("Weather Service server error ({}): {}", status.value(), ex.getMessage(), ex);
+        }
         return ResponseEntity.status(status)
                 .body(new CustomResponse<>(false, ex.getMessage(), null));
     }
