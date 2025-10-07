@@ -11,19 +11,19 @@ service -> cache: Read metadata for all cities
 
 scheduler -> scheduler: Loop over each city
 alt HOT Cities (hits ≥ 50)
-    scheduler -> service: Refresh city if last refresh > 5 min
+    scheduler -> service: Refresh city if last access < 30 min
     scheduler -> api: Fetch latest weather data
     api -> scheduler: Return weather data
     scheduler -> service: Update cache (TTL=5min, LFU)
     service -> cache: Store refreshed data
 else if MEDIUM Cities (20 ≤ hits < 50)
-    scheduler -> service: Refresh city if last refresh > 15 min
+    scheduler -> service: Refresh city if last access < 1 hour
     scheduler -> api: Fetch latest weather data
     api -> scheduler: Return weather data
     scheduler -> service: Update cache (TTL=15min)
     service -> cache: Store refreshed data
 else LOW/Inactive Cities (hits < 20)
-    scheduler -> service: Evict city if age > 1 hour
+    scheduler -> service: Evict city if (last access access)) or age > 1 hour
     service -> cache: Evict city (LRU)
 end
 
