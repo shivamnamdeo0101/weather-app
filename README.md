@@ -99,7 +99,30 @@ scheduler -> cache: Repeat evaluation every 1 min
 
 
 ## 🏆 Best Practices
-### Backend
+
+
+### 🧩 Weather Cache Scheduler
+
+The **Weather Cache Scheduler** manages cached weather data in Redis efficiently, balancing **freshness** and **performance**. It monitors city-level cache entries using **hit counts** and **last access time**.
+
+- **Behavior:**  ✅
+
+  - 🔥 **Hot Cities:** `hits ≥ 50` → refreshed every 5 min.
+  - 🌤 **Medium Cities:** `20 ≤ hits < 50` → refreshed every 15 min.
+  - ❄️ **Low/Inactive Cities:** `hits < 20` → stay in mid-state before eviction after 1 hr.
+  - Scheduler runs **every 5 min** to evaluate all cities.
+
+
+- **Cache Eviction Strategy:**  ✅
+  - Uses a combination of **LFU, LRU, and TTL**:
+  - **Hot Keys:** LFU → keep frequently accessed data longer.
+  - **Cold Keys:** LRU → evict least recently used entries first.
+  - **Normal Keys:** TTL → 5 min standard refresh.
+
+This ensures **optimal cache usage**, reduces backend API calls, and keeps frequently used data updated, while low-traffic keys aren’t removed immediately but gradually evicted after inactivity.
+
+
+### 🧩 Backend
 
 - **Rate Limiter:**  ✅  
   Implemented in `weather-svc` to allow **60 requests per minute per client**.  
@@ -114,13 +137,6 @@ scheduler -> cache: Repeat evaluation every 1 min
   - This offloads `weather-svc`, improves response time, and optimizes system performance. 
   - Can be extended to multi-level caching (e.g., global + regional caches).
 
-- **Cache Eviction Strategy (Strategy Pattern):**  
-  Uses a combination of **LRU, LFU, and TTL** strategies:  
-  - **Hot Keys:** Most active cities in the last 6 minutes → LFU (least frequently used items are kept longer with refresh data in redis so BE call will reduce and increase availability of the latest data).  
-  - **Cold Keys:** Less active cities in the last 6 minutes → LRU (least recently used items are evicted first).  
-  - **Normal Keys:** TTL (time-to-live) of 5 minutes for standard entries.✅   
-  - A scheduler runs **every 1 minute** to evaluate and adjust eviction strategies automatically.  
-  - This ensures optimal cache utilization and prioritizes frequently accessed cities.  
 
 - **Inflight Request Pattern:**  
   Handles multiple simultaneous requests for the same city within 1 minute:  
@@ -149,7 +165,7 @@ scheduler -> cache: Repeat evaluation every 1 min
   - Enhance **logging and monitoring** for better observability and troubleshooting.  
 
 
-## Frontend
+### 🧩 Frontend
 
 - **App Router and File-Based Structure (Next.js 15)** ✅ 
   - Uses `app/` directory with `layout.tsx` and `page.tsx` for clear route and layout composition.

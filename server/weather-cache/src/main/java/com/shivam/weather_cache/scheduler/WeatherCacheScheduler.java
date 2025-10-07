@@ -1,9 +1,9 @@
-package com.shivam.weather_cache.service;
+package com.shivam.weather_cache.scheduler;
 
 import java.util.Map;
 import java.util.Set;
 
-public interface GenericRedisService {
+public interface WeatherCacheScheduler {
 
     /**
      * Saves a value and its metadata (hits, lastAccess) with a TTL.
