@@ -67,7 +67,7 @@ export class WeatherApiService {
           });
         }
         throw new WeatherError({
-          message: `Network error: ${error.message}`,
+          message: error.message,
         });
       }
       throw error;

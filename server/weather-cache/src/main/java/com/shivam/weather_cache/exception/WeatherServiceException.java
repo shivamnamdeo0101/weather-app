@@ -1,7 +1,9 @@
 package com.shivam.weather_cache.exception;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public class WeatherServiceException extends RuntimeException {
 
     private final HttpStatus status;
@@ -21,7 +23,4 @@ public class WeatherServiceException extends RuntimeException {
         this.status = status;
     }
 
-    public HttpStatus getStatus() {
-        return status;
-    }
 }
