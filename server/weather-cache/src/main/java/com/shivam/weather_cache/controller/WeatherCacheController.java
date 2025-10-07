@@ -2,27 +2,25 @@
 package com.shivam.weather_cache.controller;
 
 import com.shivam.weather_cache.dto.CacheResult;
-import com.shivam.weather_cache.exception.BadRequestException;
-import com.shivam.weather_cache.service.WeatherCacheServiceImpl;
+import com.shivam.weather_cache.service.WeatherCacheService;
+import com.shivam.weather_cache.utils.WeatherUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
-import org.jetbrains.annotations.NotNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/weather-cache")
 public class WeatherCacheController {
-    private final WeatherCacheServiceImpl cacheService;
 
-    public WeatherCacheController(WeatherCacheServiceImpl cacheService) {
-        this.cacheService = cacheService;
-    }
+    private final WeatherCacheService cacheService;
 
     @Operation(
             summary = "Get 3-hour weather forecast for a city",
@@ -54,11 +52,7 @@ public class WeatherCacheController {
     })
     @GetMapping("/forecast")
     public ResponseEntity<java.util.Map<String, Object>> getWeather(@RequestParam(name = "city", required = true) String city) {
-        if (city == null) {
-            throw new BadRequestException("City parameter is required");
-        }
-
-        String trimmed = getTrimmed(city);
+        String trimmed = WeatherUtils.validateAndTrimCity(city);
 
         CacheResult result = cacheService.getWeather(trimmed);
         String headerValue = result.isCacheHit() ? "HIT" : "MISS";
@@ -66,20 +60,5 @@ public class WeatherCacheController {
         return ResponseEntity.ok()
                 .header("X-Cache", headerValue)
                 .body(result.getData());
-    }
-
-    private static @NotNull String getTrimmed(String city) {
-        String trimmed = city.trim();
-        if (trimmed.isEmpty()) {
-            throw new BadRequestException("City cannot be empty");
-        }
-
-        // Only allow English letters (A-Z, a-z), spaces and hyphens. Prevents non-English characters.
-        // Examples allowed: "New York", "St. Louis" (dot not allowed here), "San-Francisco" (hyphen allowed)
-        String pattern = "^[A-Za-z\\s-]+$";
-        if (!trimmed.matches(pattern)) {
-            throw new BadRequestException("City must contain only English letters, spaces or hyphens");
-        }
-        return trimmed;
     }
 }

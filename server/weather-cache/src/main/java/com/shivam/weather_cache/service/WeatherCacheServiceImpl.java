@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shivam.weather_cache.dto.CacheResult;
 import com.shivam.weather_cache.exception.WeatherServiceException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,13 +16,13 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class WeatherCacheServiceImpl implements WeatherCacheService{
 
-    @Autowired
-    private GenericRedisService redisService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final GenericRedisService redisService;
+
+    private final ObjectMapper objectMapper;
 
     private final RestTemplate restTemplate;
 
@@ -30,10 +31,6 @@ public class WeatherCacheServiceImpl implements WeatherCacheService{
 
     @Value("${weather.svc.url}")
     private String svcUrl;
-
-    public WeatherCacheServiceImpl(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     public CacheResult getWeather(String city) {
         if (city == null || city.isBlank()) {
