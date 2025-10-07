@@ -1,23 +1,21 @@
 package com.shivam.weather_cache.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Service;
+import java.util.Map;
+import java.util.Set;
 
-import java.time.Duration;
+public interface GenericRedisService {
 
-@Service
-public class GenericRedisService {
+    void saveWithMeta(String key, Object value, long ttlSeconds);
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+    Object getAndUpdateMeta(String key);
 
-    public void saveWithTTL(String key, Object value, long seconds) {
-        redisTemplate.opsForValue().set(key, value, Duration.ofSeconds(seconds));
-    }
+    Object getData(String key);
 
-    public Object get(String key) {
-        return redisTemplate.opsForValue().get(key);
-    }
+    Map<Object, Object> getMeta(String key);
+
+    Set<String> getAllKeys(String pattern);
+
+    void updateLastRefresh(String key, long timestamp);
+
+    void deleteKey(String key);
 }
-

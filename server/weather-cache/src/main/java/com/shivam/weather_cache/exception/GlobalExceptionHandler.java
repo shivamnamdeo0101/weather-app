@@ -17,7 +17,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WeatherServiceException.class)
     public ResponseEntity<CustomResponse<Object>> handleWeatherServiceException(WeatherServiceException ex) {
         HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-        log.error("Weather Service server error ({}): {}", status.value(), ex.getMessage());
+
+        if (status.is4xxClientError()) {
+            // 💡 CONCISE 4XX LOGGING
+            log.warn("Weather Service client error ({}): {}", status.value(), ex.getMessage());
+        } else {
+            // 💡 CONCISE 5XX LOGGING (No stack trace 'ex')
+            log.error("Weather Service server error ({}): {}", status.value(), ex.getMessage());
+        }
+
         return ResponseEntity.status(status)
                 .body(new CustomResponse<>(false, ex.getMessage(), null));
     }
@@ -25,7 +33,8 @@ public class GlobalExceptionHandler {
     // 2️⃣ Endpoint not found → 404
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<CustomResponse<Object>> handleNoHandlerFound(NoHandlerFoundException ex) {
-        log.error("No handler found for request: {} {}", ex.getHttpMethod(), ex.getRequestURL());
+        // 💡 CONCISE LOGGING
+        log.warn("No handler found for request: {} {}", ex.getHttpMethod(), ex.getRequestURL());
         String message = String.format("Endpoint not found: %s. Please check the URL.", ex.getRequestURL());
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new CustomResponse<>(false, message, null));
@@ -35,7 +44,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<CustomResponse<Object>> handleMissingRequestParam(
             MissingServletRequestParameterException ex) {
-        log.error("Missing required query parameter: {}", ex.getParameterName());
+        // 💡 CONCISE LOGGING
+        log.warn("Missing required query parameter: {}", ex.getParameterName());
         String message = String.format("Missing or invalid query parameter: %s", ex.getParameterName());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new CustomResponse<>(false, message, null));
