@@ -56,13 +56,13 @@ public class AppConstants {
         public static final double MAX_TEMP_THRESHOLD = 40.0;
         public static final double MAX_WIND_SPEED = 10.0;
 
-        public final class Conditions {
+        public static final class Conditions {
             private Conditions() {}
             public static final String RAIN = "Rain";
             public static final String THUNDERSTORM = "Thunderstorm";
         }
 
-        public final class Predictions {
+        public static final class Predictions {
             private Predictions() {}
             public static final String CARRY_UMBRELLA = "Carry umbrella";
             public static final String STORM_WARNING = "Don't step out! A Storm is brewing!";
