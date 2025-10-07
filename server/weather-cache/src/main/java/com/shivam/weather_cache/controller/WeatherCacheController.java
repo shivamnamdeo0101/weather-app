@@ -1,8 +1,10 @@
 package com.shivam.weather_cache.controller;
 
 import com.shivam.weather_cache.dto.CacheResult;
+import com.shivam.weather_cache.dto.CustomResponse;
 import com.shivam.weather_cache.exception.BadRequestException;
 import com.shivam.weather_cache.service.WeatherCacheService;
+import com.shivam.weather_cache.utils.AppConstants;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -52,19 +54,18 @@ public class WeatherCacheController {
                 examples = @ExampleObject(value = "{\"success\":false,\"message\":\"Internal server error\",\"data\":null}")))
     })
     @GetMapping("/forecast")
-    public ResponseEntity<java.util.Map<String, Object>> getWeather(@RequestParam(name = "city", required = true) String city) {
+    public ResponseEntity<CustomResponse<Object>> getWeather(@RequestParam(name = "city", required = true) String city) {
         if (city == null) {
             throw new BadRequestException("City parameter is required");
         }
-
-    String trimmed = CityUtils.validateAndTrimCity(city);
+        String trimmed = CityUtils.validateAndTrimCity(city);
 
         CacheResult result = cacheService.getWeather(trimmed);
-        String headerValue = result.isCacheHit() ? "HIT" : "MISS";
+        String headerValue = result.isCacheHit() ? AppConstants.Headers.CACHE_HIT : AppConstants.Headers.CACHE_MISS;
 
         return ResponseEntity.ok()
-                .header("X-Cache", headerValue)
-                .body(result.getData());
+                .header(AppConstants.Headers.X_CACHE, headerValue)
+                .body(new CustomResponse<>(true, AppConstants.Messages.FORECAST_SUCCESS, result.getData()));
     }
 
     
