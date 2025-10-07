@@ -39,11 +39,38 @@ export function useWeatherSearch(): UseWeatherSearchReturn {
         setWeatherData([]);
       }
     } catch (err) {
-      if (err instanceof WeatherError) {
-        setError(err.message);
-      } else {
-        setError('An unexpected error occurred. Please try again.');
-      }
+      // Normalize errors and map HTTP status codes to user-friendly messages
+      const mapWeatherError = (we: WeatherError | Error, requestedCity: string) => {
+        if (we instanceof WeatherError) {
+          const status = we.status;
+          const serverMsg = we.message;
+          if (status) {
+            switch (status) {
+              case 400:
+                return serverMsg || 'Invalid request. Please check your input.';
+              case 401:
+                return serverMsg || 'Unauthorized to access weather provider.';
+              case 404:
+                return serverMsg || `No forecast found for ${requestedCity}.`;
+              case 429:
+                return serverMsg || 'Too many requests. Please wait before retrying.';
+              case 502:
+              case 503:
+              case 504:
+                return serverMsg || 'Weather service is temporarily unavailable. Please try again later.';
+              case 500:
+              default:
+                return serverMsg || 'An unexpected server error occurred. Please try again later.';
+            }
+          }
+          // No HTTP status on the WeatherError -- likely network/timeout
+          return serverMsg || 'Network error. Please check your connection and try again.';
+        }
+        // Non-WeatherError fallback
+  return we.message || 'An unexpected error occurred. Please try again.';
+      };
+
+      setError(mapWeatherError(err as Error, city));
       setWeatherData([]);
     } finally {
       setIsLoading(false);

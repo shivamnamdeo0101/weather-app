@@ -22,7 +22,28 @@ export class WeatherApiService {
       });
     }
 
-    return response.json();
+    const json = await response.json().catch(() => ({}));
+
+    // Defensive normalization: some server responses may wrap the actual array
+    // as `data.data` (e.g., upstream CustomResponse saved into the cache). If we
+    // see that pattern, unwrap it so FE always receives `data` as WeatherData[].
+    try {
+      if (json && typeof json === 'object' && json.data && typeof json.data === 'object') {
+        let inner = json.data;
+        // Unwrap nested `.data` layers until we hit an array or a non-object
+        while (inner && typeof inner === 'object' && inner.data) {
+          inner = inner.data;
+        }
+        if (Array.isArray(inner)) {
+          // return a normalized payload where `data` is the array
+          return { ...json, data: inner } as unknown as T;
+        }
+      }
+    } catch (e) {
+      console.debug('Response normalization failed', e);
+    }
+
+    return json as T;
   }
 
   static async getForecast(city: string): Promise<WeatherApiResponse> {

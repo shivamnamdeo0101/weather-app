@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 'use client';
 
 import React, { memo, useMemo } from 'react';
@@ -8,7 +9,8 @@ interface PredictionsListProps {
   weatherData: WeatherData[];
 }
 
-const PredictionsList = memo<PredictionsListProps>(({ weatherData }) => {
+const PredictionsListComponent: React.FC<Readonly<PredictionsListProps>> = ({ weatherData }) => {
+  // Named component (typed) — will memoize on export
   const predictionsWithTime = useMemo(() => {
     return weatherData
       .filter(item => item.predictions && item.predictions.length > 0)
@@ -37,7 +39,6 @@ const PredictionsList = memo<PredictionsListProps>(({ weatherData }) => {
         };
       });
   }, [weatherData]);
-
   const getPredictionIcon = useMemo(() => {
     return (prediction: string) => {
       const lowerPrediction = prediction.toLowerCase();
@@ -166,8 +167,12 @@ const PredictionsList = memo<PredictionsListProps>(({ weatherData }) => {
       </div>
     </div>
   );
-});
+};
 
+// Set display name explicitly for debug and tooling
+PredictionsListComponent.displayName = 'PredictionsList';
+
+const PredictionsList = memo(PredictionsListComponent);
 PredictionsList.displayName = 'PredictionsList';
 
 export default PredictionsList;

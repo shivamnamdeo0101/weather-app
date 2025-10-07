@@ -12,7 +12,9 @@ interface WeatherTimeSlotProps {
   index: number;
 }
 
-const WeatherTimeSlot = memo<WeatherTimeSlotProps>(({ weatherData, index }) => {
+const WeatherTimeSlot = memo<WeatherTimeSlotProps>(({ weatherData, index: _index }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _unusedIndex = _index;
   const formatDate = useFormattedForecastDate();
   const { date: formattedDate, time } = formatDate(weatherData.dt_txt);
 
