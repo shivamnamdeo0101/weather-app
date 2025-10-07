@@ -1,26 +1,31 @@
 @startuml
-title Cache Maintenance (Refresh-or-Evict Strategy)
+title Weather Cache Scheduler (Refresh-or-Evict via Cache Service)
 
-participant "Eviction Scheduler" as scheduler
-participant "Eviction Strategy (Refresh/Delete + TTL)" as strategy
-participant "Weather-Cache" as cache
-participant "Weather-SVC" as svc
+participant "Weather Cache Scheduler" as scheduler
+participant "Cache Service (CRUD/Refresh/Evict APIs)" as service
+participant "Weather Cache (Redis)" as cache
 participant "Open Weather API" as api
 
-scheduler -> strategy: Evaluate cache usage (every 1 min)
-strategy -> cache: Analyze access frequency & recency
+scheduler -> service: Fetch all city cache metadata (hits, lastAccess, lastRefresh) every 5 min
+service -> cache: Read metadata for all cities
 
-alt HOT KEYS (Active <6 min)
-    strategy -> cache: Delete old data
-    strategy -> svc: Fetch fresh data from API
-    svc -> api: Fetch latest weather
-    api -> svc: Return data
-    svc -> cache: Store refreshed data (TTL = 5 min)
-else COLD KEYS (Inactive >6 min)
-    strategy -> cache: Delete from cache (evict)
-else NORMAL KEYS
-    strategy -> cache: Maintain TTL = 5 min
+scheduler -> scheduler: Loop over each city
+alt HOT Cities (hits ≥ 50)
+    scheduler -> service: Refresh city if last refresh > 5 min
+    scheduler -> api: Fetch latest weather data
+    api -> scheduler: Return weather data
+    scheduler -> service: Update cache (TTL=5min, LFU)
+    service -> cache: Store refreshed data
+else if MEDIUM Cities (20 ≤ hits < 50)
+    scheduler -> service: Refresh city if last refresh > 15 min
+    scheduler -> api: Fetch latest weather data
+    api -> scheduler: Return weather data
+    scheduler -> service: Update cache (TTL=15min)
+    service -> cache: Store refreshed data
+else LOW/Inactive Cities (hits < 20)
+    scheduler -> service: Evict city if age > 1 hour
+    service -> cache: Evict city (LRU)
 end
 
-scheduler -> cache: Repeat evaluation every 1 min
+scheduler -> scheduler: Repeat evaluation every 5 min
 @enduml
