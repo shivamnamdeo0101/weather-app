@@ -15,64 +15,9 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 
 ## 🧩 Sequnce Diagrams
 <img width="1256" height="988" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/876623bf-5c40-4e31-bc79-98e0015e2995" />
-<img width="1256" height="482" alt="SequnceSchedularDig-Cache_Maintenance__Refresh_or_Evict_Strategy_" src="https://github.com/user-attachments/assets/f4472a9a-4b83-4476-877e-cf30dcf9c5df" />
+<img width="1256" height="482" alt="SequnceSchedularDig-Cache_Maintenance__Refresh_or_Evict_Strategy_" src="https://github.com/user-attachments/assets/1c1b1b8c-e50d-4241-96dc-76f4fccab9de" />
 
 
-
-
-````
-@startuml
-actor User
-participant "Weather App" as app
-participant "Weather-Cache" as cache
-participant "Weather-SVC" as svc
-participant "Rate Limiter" as limiter
-participant "Open Weather API" as api
-participant "Eviction Scheduler" as scheduler
-participant "Eviction Strategy (Refresh/Delete + TTL)" as strategy
-
-User -> app: Request weather forecast
-app -> cache: Query cached data
-
-alt CACHE HIT
-    cache -> app: Return cached data
-    app -> User: Display forecast
-else CACHE MISS
-    cache -> svc: Request fresh data
-    svc -> limiter: Validate request quota (60 req/min per client)
-
-    alt WITHIN LIMIT
-        limiter -> svc: Allow request
-        svc -> api: Fetch latest weather
-        api -> svc: Return weather data
-        svc -> cache: Store data in cache (TTL = 5 min)
-        cache -> app: Return updated data
-        app -> User: Display forecast
-    else RATE LIMIT EXCEEDED
-        limiter -> svc: Reject with 429 Too Many Requests
-        svc -> app: Return error (429)
-        app -> User: Show rate limit warning
-    end
-end
-
-== Strategy Pattern Execution ==
-scheduler -> strategy: Evaluate cache usage (every 1 min)
-strategy -> cache: Analyze access frequency & recency
-
-alt HOT KEYS (Active <6 min)
-    strategy -> cache: Delete old data
-    strategy -> svc: Fetch fresh data from API
-    svc -> cache: Store refreshed data (TTL = 5 min)
-else COLD KEYS (Inactive >6 min)
-    strategy -> cache: Delete from cache (evict)
-else NORMAL KEYS
-    strategy -> cache: Maintain TTL = 5 min
-end
-
-scheduler -> cache: Repeat evaluation every 1 min
-@enduml
-
-````
 
 ## ⚙️ Tech Stack
 
