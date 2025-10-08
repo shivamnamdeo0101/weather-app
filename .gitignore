@@ -11,7 +11,11 @@
 # -------------------------
 # Backend (Maven / Java)
 # -------------------------
-/server/**/target/
+/server/**/target/*
+!/server/**/target/
+!/server/**/target/*.jar
+
+# Ignore rest of the dev/IDE metadata
 /server/**/.idea
 /server/**/.vscode
 /server/**/.classpath
@@ -20,6 +24,7 @@
 /server/**/.springBeans
 /server/**/.sts4-cache
 /server/**/.env
+
 
 # OS files
 .DS_Store
