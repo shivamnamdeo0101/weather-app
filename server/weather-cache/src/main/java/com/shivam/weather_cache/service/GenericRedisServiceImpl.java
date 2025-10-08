@@ -32,8 +32,8 @@ public class GenericRedisServiceImpl implements GenericRedisService {
                     HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 
                     valueOps.set(key + ":data", value);
-                    hashOps.put(key + ":meta", "hits", 0);
-                    hashOps.put(key + ":meta", "lastAccess", Instant.now().toEpochMilli());
+                    hashOps.put(key + ":meta", "hits", 1);
+                    hashOps.put(key + ":meta", "lastRefresh", Instant.now().toEpochMilli());
 
                     redisTemplate.expire(key + ":data", java.time.Duration.ofSeconds(ttlSeconds));
                     redisTemplate.expire(key + ":meta", java.time.Duration.ofSeconds(ttlSeconds));
