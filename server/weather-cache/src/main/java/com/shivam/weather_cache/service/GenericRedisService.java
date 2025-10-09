@@ -5,17 +5,13 @@ import java.util.Set;
 
 public interface GenericRedisService {
 
-    void saveWithMeta(String key, Object value, long ttlSeconds);
+    void saveWithMeta(String key, Object value, boolean refresh);
 
     Object getAndUpdateMeta(String key);
-
-    Object getData(String key);
 
     Map<Object, Object> getMeta(String key);
 
     Set<String> getAllKeys(String pattern);
-
-    void updateLastRefresh(String key, long timestamp);
 
     void deleteKey(String key);
 }
