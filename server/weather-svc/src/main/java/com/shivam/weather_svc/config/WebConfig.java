@@ -11,7 +11,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")           // sab endpoints
-                        .allowedOrigins("http://weather-svc:8080")  // FE URL
+                        .allowedOrigins("http://weather-cache:8081")  // FE URL
                         .allowedMethods("GET")
                         .allowedHeaders("*")
                         .allowCredentials(true);

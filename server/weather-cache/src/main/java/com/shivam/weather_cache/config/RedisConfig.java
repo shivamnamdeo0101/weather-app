@@ -68,7 +68,7 @@ public class RedisConfig {
 
             LettucePoolingClientConfiguration clientConfig = LettucePoolingClientConfiguration.builder()
                     .commandTimeout(Duration.ofSeconds(timeout))
-                    .poolConfig(poolConfig) // ✅ now matches
+                    .poolConfig(poolConfig)
                     .clientResources(DefaultClientResources.create())
                     .clientOptions(ClientOptions.builder()
                             .autoReconnect(true)
@@ -79,16 +79,16 @@ public class RedisConfig {
 
 
             LettuceConnectionFactory factory = new LettuceConnectionFactory(config, clientConfig);
-            factory.afterPropertiesSet(); // force initialization
-            log.info("✅ Successfully connected to Redis at {}:{}", host, port);
+            factory.afterPropertiesSet();
+            log.info("Successfully connected to Redis at {}:{}", host, port);
 
             return factory;
 
         } catch (RedisConnectionException | RedisConnectionFailureException ex) {
-            log.error("❌ Failed to connect to Redis at {}:{}. Check host/port/credentials.", host, port, ex);
-            throw ex; // rethrow to fail fast on startup
+            log.error("Failed to connect to Redis at {}:{}. Check host/port/credentials.", host, port, ex);
+            throw ex;
         } catch (Exception ex) {
-            log.error("❌ Unexpected error while initializing Redis connection", ex);
+            log.error("Unexpected error while initializing Redis connection", ex);
             throw ex;
         }
     }
@@ -108,13 +108,13 @@ public class RedisConfig {
             template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
 
             template.afterPropertiesSet();
-            log.info("✅ RedisTemplate initialized successfully with JSON serializer");
+            log.info("RedisTemplate initialized successfully with JSON serializer");
 
         } catch (DataAccessException ex) {
-            log.error("❌ RedisTemplate initialization failed due to DataAccessException", ex);
+            log.error("RedisTemplate initialization failed due to DataAccessException", ex);
             throw ex;
         } catch (Exception ex) {
-            log.error("❌ Unexpected error while setting up RedisTemplate", ex);
+            log.error("Unexpected error while setting up RedisTemplate", ex);
             throw ex;
         }
         return template;

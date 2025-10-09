@@ -1,7 +1,7 @@
 version: "3.9"
 
 services:
-  # 1. weather-app (Frontend/Entry Point - Client)
+#  1. weather-app (Frontend/Entry Point - Client)
 #  weather-app:
 #    image: weather-client:latest
 #    build:

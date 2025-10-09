@@ -9,46 +9,49 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
-@RestControllerAdvice
 @Slf4j
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 1️⃣ Weather SVC errors (4xx/5xx)
+    /**
+     * Handles custom WeatherServiceException thrown by downstream weather services.
+     * Logs 4xx as warnings and 5xx as errors (without stack traces for clean logs).
+     */
     @ExceptionHandler(WeatherServiceException.class)
     public ResponseEntity<CustomResponse<Object>> handleWeatherServiceException(WeatherServiceException ex) {
         HttpStatus status = ex.getStatus() != null ? ex.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
         if (status.is4xxClientError()) {
-            // 💡 CONCISE 4XX LOGGING
-            log.warn("Weather Service client error ({}): {}", status.value(), ex.getMessage());
+            log.warn("Weather service client error ({}): {}", status.value(), ex.getMessage());
         } else {
-            // 💡 CONCISE 5XX LOGGING (No stack trace 'ex')
-            log.error("Weather Service server error ({}): {}", status.value(), ex.getMessage());
+            log.error("Weather service server error ({}): {}", status.value(), ex.getMessage());
         }
 
         return ResponseEntity.status(status)
                 .body(new CustomResponse<>(false, ex.getMessage(), null));
     }
 
-    // 2️⃣ Endpoint not found → 404
+    /**
+     * Handles 404s when no endpoint matches the requested path.
+     */
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<CustomResponse<Object>> handleNoHandlerFound(NoHandlerFoundException ex) {
-        // 💡 CONCISE LOGGING
         log.warn("No handler found for request: {} {}", ex.getHttpMethod(), ex.getRequestURL());
         String message = String.format("Endpoint not found: %s. Please check the URL.", ex.getRequestURL());
+
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new CustomResponse<>(false, message, null));
     }
 
-    // 3️⃣ Missing or invalid query parameter → 400
+    /**
+     * Handles missing or invalid query parameters (e.g. ?city= is missing).
+     */
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<CustomResponse<Object>> handleMissingRequestParam(
-            MissingServletRequestParameterException ex) {
-        // 💡 CONCISE LOGGING
+    public ResponseEntity<CustomResponse<Object>> handleMissingRequestParam(MissingServletRequestParameterException ex) {
         log.warn("Missing required query parameter: {}", ex.getParameterName());
         String message = String.format("Missing or invalid query parameter: %s", ex.getParameterName());
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new CustomResponse<>(false, message, null));
     }
-
 }
