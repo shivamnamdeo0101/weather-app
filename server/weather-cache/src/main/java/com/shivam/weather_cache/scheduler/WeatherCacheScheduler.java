@@ -7,6 +7,7 @@ import com.shivam.weather_cache.utils.DateTimeUtils;
 import com.shivam.weather_cache.utils.WeatherSvcClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -21,26 +22,31 @@ import java.util.Set;
 public class WeatherCacheScheduler {
 
     private final GenericRedisServiceImpl redisService;
-    private final WeatherCacheService cacheService;
     private final WeatherSvcClient weatherSvcClient;
 
-
     // Thresholds
-    private static final long HOT_HIT_THRESHOLD = 50;
-    private static final long MEDIUM_HIT_THRESHOLD = 20;
+    @Value("${schedular.hot_hit_threshold}")
+    private long HOT_HIT_THRESHOLD;
 
-    // Refresh intervals (ms)
-    private static final long HOT_REFRESH_INTERVAL = 5 * 60 * 1000L;       // 5 minutes
-    private static final long MEDIUM_REFRESH_INTERVAL = 15 * 60 * 1000L;   // 15 minutes
-    private static final long MAX_AGE = 60 * 60 * 1000L;                   // 1 hour
+    @Value("${schedular.medium_hit_threshold}")
+    private long MEDIUM_HIT_THRESHOLD;
+
+    // Refresh intervals
+    @Value("${schedular.hot_refresh_interval}")
+    private long HOT_REFRESH_INTERVAL;
+
+    @Value("${schedular.medium_refresh_interval}")
+    private long MEDIUM_REFRESH_INTERVAL;
+
+    @Value("${schedular.max_age}")
+    private long MAX_AGE;
 
     /**
      * Scheduled task runs every 5 minutes.
      * - Refreshes "hot" or "medium" cities as needed with the latest weather data as per interval.
      * - Removes inactive cities.
      */
-    //@Scheduled(fixedRate = 5 * 60 * 1000L)
-    @Scheduled(fixedRate = 5 * 1000L)
+    @Scheduled(fixedRate = 5 * 60 * 1000L) //5 min
     public void refreshCache() {
         long now = Instant.now().toEpochMilli();
         log.info("Scheduler triggered at {}", DateTimeUtils.formatEpochMilli(now));
