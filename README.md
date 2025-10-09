@@ -52,9 +52,9 @@ The **Weather Cache Scheduler** manages cached weather data in Redis efficiently
 
 - **Behavior:**  ✅
 
-  - 🔥 **Hot Cities:** `hits ≥ 50` → refreshed every 5 min.
-  - 🌤 **Medium Cities:** `20 ≤ hits < 50` → refreshed every 15 min.
-  - ❄️ **Low/Inactive Cities:** `hits < 20` → stay in mid-state before eviction after 1 hr.
+  - 🔥 **Hot Cities:** `hits ≥ 50` → Most active refreshed every 10 min and reset hits
+  - 🌤 **Medium Cities:** `20 ≤ hits < 50` → refreshed every 30 min and reset hits.
+  - ❄️ **Low Cities**:** Eviction / remove record if no lastAccess in last 1 hour.
   - Scheduler runs **every 5 min** to evaluate all cities.
 
 
@@ -64,7 +64,7 @@ The **Weather Cache Scheduler** manages cached weather data in Redis efficiently
   - **Cold Keys:** LRU → evict least recently used entries first.
   - **Normal Keys:** TTL → 5 min standard refresh.
 
-This ensures **optimal cache usage**, reduces backend API calls, and keeps frequently used data updated, while low-traffic keys aren’t removed immediately but gradually evicted after inactivity.
+This ensures **optimal cache usage**, reduces backend API calls, and keeps frequently used data updated in redis, while low-traffic keys aren’t removed immediately but gradually evicted after inactivity.
 
 
 ### 🧩 Backend
@@ -83,7 +83,7 @@ This ensures **optimal cache usage**, reduces backend API calls, and keeps frequ
   - Can be extended to multi-level caching (e.g., global + regional caches).
 
 
-- **Inflight Request Pattern:**  
+- **Inflight Request Design Pattern:**  
   Handles multiple simultaneous requests for the same city within 1 minute:  
   - Only **one request** is sent to `weather-svc`.  
   - Other requests for the same city wait for the response and then receive the same data.  
