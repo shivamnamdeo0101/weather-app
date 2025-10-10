@@ -1,11 +1,22 @@
 @startuml
 title Weather Cache Scheduler — Internal Cache Refresh & Eviction Flow
 
-participant "WeatherCacheScheduler\n(@Component inside weather-cache)" as scheduler
-participant "GenericRedisService\n(Redis CRUD + Meta Ops)" as redis
-participant "WeatherSvcClient\n(Calls Weather Service API)" as svc
+participant "WeatherCacheScheduler\n(@Component inside Weather-Cache)" as scheduler
+participant "Weather-Cache\n(Redis CRUD + Meta Ops)" as redis
+participant "Weather-SVC\n(Calls Weather Open Weather API)" as svc
 
 == Scheduler Execution ==
+note right of scheduler
+Runs every 5 minutes to: @Scheduled(fixedRate = 5 * 60 * 1000L)
+1. Refresh HOT & MEDIUM cities based on access patterns
+2. Evict LOW / Inactive cities
+Uses LFU + LRU hybrid strategy
+WHERE HOT = frequently accessed
+      MEDIUM = moderately accessed
+      LOW = rarely accessed
+      INACTIVE = not accessed recently
+end note
+
 scheduler -> redis: getAllKeys("weather:*:data")
 redis --> scheduler: Return all cached city keys
 
