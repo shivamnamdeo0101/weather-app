@@ -47,9 +47,8 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 ## 🏆 Best Practices
 
 - **System Design Principles**
-  - Separation of Concerns / SOLID – Cache, Scheduler, and Service layers have distinct responsibilities.
   - BASE: Cache refresh is async, eventual sync with API data.
-  - KISS / DRY / Separation of Concerns: Simple, maintainable, reusable
+  - SOLID / KISS / DRY / Separation of Concerns: Simple, maintainable, reusable, Cache, Scheduler, and Service layers have distinct responsibilities.
   - Performance Optimization – Hot/Medium/Cold segregation using LFU + LRU strategies.
   - Resilience & Fault Tolerance – Retry, Circuit Breaker, and fallback handling external failures.
 
