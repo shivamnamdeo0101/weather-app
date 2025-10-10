@@ -4,8 +4,8 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 # 💡Features
 
 - 🔍 Search weather by city
-- 📅 View 5-day forecast
-- ⏰ See hourly updates
+- 📅 View 3-day forecast
+- ⏰ See 3 hourly updates
 - 🌡️ Temperature in °C
 - ☁️ Weather condition: clear, cloudy, or rain
 - 💨 Check wind speed & humidity
