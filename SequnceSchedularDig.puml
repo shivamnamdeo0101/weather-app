@@ -1,33 +1,72 @@
 @startuml
-title Weather Cache Scheduler (Refresh-or-Evict via Cache Service)
+title Weather Cache Scheduler — Internal Cache Refresh & Eviction Flow
 
-participant "Weather Cache Scheduler" as scheduler
-participant "Cache Service (CRUD/Refresh/Evict APIs)" as service
-participant "Weather Cache (Redis)" as cache
-participant "Open Weather API" as api
+participant "WeatherCacheScheduler\n(@Component inside weather-cache)" as scheduler
+participant "GenericRedisService\n(Redis CRUD + Meta Ops)" as redis
+participant "WeatherSvcClient\n(Calls Weather Service API)" as svc
 
-scheduler -> service: Fetch all city metadata (hits, lastAccess) every 5 min
-service -> cache: Read meta+data for all cities
+== Scheduler Execution ==
+scheduler -> redis: getAllKeys("weather:*:data")
+redis --> scheduler: Return all cached city keys
 
-loop
-    scheduler -> scheduler: Loop over each city
+loop For each cityKey in cache
+    scheduler -> redis: getMeta(cityKey)
+    redis --> scheduler: Return metadata (hits, lastAccess, lastRefresh)
 
-    alt HOT Cities (hits ≥ 50)
-        scheduler -> api: Fetch latest weather data
-        api -> scheduler: Return data
-        scheduler -> service: Refresh & update cache (TTL=5min, LFU)
-        service -> cache: Store refreshed data
-    else if MEDIUM Cities (20 ≤ hits < 50)
-        scheduler -> api: Fetch latest weather data
-        api -> scheduler: Return data
-        scheduler -> service: Refresh & update cache (TTL=15min)
-        service -> cache: Store refreshed data
-    else LOW/Inactive Cities (hits < 20)
-        scheduler -> service: Evict city if age > 1 hour
-        service -> cache: Evict city (LRU)
+    alt 🔥 HOT Cities (hits ≥ HOT_HIT_THRESHOLD)
+        scheduler -> scheduler: Check if refresh due (now - lastRefresh ≥ HOT_REFRESH_INTERVAL)
+        note right of scheduler
+            HOT_HIT_THRESHOLD = 50
+            HOT_REFRESH_INTERVAL = 10 minutes
+        end note
+        alt Refresh Required
+            scheduler -> svc: fetchWeatherData(city)
+            svc --> scheduler: Return latest weather data
+            scheduler -> redis: saveWithMeta(cityKey, data, resetHits=true)
+            scheduler -> scheduler: Log success (🔥 Hot refreshed)
+        else Not Due Yet
+            scheduler -> scheduler: Skip refresh
+        end
+
+    else 🌤 MEDIUM Cities (hits ≥ MEDIUM_HIT_THRESHOLD)
+        scheduler -> scheduler: Check if refresh due (now - lastRefresh ≥ MEDIUM_REFRESH_INTERVAL)
+        note right of scheduler
+            MEDIUM_HIT_THRESHOLD = 10
+            MEDIUM_REFRESH_INTERVAL = 20 minutes
+        end note
+        alt Refresh Required
+            scheduler -> svc: fetchWeatherData(city)
+            svc --> scheduler: Return latest weather data
+            scheduler -> redis: saveWithMeta(cityKey, data, resetHits=true)
+            scheduler -> scheduler: Log success (🌤 Medium refreshed)
+        else Not Due Yet
+            scheduler -> scheduler: Skip refresh
+        end
+
+    else ❄️ LOW / Inactive Cities (hits < MEDIUM_HIT_THRESHOLD)
+        scheduler -> scheduler: Check if age > MAX_AGE (inactive > 1 hour)
+        note right of scheduler
+            MAX_AGE = 1 hour
+        end note
+        alt Inactive > 1h
+            scheduler -> redis: deleteKey(cityKey)
+            scheduler -> scheduler: Log removal (❄️ Evicted)
+        else Recently Accessed
+            scheduler -> scheduler: Retain entry
+        end
     end
-scheduler -> scheduler: Repeat evaluation every 5 min
-
 end
+
+== Repeat Cycle ==
+scheduler -> scheduler: Run again every 5 minutes (fixedRate)
+
+== Strategy Summary ==
+note right of scheduler
+LFU1 → HOT Keys (frequent access, refreshed every 10 min)
+LFU2 → MEDIUM Keys (moderate access, refreshed every 20 min)
+LRU → LOW Keys (inactive > 1h, evicted)
+TTL → All keys expire after 1 hour if no lastAccess update(As if user will request again within an hour
+    it will update lastAccess and prevent eviction)
+end note
 
 @enduml
