@@ -14,8 +14,8 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 - 👀 Prediction / Advice for the user
 
 ## 🧩 Sequnce Diagrams
-<img width="1256" height="988" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/876623bf-5c40-4e31-bc79-98e0015e2995" />
-<img width="1256" height="482" alt="SequnceSchedularDig-Cache_Maintenance__Refresh_or_Evict_Strategy_" src="https://github.com/user-attachments/assets/1c1b1b8c-e50d-4241-96dc-76f4fccab9de" />
+<img width="1261" height="1017" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/ca2af486-e7c6-4554-a489-29192c0774e4" />
+<img width="1029" height="1643" alt="SequnceSchedularDig-Weather_Cache_Scheduler__Internal_Cache_Refresh___Eviction_Flow" src="https://github.com/user-attachments/assets/fc966047-fa9e-406c-9b89-a011bab06608" />
 
 
 
@@ -43,10 +43,19 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 
 
 
+
 ## 🏆 Best Practices
 
 
 ### 🧩 Backend
+
+- **Flow:**
+  - Frontend ->  hits -> Weather-Cache service
+  - Weather-Cache -checks Redis for city data
+    - ✅ If found → return data immediately
+    - ❌ If not found → call Weather-SVC
+  - Weather-SVC -> Check if (rate limiter allowed 60 calls per min) then calls external OpenWeather API, then SVC put the data into cache then return data on FE
+  
 
 - **Rate Limiter:**    
   Implemented in `weather-svc` to allow **60 requests per minute per client**.  
