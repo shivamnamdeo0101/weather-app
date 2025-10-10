@@ -54,7 +54,8 @@ This project provides a high-performance, cache-enabled weather forecasting syst
   - Weather-Cache -checks Redis for city data
     - ✅ If found → return data immediately
     - ❌ If not found → call Weather-SVC
-  - Weather-SVC → calls external OpenWeather API
+  - Weather-SVC -> Check if (rate limiter allowed 60 calls per min) then calls external OpenWeather API, then SVC put the data into cache then return data on FE
+  
 
 - **Rate Limiter:**    
   Implemented in `weather-svc` to allow **60 requests per minute per client**.  
