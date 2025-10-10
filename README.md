@@ -43,10 +43,18 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 
 
 
+
 ## 🏆 Best Practices
 
 
 ### 🧩 Backend
+
+- **Flow:**
+  - Frontend ->  hits -> Weather-Cache service
+  - Weather-Cache -checks Redis for city data
+    - ✅ If found → return data immediately
+    - ❌ If not found → call Weather-SVC
+  - Weather-SVC → calls external OpenWeather API
 
 - **Rate Limiter:**    
   Implemented in `weather-svc` to allow **60 requests per minute per client**.  
