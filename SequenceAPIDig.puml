@@ -22,7 +22,7 @@ else CACHE MISS
         limiter -> svc: Allow request (HTTP 200)
         svc -> api: Fetch latest weather
         api -> svc: Return weather data (HTTP 200)
-        svc -> cache: Store data in cache (TTL = 5 min)
+        svc -> cache: Store data in cache (TTL = 1 hour)
         cache -> app: Return updated data (HTTP 200)
         app -> User: Display forecast
     else RATE LIMIT EXCEEDED
@@ -30,6 +30,8 @@ else CACHE MISS
         svc -> app: Return error (429 Too Many Requests)
         app -> User: Show rate limit warning
     end
+
+    api -> svc: Return error (e.g., 404, 502, 400)
 
     alt INVALID CITY
         svc -> app: Return error (HTTP 404 City Not Found)
