@@ -46,10 +46,24 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 
 ## 🏆 Best Practices
 
+- **System Design Principles**
+  - Separation of Concerns / SOLID – Cache, Scheduler, and Service layers have distinct responsibilities.
+  - BASE: Cache refresh is async, eventual sync with API data.
+  - KISS / DRY / Separation of Concerns: Simple, maintainable, reusable
+  - Performance Optimization – Hot/Medium/Cold segregation using LFU + LRU strategies.
+  - Resilience & Fault Tolerance – Retry, Circuit Breaker, and fallback handling external failures.
 
-### 🧩 Backend
 
-- **Flow:**
+- **Design Patterns Used**
+  - Strategy Pattern – Different cache refresh/evict logic (HOT, MEDIUM, LOW).
+  - Scheduler Pattern – Periodic refresh and cleanup triggered automatically.
+  - Facade Pattern - Unified interface to fetch weather data (handles API calls, retries, circuit breaker, fallback)
+  - Circuit Breaker / Retry Pattern – For API call resilience.
+  - Repository-Service Pattern– Redis operations abstracted in GenericRedisServiceImpl.
+
+### 🧩 Detailed Flow
+
+- **Basic Flow:**
   - Frontend ->  hits -> Weather-Cache service
   - Weather-Cache -checks Redis for city data
     - ✅ If found → return data immediately
@@ -144,7 +158,7 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 
 - **Resilient Networking**  
   - Centralized response handling with typed `WeatherError`.  
-  - Uses `AbortSignal.timeout(10000)` to avoid hanging requests and provide user feedback.
+  - Uses `AbortSignal.timeout(10000)` to avoid hanging requests and provide user feedback with max 3 retries.
 
 - **Styling Consistency**  
   - Tailwind CSS with design tokens via CSS variables in `globals.css`.  
