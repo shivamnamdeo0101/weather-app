@@ -102,6 +102,7 @@ This project provides a high-performance, cache-enabled weather forecasting syst
     - Other requests for the same city wait for the response and then receive the same data.  
     - Implemented using **queue + ConcurrentHashMap** to track inflight requests.  
     - Reduces redundant backend calls and avoids hitting rate limits. 
+    - For global - multi-region Redis replication (AWS Global Datastore).
 
 
 ### 🧩 Frontend
