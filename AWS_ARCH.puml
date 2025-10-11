@@ -60,7 +60,7 @@ package "AWS Global Infrastructure" {
 cloud CF as "Amazon CloudFront (CDN)"
 
 note top of CF
--Cache Static Assets (HTML, CSS, JS, Images)
+-Cache Static Assets (Images / Video Assets)
 -Static assets related to weather
 end note
 
