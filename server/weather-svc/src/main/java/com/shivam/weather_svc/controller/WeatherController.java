@@ -16,6 +16,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -58,6 +60,7 @@ public class WeatherController {
     @GetMapping("/forecast")
     public ResponseEntity<CustomResponse<List<ForecastItemDTO>>> getForecast(@RequestParam String city) {
         log.info("Incoming request for weather forecast: city={}", city);
+        city = URLDecoder.decode(city, StandardCharsets.UTF_8);
 
         if (city == null || city.trim().isEmpty()) {
             throw new IllegalArgumentException("City name cannot be empty.");

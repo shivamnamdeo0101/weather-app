@@ -32,7 +32,7 @@ public class AppConfig {
         //logging interceptor for debugging requests
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         interceptors.add((request, body, execution) -> {
-            log.info("Calling URL: " + request.getURI());
+//            log.info("Calling URL: " + request.getURI());
             return execution.execute(request, body);
         });
         restTemplate.setInterceptors(interceptors);

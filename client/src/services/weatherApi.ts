@@ -48,7 +48,7 @@ export class WeatherApiService {
 
   static async getForecast(city: string): Promise<WeatherApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/forecast?city=${encodeURIComponent(city)}`, {
+      const response = await fetch(`${API_BASE_URL}/forecast?city=${city}`, {
         method: 'GET',
         headers: {
           'accept': 'application/json',
