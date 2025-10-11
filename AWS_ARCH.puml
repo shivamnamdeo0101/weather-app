@@ -1,121 +1,108 @@
 @startuml
-title Global Weather App — AWS Architecture Overview
+title 🌍 Global Weather App — AWS Multi-Region Unified Pod Architecture
 
-' Layout Settings for Readability
+' --- Layout Settings ---
 skinparam packagePadding 15
 skinparam rectangle {
     Shadowing false
     RoundCorner 10
     Padding 8
-    MinWidth 150
+    MinWidth 180
 }
 skinparam database {
     Shadowing false
     RoundCorner 10
     Padding 8
-    MinWidth 150
+    MinWidth 160
 }
 skinparam cloud {
     Shadowing false
 }
 
-actor User
+actor USER
 cloud OPENWEATHER as "OpenWeather API"
 
+' ===========================
+' AWS GLOBAL INFRASTRUCTURE
+' ===========================
 package "AWS Global Infrastructure" {
 
-    ' -------- ASIA REGION (Singapore) --------
-    package "Region: Asia (Singapore)" {
-        rectangle FE_ASIA as "Frontend SPA"
-        database REDIS_ASIA as "Redis Cache"
-        rectangle BE_ASIA as "Backend API\n(EC2/ECS)"
+    ' -------- ASIA REGION --------
+    package "Region: Asia (Singapore - ap-southeast-1)" {
+        rectangle POD_ASIA as "Weather Service Pod\n(Frontend + API + Scheduler + Redis)"
     }
 
-    ' -------- EUROPE REGION (Frankfurt) --------
-    package "Region: Europe (Frankfurt)" {
-        rectangle FE_EU as "Frontend SPA"
-        database REDIS_EU as "Redis Cache"
-        rectangle BE_EU as "Backend API"
+    ' -------- EUROPE REGION --------
+    package "Region: Europe (Frankfurt - eu-central-1)" {
+        rectangle POD_EU as "Weather Service Pod\n(Frontend + API + Scheduler + Redis)"
     }
 
-    ' -------- AFRICA REGION (South Africa) --------
-    package "Region: Africa (South Africa)" {
-        rectangle FE_AF as "Frontend SPA"
-        database REDIS_AF as "Redis Cache"
-        rectangle BE_AF as "Backend API"
+    ' -------- AFRICA REGION --------
+    package "Region: Africa (South Africa - af-south-1)" {
+        rectangle POD_AF as "Weather Service Pod\n(Frontend + API + Scheduler + Redis)"
     }
 
-    ' -------- AMERICAS REGION (US East + Sao Paulo) --------
-    package "Region: Americas (US East + Sao Paulo)" {
-        rectangle FE_AM as "Frontend SPA"
-        rectangle BE_US as "Backend API US East"
-        rectangle BE_SA as "Backend API Sao Paulo"
-        database REDIS_US as "Redis US"
-        database REDIS_SA as "Redis SA"
+    ' -------- AMERICAS REGION --------
+    package "Region: Americas (US East + São Paulo)" {
+        rectangle POD_US as "Weather Service Pod — US East (us-east-1)\n(Frontend + API + Scheduler + Redis)"
+        rectangle POD_SA as "Weather Service Pod — São Paulo (sa-east-1)\n(Frontend + API + Scheduler + Redis)"
     }
 
-    ' -------- OCEANIA REGION (Sydney) --------
-    package "Region: Oceania (Sydney)" {
-        rectangle FE_OC as "Frontend SPA"
-        database REDIS_OC as "Redis Cache"
-        rectangle BE_OC as "Backend API"
+    ' -------- OCEANIA REGION --------
+    package "Region: Oceania (Sydney - ap-southeast-2)" {
+        rectangle POD_OC as "Weather Service Pod\n(Frontend + API + Scheduler + Redis)"
     }
 }
 
-' --- Global Services ---
+' ===========================
+' GLOBAL SERVICES
+' ===========================
+cloud CF as "Amazon CloudFront (CDN)"
+rectangle R53 as "Route 53 (Latency-Based Routing)"
 
-cloud CF as "CloudFront CDN"
-rectangle R53 as "Route53 Latency-Based Routing"
+' ===========================
+' GLOBAL CONNECTION FLOW
+' ===========================
 
-' --- Global Connection Flow ---
+USER --> CF : Initial Page Load (Static Assets)
+USER --> R53 : API Endpoint (Latency-Based DNS)
 
-' 1. User to Global Entry Points
-User --> CF : Initial Page Load
-User --> R53 : API Endpoint DNS
+' CloudFront → Regional Pods (Frontend)
+CF --> POD_ASIA
+CF --> POD_EU
+CF --> POD_AF
+CF --> POD_US
+CF --> POD_SA
+CF --> POD_OC
 
-' 2. CloudFront (Static Content) to Regional Frontends
-CF --> FE_ASIA
-CF --> FE_EU
-CF --> FE_AF
-CF --> FE_AM
-CF --> FE_OC
+' Route 53 → Regional Pods (API Traffic)
+R53 --> POD_ASIA
+R53 --> POD_EU
+R53 --> POD_AF
+R53 --> POD_US
+R53 --> POD_SA
+R53 --> POD_OC
 
-' 3. Route53 (API Calls) to Regional Backends
-R53 --> BE_ASIA
-R53 --> BE_EU
-R53 --> BE_AF
-R53 --> BE_US
-R53 --> BE_SA
-R53 --> BE_OC
+' ===========================
+' REGIONAL DATA FLOW
+' ===========================
 
-' --- Regional Processing Flow ---
+POD_ASIA --> OPENWEATHER : Fetch Forecast / Current Weather
+POD_EU --> OPENWEATHER
+POD_AF --> OPENWEATHER
+POD_US --> OPENWEATHER
+POD_SA --> OPENWEATHER
+POD_OC --> OPENWEATHER
 
-' Asia (Singapore)
-FE_ASIA --> BE_ASIA : API Call
-BE_ASIA --> REDIS_ASIA : Cache Read/Write
-BE_ASIA --> OPENWEATHER : Fetch Data
-
-' Europe (Frankfurt)
-FE_EU --> BE_EU
-BE_EU --> REDIS_EU
-BE_EU --> OPENWEATHER
-
-' Africa (South Africa)
-FE_AF --> BE_AF
-BE_AF --> REDIS_AF
-BE_AF --> OPENWEATHER
-
-' Americas (US East + Sao Paulo) - Dual Backends
-FE_AM --> BE_US : US Traffic
-FE_AM --> BE_SA : SA Traffic
-BE_US --> REDIS_US
-BE_SA --> REDIS_SA
-BE_US --> OPENWEATHER
-BE_SA --> OPENWEATHER
-
-' Oceania (Sydney)
-FE_OC --> BE_OC
-BE_OC --> REDIS_OC
-BE_OC --> OPENWEATHER
+' ===========================
+' SYSTEM CONSTRAINTS
+' ===========================
+note bottom of OPENWEATHER
+<b>CONSTRAINTS:</b>
+- MAX_CITIES_OPEN_WEATHER = 200,000
+- PER_CITY_DATA_SIZE_IN_REDIS = 8 KB
+- MAX_REDIS_MEMORY = 1.6 GB GLOBALLY
+- PER_REGION_REDIS_MEMORY ≈ 327.68 MB (FOR 5 REGIONS)
+end note
 
 @enduml
