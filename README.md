@@ -14,8 +14,7 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 - 👀 Prediction / Advice for the user
 
 ## 🧩 Sequence Diagrams
-<img width="1261" height="360" alt="image" src="https://github.com/user-attachments/assets/a35652f4-9413-4e57-a36a-6b740bc62bf0" />
-
+![image](https://github.com/user-attachments/assets/5e089945-0b06-49bd-b8bd-c67fa78d1cb7)
 <img width="1261" height="1017" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/ca2af486-e7c6-4554-a489-29192c0774e4" />
 <img width="1261" height="1451" alt="image" src="https://github.com/user-attachments/assets/1e50204a-2330-41d6-8013-7d62fdbf9621" />
 
