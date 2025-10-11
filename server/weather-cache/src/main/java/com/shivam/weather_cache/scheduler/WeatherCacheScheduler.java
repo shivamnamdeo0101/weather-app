@@ -57,7 +57,7 @@ public class WeatherCacheScheduler {
                 log.info("No cached cities to process.");
                 return;
             }
-
+            String refreshKeyFor = null;
             for (String dataKey : keys) {
                 String cityKey = dataKey.replace(":data", "");
                 Map<Object, Object> meta = safeMeta(redisService.getMeta(cityKey));
@@ -68,13 +68,23 @@ public class WeatherCacheScheduler {
                 long age = now - lastAccess;
 
                 if (hits >= HOT_HIT_THRESHOLD) {
+                    refreshKeyFor = "HOT";
                     handleRefresh(cityKey, meta, now, lastRefresh, HOT_REFRESH_INTERVAL, "🔥 HOT");
                 } else if (hits >= MEDIUM_HIT_THRESHOLD) {
+                    refreshKeyFor = "MEDIUM";
                     handleRefresh(cityKey, meta, now, lastRefresh, MEDIUM_REFRESH_INTERVAL, "🌤 MEDIUM");
                 } else if (age > MAX_AGE) {
+                    refreshKeyFor = "INACTIVE";
                     handleRemoval(cityKey, age);
                 }
             }
+
+            if(refreshKeyFor != null){
+                log.info("Refreshed and updated "+ refreshKeyFor);
+            }else{
+                log.info("No cities found to refresh");
+            }
+
             log.info("Schedular completed");
 
         } catch (Exception ex) {
