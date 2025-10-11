@@ -58,6 +58,13 @@ package "AWS Global Infrastructure" {
 ' GLOBAL SERVICES
 ' ===========================
 cloud CF as "Amazon CloudFront (CDN)"
+
+note top of CF
+-Cache Static Assets (HTML, CSS, JS, Images)
+-Static assets related to weather
+end note
+
+
 rectangle R53 as "Route 53 (Latency-Based Routing)"
 
 ' ===========================
