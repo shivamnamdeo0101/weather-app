@@ -1,0 +1,121 @@
+@startuml
+title Global Weather App — AWS Architecture Overview
+
+' Layout Settings for Readability
+skinparam packagePadding 15
+skinparam rectangle {
+    Shadowing false
+    RoundCorner 10
+    Padding 8
+    MinWidth 150
+}
+skinparam database {
+    Shadowing false
+    RoundCorner 10
+    Padding 8
+    MinWidth 150
+}
+skinparam cloud {
+    Shadowing false
+}
+
+actor User
+cloud OPENWEATHER as "OpenWeather API"
+
+package "AWS Global Infrastructure" {
+
+    ' -------- ASIA REGION (Singapore) --------
+    package "Region: Asia (Singapore)" {
+        rectangle FE_ASIA as "Frontend SPA"
+        database REDIS_ASIA as "Redis Cache"
+        rectangle BE_ASIA as "Backend API\n(EC2/ECS)"
+    }
+
+    ' -------- EUROPE REGION (Frankfurt) --------
+    package "Region: Europe (Frankfurt)" {
+        rectangle FE_EU as "Frontend SPA"
+        database REDIS_EU as "Redis Cache"
+        rectangle BE_EU as "Backend API"
+    }
+
+    ' -------- AFRICA REGION (South Africa) --------
+    package "Region: Africa (South Africa)" {
+        rectangle FE_AF as "Frontend SPA"
+        database REDIS_AF as "Redis Cache"
+        rectangle BE_AF as "Backend API"
+    }
+
+    ' -------- AMERICAS REGION (US East + Sao Paulo) --------
+    package "Region: Americas (US East + Sao Paulo)" {
+        rectangle FE_AM as "Frontend SPA"
+        rectangle BE_US as "Backend API US East"
+        rectangle BE_SA as "Backend API Sao Paulo"
+        database REDIS_US as "Redis US"
+        database REDIS_SA as "Redis SA"
+    }
+
+    ' -------- OCEANIA REGION (Sydney) --------
+    package "Region: Oceania (Sydney)" {
+        rectangle FE_OC as "Frontend SPA"
+        database REDIS_OC as "Redis Cache"
+        rectangle BE_OC as "Backend API"
+    }
+}
+
+' --- Global Services ---
+
+cloud CF as "CloudFront CDN"
+rectangle R53 as "Route53 Latency-Based Routing"
+
+' --- Global Connection Flow ---
+
+' 1. User to Global Entry Points
+User --> CF : Initial Page Load
+User --> R53 : API Endpoint DNS
+
+' 2. CloudFront (Static Content) to Regional Frontends
+CF --> FE_ASIA
+CF --> FE_EU
+CF --> FE_AF
+CF --> FE_AM
+CF --> FE_OC
+
+' 3. Route53 (API Calls) to Regional Backends
+R53 --> BE_ASIA
+R53 --> BE_EU
+R53 --> BE_AF
+R53 --> BE_US
+R53 --> BE_SA
+R53 --> BE_OC
+
+' --- Regional Processing Flow ---
+
+' Asia (Singapore)
+FE_ASIA --> BE_ASIA : API Call
+BE_ASIA --> REDIS_ASIA : Cache Read/Write
+BE_ASIA --> OPENWEATHER : Fetch Data
+
+' Europe (Frankfurt)
+FE_EU --> BE_EU
+BE_EU --> REDIS_EU
+BE_EU --> OPENWEATHER
+
+' Africa (South Africa)
+FE_AF --> BE_AF
+BE_AF --> REDIS_AF
+BE_AF --> OPENWEATHER
+
+' Americas (US East + Sao Paulo) - Dual Backends
+FE_AM --> BE_US : US Traffic
+FE_AM --> BE_SA : SA Traffic
+BE_US --> REDIS_US
+BE_SA --> REDIS_SA
+BE_US --> OPENWEATHER
+BE_SA --> OPENWEATHER
+
+' Oceania (Sydney)
+FE_OC --> BE_OC
+BE_OC --> REDIS_OC
+BE_OC --> OPENWEATHER
+
+@enduml

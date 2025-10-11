@@ -36,6 +36,9 @@ public class WeatherCacheScheduler {
     @Value("${schedular.medium_refresh_interval}")
     private long MEDIUM_REFRESH_INTERVAL;
 
+    @Value("${schedular.low_active_refresh_interval}")
+    private long LOW_ACTIVE_REFRESH_INTERVAL;
+
     @Value("${schedular.max_age}")
     private long MAX_AGE;
 
@@ -88,7 +91,9 @@ public class WeatherCacheScheduler {
                             handleRefresh(cityKey, meta, now, lastRefresh, MEDIUM_REFRESH_INTERVAL, "🌤 MEDIUM");
                             mediumRefreshed.add(cityKey);
                         } else if (age > MAX_AGE) {
-                            handleRemoval(cityKey, age);
+                            handleRefresh(cityKey, meta, now, lastRefresh, LOW_ACTIVE_REFRESH_INTERVAL, "☁️ LOW_ACTIVE");
+                            //handleRemoval(cityKey, age);
+                            //we are not supposed to remvoe the city key and needed for future preload by this schedular
                         }
 
                     } catch (InterruptedException e) {
