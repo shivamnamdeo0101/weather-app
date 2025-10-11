@@ -92,6 +92,12 @@ This project provides a high-performance, cache-enabled weather forecasting syst
     - 🌤 **Medium Cities:** `20 ≤ hits < 50` → refreshed latest weather every 30 min and reset hits.
     - ❄️ **Low Cities**:** Eviction / remove record if no lastAccess in last 1 hour.
 
+
+  - **Refreshes HOT/MEDIUM cities asynchronously via virtual threads.**
+    - Removes inactive cities.
+    - Staggered 0-500ms delay per city for SVC call so will be in limit.
+    - Logs summary **after all threads complete**.
+
   - **Strategy Design Pattern:**  
     - Uses a combination of **LFU, LRU, and TTL**:
     - **Hot Keys:** LFU → keep frequently accessed data longer with latest data.
