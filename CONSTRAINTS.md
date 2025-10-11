@@ -54,6 +54,32 @@ Notes:
 4. Route 53 figures out user is in Asia → sends request to BE_ASIA.  
 5. Backend checks Redis cache → if miss, hits OpenWeather API → stores in Redis → returns JSON.
 
+| Region                    | Total Cities | HOT Cities (Frequent Access) | MEDIUM Cities (Moderate Access) | LOW Cities (Infrequent Access) | Notes / Examples                                                                                                                                                                                                   |
+| ------------------------- | ------------ | ---------------------------- | ------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **North & South America** | 40,000       | 10% (~4,000)                 | 25% (~10,000)                   | 65% (~26,000)                  | HOT: New York, Los Angeles, Toronto, São Paulo, Rio de Janeiro. Cities with high population density, tech adoption, and urban lifestyle. Medium: mid-size US/Brazil/Canada cities. Low: small towns / rural areas. |
+| **Europe**                | 40,000       | 12% (~4,800)                 | 28% (~11,200)                   | 60% (~24,000)                  | HOT: London, Paris, Berlin, Madrid, Milan. Highly urbanized cities with active weather API usage. Medium: medium-size EU cities. Low: rural towns, low-density regions.                                            |
+| **Asia**                  | 40,000       | 8% (~3,200)                  | 27% (~10,800)                   | 65% (~26,000)                  | HOT: Mumbai, Delhi, Tokyo, Singapore, Shanghai. Mega-cities with high digital adoption. Medium: Tier 2 cities. Low: smaller towns, villages, low app usage.                                                        |
+| **Africa**                | 40,000       | 5% (~2,000)                  | 15% (~6,000)                    | 80% (~32,000)                  | HOT: Johannesburg, Cairo, Lagos. Main urban centers with digital connectivity. Medium: mid-size cities. Low: rural regions with low API usage.                                                                     |
+| **Oceania**               | 40,000       | 7% (~2,800)                  | 23% (~9,200)                    | 70% (~28,000)                  | HOT: Sydney, Melbourne, Auckland. Medium: other urban areas. Low: small towns and rural areas.                                                                                                                     |
+
+#### Assumptions Used
+
+- **HOT Cities:**
+    - Population > 1M, high internet penetration, frequent app usage.
+    - Cities are tech-forward, likely to make multiple API calls per hour.
+
+- **MEDIUM Cities:**
+    - Population 0.1M – 1M, moderate internet/tech adoption.
+    - Weather API calls once every few hours.
+
+- **LOW Cities:**
+    - Small towns, villages, rural areas.
+    - Rare access; TTL or on-demand fetch only.
+
+- **Notes**
+    - Percentages reflect practical load for caching + scheduler planning, not fixed Redis storage.
+    - Scheduler staggering + lastAccess checks ensure not all HOT/Medium cities hit API at once — reduces spike risk.
+
 ---
 ### AWS Services Role
 
