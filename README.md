@@ -13,8 +13,8 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 - 📱 Fully mobile-responsive
 - 👀 Prediction / Advice for the user
 
-## 🧩 Sequence Diagrams
-![image](https://github.com/user-attachments/assets/5e089945-0b06-49bd-b8bd-c67fa78d1cb7)
+## 🧩 Diagrams
+<img width="1261" height="434" alt="AWS_ARCH-_Global_Weather_App__AWS_Multi_Region_Unified_Pod_Architecture" src="https://github.com/user-attachments/assets/c0502169-7b88-4b45-9978-ec60d712cfd5" />
 <img width="1261" height="1017" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/ca2af486-e7c6-4554-a489-29192c0774e4" />
 <img width="1261" height="1451" alt="image" src="https://github.com/user-attachments/assets/1e50204a-2330-41d6-8013-7d62fdbf9621" />
 
