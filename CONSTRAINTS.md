@@ -19,6 +19,17 @@ CONSTRAINTS:
 - PER_REGION_REDIS_MEMORY ≈ 327.68 MB (IF 5 REGIONS)
 
 ---
+### Redis Memory Planning Per Region
+
+- Most Active (~5k cities × 8 KB) = 40 MB
+- Medium (~13k cities × 8 KB) = 104 MB
+- Low (~22k cities × 8 KB) = 176 MB
+- Total ≈ 320 MB = Fits nicely within 327 MB per region
+
+- ✅ This ensures high hit ratio for most-used cities, while keeping memory under control.
+- ✅ Low-demand cities don’t occupy Redis unnecessarily; TTL handles expiry.
+
+---
 ### Regional Deployment Strategy
 
 | Continent    | Central AWS Region                  | Reason / Coverage                                                             |
@@ -38,7 +49,7 @@ Notes:
 ### Traffic Flow Example
 
 1. User in Singapore opens the site.  
-2. CloudFront serves Next.js JS/CSS from nearest edge node.  
+2. CloudFront serves video/image from nearest edge node.  
 3. API call goes to api.weatherapp.com.  
 4. Route 53 figures out user is in Asia → sends request to BE_ASIA.  
 5. Backend checks Redis cache → if miss, hits OpenWeather API → stores in Redis → returns JSON.

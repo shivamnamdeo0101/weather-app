@@ -85,15 +85,19 @@ public class WeatherCacheScheduler {
                         long age = now - lastAccess;
 
                         if (hits >= HOT_HIT_THRESHOLD) {
+                            log.info("HOT_ACTIVE_REFRESH");
                             handleRefresh(cityKey, meta, now, lastRefresh, HOT_REFRESH_INTERVAL, "🔥 HOT");
                             hotRefreshed.add(cityKey);
                         } else if (hits >= MEDIUM_HIT_THRESHOLD) {
+                            log.info("MEDIUM_ACTIVE_REFRESH");
                             handleRefresh(cityKey, meta, now, lastRefresh, MEDIUM_REFRESH_INTERVAL, "🌤 MEDIUM");
                             mediumRefreshed.add(cityKey);
-                        } else if (age > MAX_AGE) {
-                            handleRefresh(cityKey, meta, now, lastRefresh, LOW_ACTIVE_REFRESH_INTERVAL, "☁️ LOW_ACTIVE");
-                            //handleRemoval(cityKey, age);
-                            //we are not supposed to remvoe the city key and needed for future preload by this schedular
+                        } else {
+                            log.info("LOW_ACTIVE_REMOVAL");
+                            log.info("LOW_ACTIVE city {} age is {} removed with TTL naturally : ", cityKey, (age / 1000 * 60));
+                            log.info("LOW_ACTIVE cities expire naturally via Redis TTL of 1 hours, no scheduler refresh needed.");
+                            //NOT REQ - handleRefresh(cityKey, meta, now, lastRefresh, LOW_ACTIVE_REFRESH_INTERVAL, "☁️ LOW_ACTIVE");
+                            //NOT REQ - handleRemoval(cityKey, age);
                         }
 
                     } catch (InterruptedException e) {
