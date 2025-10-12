@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-db
+  labels:
+    app: redis-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: redis-db
+    spec:
+      containers:
+        - name: redis-db
+          image: redis:7.2.5-alpine
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-data
+              mountPath: /data
+      restartPolicy: Always
+      volumes:
+        - name: redis-data
+          persistentVolumeClaim:
+            claimName: redis-data
