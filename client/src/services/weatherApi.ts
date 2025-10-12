@@ -1,6 +1,6 @@
 import { WeatherApiResponse } from '@/types/weather';
 
-const API_BASE_URL = 'http://localhost:8081/api/weather-cache';
+const API_BASE_URL = 'http://48.194.32.29:8081/api/weather-cache';
 
 export class WeatherError extends Error {
   public status?: number;
