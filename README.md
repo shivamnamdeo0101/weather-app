@@ -55,11 +55,12 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 
 
 - **Design Patterns Used**
-  - Strategy Pattern – Different cache refresh/evict logic (HOT, MEDIUM, LOW).
-  - Scheduler Pattern – Periodic refresh and cleanup triggered automatically.
-  - Facade Pattern - Unified interface to fetch weather data (handles API calls, retries, circuit breaker, fallback)
-  - Circuit Breaker / Retry Pattern – For API call resilience.
-  - Repository-Service Pattern– Redis operations abstracted in GenericRedisServiceImpl.
+- Strategy Pattern – Defines different refresh logics (HOT, MEDIUM, LOW) for cache management.
+- Factory Pattern – Selects and provides the correct refresh strategy based on city hits.
+- Scheduler Pattern – Periodically triggers cache refresh to maintain data freshness.
+- Template Method Pattern – Provides a common refresh algorithm skeleton reused by all strategies.
+- Repository–Service Pattern – Abstracts Redis operations into a clean service layer.
+- Facade Pattern – Simplifies Weather API interaction.
 
 ### 🧩 Detailed Flow
 
