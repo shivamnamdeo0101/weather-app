@@ -1,0 +1,69 @@
+name: Docker CI & Kubernetes Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  KUBE_CONFIG_DATA: ${{ secrets.KUBE_CONFIG_DATA }}
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Checkout repo
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2️⃣ Login to Docker Hub
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ env.DOCKER_USERNAME }}
+        password: ${{ env.DOCKER_PASSWORD }}
+
+    # 3️⃣ Build Docker images
+    - name: Build weather-client image
+      run: docker build ./client --file Dockerfile --tag shivamnamdeo0101/weather-client:latest
+
+    - name: Build weather-cache image
+      run: docker build ./server/weather-cache --file Dockerfile --tag shivamnamdeo0101/weather-cache:latest
+
+    - name: Build weather-svc image
+      run: docker build ./server/weather-svc --file Dockerfile --tag shivamnamdeo0101/weather-svc:latest
+
+    # 4️⃣ Push Docker images
+    - name: Push weather-client
+      run: docker push shivamnamdeo0101/weather-client:latest
+
+    - name: Push weather-cache
+      run: docker push shivamnamdeo0101/weather-cache:latest
+
+    - name: Push weather-svc
+      run: docker push shivamnamdeo0101/weather-svc:latest
+
+    # 5️⃣ Set up kubectl
+    - name: Set up kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.30.0'
+
+    # 6️⃣ Configure kubeconfig
+    - name: Configure kubeconfig
+      run: |
+        mkdir -p $HOME/.kube
+        echo "${{ env.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+
+    # 7️⃣ Deploy all services
+    - name: Apply Kubernetes manifests
+      run: |
+        kubectl apply -f k8s/
+        kubectl rollout status deployment/weather-app
+        kubectl rollout status deployment/weather-cache
+        kubectl rollout status deployment/weather-svc
+        kubectl rollout status deployment/redis-db
