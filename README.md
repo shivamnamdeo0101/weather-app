@@ -88,9 +88,9 @@ This project provides a high-performance, cache-enabled weather forecasting syst
   -The **Weather Cache Scheduler** inside `weather-cache`  manages cached weather data in Redis efficiently, balancing **freshness** and **performance**. It monitors city-level cache entries using **hit counts** , **lastRefresh** and **last access time**.
 
   - **Cache Eviction Behavior:**  
-    - Scheduler runs **every 5 min** to evaluate all cities.
-    - 🔥 **Hot Cities:** `hits ≥ 50` → Most active refreshed latest weather every 10 min and reset hits
-    - 🌤 **Medium Cities:** `20 ≤ hits < 50` → refreshed latest weather every 30 min and reset hits.
+    - Scheduler runs **every 15 min** to evaluate all cities.
+    - 🔥 **Hot Cities:** `hits ≥ 140` → Most active refreshed latest weather every 20 min and reset hits
+    - 🌤 **Medium Cities:** `70 ≤ hits <= 140` → refreshed latest weather every 30 min and reset hits.
     - ❄️ **Low Cities**:** Eviction / remove record if no lastAccess in last 1 hour.
 
 

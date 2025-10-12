@@ -6,17 +6,22 @@
 ### Redis Memory & Scaling
 
 We have around 2 lakh cities (MAX_CITIES_OPEN_WEATHER = 200,000)  
-Each city in Redis will take ~8 KB (PER_CITY_DATA_SIZE_IN_REDIS)  
+Each city in Redis will take ~8 KB + 0.12 KB Meta Data (PER_CITY_DATA_SIZE_IN_REDIS)
 
-Total Redis memory we need globally = 200,000 * 8 KB = 1.6 GB  
-If we deploy in 5 regions, that comes to around 327.68 MB per region.  
+Total Redis memory we need globally = 200,000 * (8 + 0.12) KB ≈ 1.624 GB  
+If we deploy in 6 regions, that comes to around 1.624 GB ÷ 6 ≈ 270.67 MB per region  
+Rounded up for safety, we can assume ≈ 2 GB globally and ≈ 400 MB per region
+
 This is easily manageable in Redis, even in small nodes.
 
 CONSTRAINTS:
 - MAX_CITIES_OPEN_WEATHER = 200,000
-- PER_CITY_DATA_SIZE_IN_REDIS = 8 KB
-- MAX_REDIS_MEMORY = 1.6 GB GLOBALLY
-- PER_REGION_REDIS_MEMORY ≈ 327.68 MB (IF 5 REGIONS)
+- PER_CITY_DATA_SIZE_IN_REDIS = 8 KB + 0.12 KB Meta Data
+- TOTAL_REDIS_MEMORY ≈ 1.624 GB GLOBALLY
+- PER_REGION_REDIS_MEMORY ≈ 270.67 MB (IF 6 REGIONS)
+- ROUND_UP_MAX_REDIS_MEMORY ≈ 2 GB GLOBALLY
+- ROUND_UP_PER_REGION_REDIS_MEMORY ≈ 400 MB (IF 6 REGIONS)
+
 
 ---
 ### Redis Memory Planning Per Region
@@ -76,8 +81,11 @@ CONSTRAINTS:
 | Average sustained refresh per minute |            210 ÷ 2 |      **105 req/min** | Approximate sustained refresh rate (210 spread over ~2 minutes of effective refresh window) |
 
 - **Notes**
-- Arithmetic shown exactly — 210 ÷ 2 = 105 requests/min (rounded) direct schedular calls to SVC 
+- Arithmetic shown exactly — 210 ÷ 2 = 105 requests/min (rounded) direct schedular calls to SVC can complete in 1-2 mins 
 - Schedular run every 15 mins if hits > THRESHOLD_HITS for HOT(hit>=140) and MEDIUM(hit>= 70)
+- Strategy: Common logic for on-demand and scheduler to decide refresh. 
+- Load Reduction: Scheduler eases user request load; on-demand avoids repeated API calls from schedular. 
+- Eventual Consistency: Redis holds up-to-date data with tiered refresh (HOT/MEDIUM/LOW).
 
 | Metric / Scenario                              | Value / Calculation                           | Notes                                                                                    |
 | ---------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------- |

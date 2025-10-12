@@ -5,7 +5,7 @@ import java.util.Set;
 
 public interface GenericRedisService {
 
-    void saveWithMeta(String key, Object value, boolean refresh);
+    void saveWithMeta(String key, Object value, boolean refresh, long remainingHits);
 
     Object getAndUpdateMeta(String key);
 

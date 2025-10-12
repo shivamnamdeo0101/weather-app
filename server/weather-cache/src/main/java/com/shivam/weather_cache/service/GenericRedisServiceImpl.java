@@ -26,7 +26,7 @@ public class GenericRedisServiceImpl implements GenericRedisService {
     }
 
     @Override
-    public void saveWithMeta(String key, Object value, boolean refresh) {
+    public void saveWithMeta(String key, Object value, boolean refresh ,long remainingHits) {
         log.info("Saving weather data in redis for {} with TTL={}s Refresh :{}", key,cacheTTL,refresh);
         try {
             redisTemplate.execute(new SessionCallback<Object>() {
@@ -37,7 +37,8 @@ public class GenericRedisServiceImpl implements GenericRedisService {
                     HashOperations<String, String, Object> hashOps = redisTemplate.opsForHash();
 
                     valueOps.set(key + ":data", value);
-                    hashOps.put(key + ":meta", "hits", 1);
+                    // Only update hits if remainingHits is provided, otherwise default to 1
+                    hashOps.put(key + ":meta", "hits", remainingHits > 0 ? remainingHits : 1);
                     hashOps.put(key + ":meta", "lastAccess", Instant.now().toEpochMilli());
                     if(refresh){
                         hashOps.put(key + ":meta", "lastRefresh", Instant.now().toEpochMilli());
@@ -61,7 +62,6 @@ public class GenericRedisServiceImpl implements GenericRedisService {
             Object value = valueOps.get(key + ":data");
 
             if (value != null) {
-                log.info("Cache HIT for city: {}", key);
                 redisTemplate.execute(new SessionCallback<Object>() {
                     @Override
                     public Object execute(@NotNull RedisOperations operations) throws DataAccessException {

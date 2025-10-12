@@ -4,23 +4,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shivam.weather_cache.dto.CacheResult;
 import com.shivam.weather_cache.exception.WeatherServiceException;
+import com.shivam.weather_cache.strategy.CacheRefreshStrategy;
+import com.shivam.weather_cache.strategy.CacheRefreshStrategyFactory;
 import com.shivam.weather_cache.utils.WeatherSvcClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.*;
+import org.springframework.web.client.HttpStatusCodeException;
 
 import java.util.Map;
 
-/**
- * Service for fetching weather data with Redis caching.
- * Responsibilities:
- *  - Cache HIT / MISS
- *  - Redis Call / SVC Call
- *
- */
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +23,7 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
     private final GenericRedisService redisService;
     private final ObjectMapper objectMapper;
     private final WeatherSvcClient weatherSvcClient;
-
+    private final CacheRefreshStrategyFactory strategyFactory;
 
     @Override
     public CacheResult getWeather(String city) {
@@ -40,20 +34,31 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
         String key = "weather:" + city.toLowerCase();
         log.info("Fetching weather for city: {}", city);
 
-        //Try cache first
+        // Try cache first
         try {
             Object cached = redisService.getAndUpdateMeta(key);
+
             if (cached != null) {
+                log.info("Cache HIT for city: {}", key);
                 Map<String, Object> cachedMap = objectMapper.convertValue(cached, new TypeReference<>() {});
+
+                // Pick the correct strategy based on hits
+                CacheRefreshStrategy strategy = strategyFactory.getStrategy(key);
+                if (strategy != null) {
+                    boolean refreshed = strategy.refreshIfRequired(key);
+                    if (refreshed) {
+                        log.info("City {} refreshed on-demand via strategy {}", city, strategy.getClass().getSimpleName());
+                    }
+                }
+
                 return new CacheResult(cachedMap, true);
             }
         } catch (Exception ex) {
             log.warn("Redis read failed for key {}: {}", key, ex.getMessage());
         }
 
+        // Cache MISS → fetch from Weather SVC once
         log.info("Cache MISS for city: {}. Calling Weather SVC...", city);
-
-        //Call the Weather API via weatherSvcClient
         try {
             Map<String, Object> data = weatherSvcClient.fetchWeatherData(city);
 
@@ -64,9 +69,9 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
                 );
             }
 
-            //Save Date In the redis
+            // Save in Redis
             try {
-                redisService.saveWithMeta(key, data,false);
+                redisService.saveWithMeta(key, data, false,1);
             } catch (Exception ex) {
                 log.warn("Redis save failed for key {}: {}", key, ex.getMessage());
             }
