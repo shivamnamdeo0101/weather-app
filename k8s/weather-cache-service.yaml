@@ -3,10 +3,9 @@ kind: Service
 metadata:
   name: weather-cache
 spec:
+  type: LoadBalancer
   selector:
     app: weather-cache
   ports:
-    - protocol: TCP
-      port: 8081
+    - port: 8081
       targetPort: 8081
-  type: ClusterIP  # internal load balancing

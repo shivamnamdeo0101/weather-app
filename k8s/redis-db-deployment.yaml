@@ -17,7 +17,7 @@ spec:
         app: redis-db
     spec:
       containers:
-          name: redis-db
+        - name: redis-db
           image: redis:7.2.5-alpine
           ports:
             - containerPort: 6379
