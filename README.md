@@ -241,11 +241,11 @@ REDIS_HOST=redis-db
 REDIS_PORT=6379
  #in REDIS_COMMAND_TIMEOUT Seconds
 REDIS_COMMAND_TIMEOUT=60
-#In Seconds REDIS_TTL
-REDIS_TTL=900
+#In Seconds REDIS_TTL 1-hours Min In Sec
+REDIS_TTL=3600000
 # Uses the specified credentials for the local Redis instance (if configured)
 REDIS_USERNAME=default
-REDIS_PASSWORD=0tr************************3A
+REDIS_PASSWORD=0t*******YOUR_API_KEY**********3A
 # Sets the Spring profile
 SPRING_PROFILES_ACTIVE=prod
 #Rest Template
@@ -253,12 +253,17 @@ SPRING_PROFILES_ACTIVE=prod
 #in MILLISECONDS
 REST_CONNECT_TIMEOUT=200000
 REST_READ_TIMEOUT=200000
+
 #Schedular Configs
-HOT_HIT_THRESHOLD=50 #hits count
-MEDIUM_HIT_THRESHOLD=20 #hits count
-HOT_REFRESH_INTERVAL_MS=300000       # 5 minutes
-MEDIUM_REFRESH_INTERVAL_MS=900000   # 15 minutes
-MAX_AGE_MS=3600000                   # 1 hour
+HOT_HIT_THRESHOLD=140                  #hits count most hot/active/priority cities
+MEDIUM_HIT_THRESHOLD=70                #hits count mid  hot/active/priority cities
+
+HOT_REFRESH_INTERVAL_MS=1200000         #20 minutes
+MEDIUM_REFRESH_INTERVAL_MS=1800000      #30 minutes
+LOW_ACTIVE_REFRESH_INTERVAL_MS=2400000  #40 minutes
+MAX_AGE_MS=2700000                      #45 minutes
+
+
 
 ```
 
