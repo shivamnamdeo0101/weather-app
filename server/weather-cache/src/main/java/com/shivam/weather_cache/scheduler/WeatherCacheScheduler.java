@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Component
@@ -94,7 +95,7 @@ public class WeatherCacheScheduler {
                             mediumRefreshed.add(cityKey);
                         } else {
                             log.info("LOW_ACTIVE_REMOVAL");
-                            log.info("LOW_ACTIVE city {} age is {} mins so removed with TTL naturally : ", cityKey, (age / 1000 * 60));
+                            log.info("LOW_ACTIVE city {} age is {} mins so removed with TTL naturally : ", cityKey, TimeUnit.MILLISECONDS.toMinutes(age));
                             log.info("LOW_ACTIVE cities expire naturally via Redis TTL of 1 hours, no scheduler refresh needed.");
                             //NOT REQ - handleRefresh(cityKey, meta, now, lastRefresh, LOW_ACTIVE_REFRESH_INTERVAL, "☁️ LOW_ACTIVE");
                             //NOT REQ - handleRemoval(cityKey, age);
