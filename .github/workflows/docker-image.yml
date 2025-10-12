@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    # 1️⃣ Checkout repo
+    # 1️⃣ Checkout code
     - name: Checkout code
       uses: actions/checkout@v4
 
@@ -29,13 +29,16 @@ jobs:
 
     # 3️⃣ Build Docker images
     - name: Build weather-client image
-      run: docker build ./client --file Dockerfile --tag shivamnamdeo0101/weather-client:latest
+      run: docker build . -t shivamnamdeo0101/weather-client:latest
+      working-directory: ./client
 
     - name: Build weather-cache image
-      run: docker build ./server/weather-cache --file Dockerfile --tag shivamnamdeo0101/weather-cache:latest
+      run: docker build . -t shivamnamdeo0101/weather-cache:latest
+      working-directory: ./server/weather-cache
 
     - name: Build weather-svc image
-      run: docker build ./server/weather-svc --file Dockerfile --tag shivamnamdeo0101/weather-svc:latest
+      run: docker build . -t shivamnamdeo0101/weather-svc:latest
+      working-directory: ./server/weather-svc
 
     # 4️⃣ Push Docker images
     - name: Push weather-client
