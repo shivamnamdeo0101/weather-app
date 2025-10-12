@@ -46,12 +46,12 @@ public class WeatherCacheScheduler {
 
     /**
      * Scheduler runs every 5 min:
-     * - Refreshes HOT/MEDIUM cities asynchronously via virtual threads.
-     * - Removes inactive cities.
+     * - Refreshes MOST ACTIVELY REQUESTED HOT/MEDIUM cities asynchronously via virtual threads.
+     * - Removes naturally inactive cities with TTL.
      * - Staggered 0-500ms delay per city for SVC call will be in limit.
      * - Logs summary **after all threads complete**.
      */
-    @Scheduled(fixedRate = 5 * 60 * 1000L)
+    @Scheduled(fixedRate = 15 * 60 * 1000L)
     public void refreshCache() {
         long now = Instant.now().toEpochMilli();
         log.info("Scheduler triggered at {}", DateTimeUtils.formatEpochMilli(now));
@@ -94,7 +94,7 @@ public class WeatherCacheScheduler {
                             mediumRefreshed.add(cityKey);
                         } else {
                             log.info("LOW_ACTIVE_REMOVAL");
-                            log.info("LOW_ACTIVE city {} age is {} removed with TTL naturally : ", cityKey, (age / 1000 * 60));
+                            log.info("LOW_ACTIVE city {} age is {} mins so removed with TTL naturally : ", cityKey, (age / 1000 * 60));
                             log.info("LOW_ACTIVE cities expire naturally via Redis TTL of 1 hours, no scheduler refresh needed.");
                             //NOT REQ - handleRefresh(cityKey, meta, now, lastRefresh, LOW_ACTIVE_REFRESH_INTERVAL, "☁️ LOW_ACTIVE");
                             //NOT REQ - handleRemoval(cityKey, age);

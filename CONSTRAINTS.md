@@ -40,7 +40,7 @@ CONSTRAINTS:
 | Americas    | US East (us-east-1), São Paulo    | North & South America are far apart – need 2 regions                             |
 | Oceania     | Sydney (ap-southeast-2)           | Covers Australia & New Zealand                                                   |
 
-Notes:
+- **Notes:**
 - Regions without users (Antarctica, remote islands) can just rely on CloudFront edge caches.
 - Each region has 2–6 Availability Zones (AZs) for HA.
 - Central AWS region per continent selected based on population density & latency.
@@ -61,6 +61,39 @@ Notes:
 | **Asia**                  | 40,000       | 8% (~3,200)                  | 27% (~10,800)                   | 65% (~26,000)                  | HOT: Mumbai, Delhi, Tokyo, Singapore, Shanghai. Mega-cities with high digital adoption. Medium: Tier 2 cities. Low: smaller towns, villages, low app usage.                                                        |
 | **Africa**                | 40,000       | 5% (~2,000)                  | 15% (~6,000)                    | 80% (~32,000)                  | HOT: Johannesburg, Cairo, Lagos. Main urban centers with digital connectivity. Medium: mid-size cities. Low: rural regions with low API usage.                                                                     |
 | **Oceania**               | 40,000       | 7% (~2,800)                  | 23% (~9,200)                    | 70% (~28,000)                  | HOT: Sydney, Melbourne, Auckland. Medium: other urban areas. Low: small towns and rural areas.                                                                                                                     |
+
+---
+### Load Calculation
+
+| Metric                               |        Calculation |               Result | Description                                                                                 |
+| ------------------------------------ | -----------------: | -------------------: | ------------------------------------------------------------------------------------------- |
+| Cities per region                    |                  — |           **40,000** | America split into 2 regions, each region has 40k cities                                    |
+| Cities per category (≈1/3 split)     | 40,000 ÷ 3 → round | **≈13,333 → 14,000** | Approximate equal split into HOT/MEDIUM/LOW buckets (rounded)                               |
+| Most-active set (10% of category)    |       14,000 × 10% |            **1,400** | Top 10% of the category considered “most active”                                            |
+| HOT candidates (10% of active)       |        1,400 × 10% |              **140** | Cities reaching HOT threshold (e.g., ≥140 hits)                                             |
+| MEDIUM candidates (5% of active)     |         1,400 × 5% |               **70** | Cities reaching MEDIUM threshold (e.g., ≥70 hits)                                           |
+| Total refresh-triggering cities      |           140 + 70 |              **210** | Cities that will trigger refresh in the cycle                                               |
+| Average sustained refresh per minute |            210 ÷ 2 |      **105 req/min** | Approximate sustained refresh rate (210 spread over ~2 minutes of effective refresh window) |
+
+- **Notes**
+- Arithmetic shown exactly — 210 ÷ 2 = 105 requests/min (rounded) direct schedular calls to SVC 
+- Schedular run every 15 mins if hits > THRESHOLD_HITS for HOT(hit>=140) and MEDIUM(hit>= 70)
+
+| Metric / Scenario                              | Value / Calculation                           | Notes                                                                                    |
+| ---------------------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Total HOT+MEDIUM active cities**             | 1,400                                         | Top 10% of the 14,000 most active cities                                                 |
+| **Scheduler target (top HOT 10%)**             | 140                                           | Only 10% of 1,400 are refreshed by scheduler                                             |
+| **SVC quota**                                  | 150 req/min                                   | Total allowed per region                                                                 |
+| **Scheduler usage**                            | 105 req/min                                   | Refreshing 140 HOT cities                                                                |
+| **Remaining quota for user cache misses**      | 150 − 105 = 45 req/min                        | Available for occasional user-triggered misses                                           |
+| **Avg call duration**                          | 500 ms (0.5 sec)                              | Each SVC request takes ~0.5 sec                                                          |
+| **Time to refresh 140 cities sequentially**    | 140 × 0.5 sec = 70 sec                        | ~1 min 10 sec if done back-to-back without stagger                                       |
+| **Time to refresh 140 cities with stagger**    | 140 × (0.5 + avg_stagger) sec                 | If we stagger ~0.5 sec between threads → total ~2 min                                    |
+| **Impact on user requests**                    | Limited to 45 req/min during scheduler window | Scheduler + user requests should not exceed 150 req/min                                  |
+| **Cache hit expectation**                      | 90% of traffic comes from HOT 140 cities      | Most user requests served from cache, minimal SVC load                                   |
+| **Remaining HOT/MEDIUM (1,400 − 140 = 1,260)** | Only hit SVC if user requests happen          | Scheduler does not refresh these; traffic is low and handled from cache or SVC as needed |
+
+
 
 #### Assumptions Used
 
