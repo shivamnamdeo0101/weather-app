@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-weather-cache--env
+  labels:
+    app: weather-cache
+data:
+  HOT_HIT_THRESHOLD: "140"
+  HOT_REFRESH_INTERVAL_MS: "1200000"
+  LOW_ACTIVE_REFRESH_INTERVAL_MS: "2400000"
+  MAX_AGE_MS: "2700000"
+  MEDIUM_HIT_THRESHOLD: "70"
+  MEDIUM_REFRESH_INTERVAL_MS: "1800000"
+  REDIS_COMMAND_TIMEOUT: "60"
+  REDIS_HOST: redis-db
+  REDIS_PASSWORD: 0trdM3mluTs4CTTipn83YJMnXBoNJx3A
+  REDIS_PORT: "6379"
+  REDIS_USERNAME: default
+  REDIS_TTL: "3600000"
+  REST_CONNECT_TIMEOUT: "200000"
+  REST_READ_TIMEOUT: "200000"
+  SPRING_PROFILES_ACTIVE: prod
+  WEATHER_SVC_URL: http://weather-svc:8080/api/weather-svc/forecast

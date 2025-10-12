@@ -1,51 +1,32 @@
-# -----------------------------
-# 1. Use official Node.js LTS image
-# -----------------------------
-FROM node:20-alpine AS builder
+# Use official Node.js LTS image
+FROM node:18-slim
 
-# -----------------------------
-# 2. Set working directory inside the container
-# -----------------------------
-WORKDIR /app
+# Install dependencies (like curl for healthcheck)
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl tini && \
+    rm -rf /var/lib/apt/lists/*
 
-# -----------------------------
-# 3. Copy package.json and lockfile first (for caching)
-# -----------------------------
-COPY package.json package-lock.json* yarn.lock* ./
+# Set working directory
+WORKDIR /usr/src/app
 
-# -----------------------------
-# 4. Install dependencies
-# -----------------------------
-RUN npm install
+# Copy package.json and package-lock.json
+COPY package*.json ./
 
-# -----------------------------
-# 5. Copy the rest of the application code
-# -----------------------------
+# Install dependencies
+RUN npm ci && npm cache clean --force
+
+# Copy app source
 COPY . .
 
-# -----------------------------
-# 6. Build the Next.js app
-# -----------------------------
+# Build the Next.js app
 RUN npm run build
 
-# -----------------------------
-# 7. Production image
-# -----------------------------
-FROM node:20-alpine AS runner
-
-WORKDIR /app
-
-# Copy only necessary files for production
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-
-# Set environment variable
-ENV NODE_ENV production
-
-# Expose the default Next.js port
+# Set environment variables
+ENV PORT=3001
 EXPOSE 3001
 
-# Start the Next.js app
+# Use tini as entrypoint
+ENTRYPOINT ["/usr/bin/tini", "--"]
+
+# Start Next.js in production mode
 CMD ["npm", "start"]

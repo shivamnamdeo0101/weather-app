@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-svc
+  labels:
+    app: weather-svc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: weather-svc
+  template:
+    metadata:
+      labels:
+        app: weather-svc
+    spec:
+      containers:
+        - name: weather-svc
+          image: docker.io/shivamnamdeo0101/weather-svc:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: server-weather-svc--env
+      restartPolicy: Always
+
