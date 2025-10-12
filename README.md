@@ -55,12 +55,12 @@ This project provides a high-performance, cache-enabled weather forecasting syst
 
 
 - **Design Patterns Used**
-- Strategy Pattern – Defines different refresh logics (HOT, MEDIUM, LOW) for cache management.
-- Factory Pattern – Selects and provides the correct refresh strategy based on city hits.
-- Scheduler Pattern – Periodically triggers cache refresh to maintain data freshness.
-- Template Method Pattern – Provides a common refresh algorithm skeleton reused by all strategies.
-- Repository–Service Pattern – Abstracts Redis operations into a clean service layer.
-- Facade Pattern – Simplifies Weather API interaction.
+  - Strategy Pattern – Defines different refresh logics (HOT, MEDIUM, LOW) for cache management.
+  - Factory Pattern – Selects and provides the correct refresh strategy based on city hits.
+  - Scheduler Pattern – Periodically triggers cache refresh to maintain data freshness.
+  - Template Method Pattern – Provides a common refresh algorithm skeleton reused by all strategies.
+  - Repository–Service Pattern – Abstracts Redis operations into a clean service layer.
+  - Facade Pattern – Simplifies Weather API interaction.
 
 ### 🧩 Detailed Flow
 
@@ -109,13 +109,14 @@ This project provides a high-performance, cache-enabled weather forecasting syst
  
 
 - **Exception Handling:**  
-  Comprehensive error handling ensures proper responses for different scenarios:  
-    | HTTP Status | Scenario                          | Notes                                        |
-    |------------|----------------------------------|------------------------------------------------|
-    | 429        | Too Many Requests                | Triggered by the rate limiter                |
-    | 502        | Service Down                     | Returned when `weather-svc` is unreachable; can be handled with retry fallback mechanisms |
-    | 404        | City Not Found                   | Returned when an invalid city is requested   |
-    | 400        | Bad Request                      | Triggered for malformed or invalid query parameters |
+    Comprehensive error handling ensures proper responses for different scenarios:  
+
+    | HTTP Status| Scenario                       | Notes                                        |
+    |------------|--------------------------------|------------------------------------------------|
+    | 429        | Too Many Requests              | Triggered by the rate limiter                |
+    | 502        | Service Down                   | Returned when `weather-svc` is unreachable; can be handled with retry fallback mechanisms |
+    | 404        | City Not Found                 | Returned when an invalid city is requested   |
+    | 400        | Bad Request                    | Triggered for malformed or invalid query parameters |
 
 
 - **Cross-Origin Policy:**   
