@@ -1,5 +1,5 @@
 # 🌤 Weather App
-This project provides a high-performance, cache-enabled weather forecasting system. It uses **Spring Boot** for backend APIs, Redis for caching frequently accessed data, and the **OpenWeather API** for real-time weather information. Built with microservices architecture, it implements **rate limiting, cache-aside pattern, and LRU/LFU strategies** for optimal efficiency and scalability.
+This project provides a high-performance, cache-enabled weather forecasting system. It uses **Spring Boot** for backend APIs, Redis for caching frequently (on-demand, periodic scheduled) eventually consistent accessed data, and the **OpenWeather API** for real-time weather information. Built with microservices architecture, it implements **rate limiting, cache-aside pattern, and LRU/LFU strategies** for optimal efficiency and scalability.
 
 # 💡Features
 
