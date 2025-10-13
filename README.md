@@ -41,7 +41,7 @@ Built with microservices architecture, it implements rate limiting, cache-aside 
 
 ### Data Flow
 
-- **CAHCHE HIT/MISS Flow:**
+- **CAHCHE HIT/MISS/ON-DEMAND REFRESH Flow:**
   - Frontend ->  hits -> Weather-Cache service
   - Weather-Cache -checks Redis for city data
     - ✅ If found → return data immediately and also check ON-DEMAND needed with abstract strategies then refresh from SVC
