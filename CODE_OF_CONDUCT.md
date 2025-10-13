@@ -1,2 +1,28 @@
+### Frontend
 <img width="1512" height="812" alt="Screenshot 2025-10-05 at 4 55 32 PM" src="https://github.com/user-attachments/assets/836eeb98-6455-4595-9f14-951ea9a99165" />
 <img width="1502" height="801" alt="Screenshot 2025-10-05 at 4 54 53 PM" src="https://github.com/user-attachments/assets/2f34d711-e5b2-4f53-8d9c-78f0b468ee68" />
+
+### GitHub Workflow
+<img width="1512"  alt="image" src="https://github.com/user-attachments/assets/386e8487-d34d-48e1-ac90-bee0560cc136" />
+
+### JMeter Testing - Throughput
+<img width="1512" alt="image" src="https://github.com/user-attachments/assets/27bde42e-ab6e-4802-8d91-9c0cd2608620" />
+
+### Schedular refreshing HOT/Medium active cities
+<img width="1512"  alt="image" src="https://github.com/user-attachments/assets/1c560f84-e335-44f8-8262-30d9e9ab1709" />
+<img width="1512"  alt="image" src="https://github.com/user-attachments/assets/5333ae5d-7e34-47a8-9f85-7e578a22abaf" />
+
+### No cities for schedular
+<img width="1512" height="45" alt="image" src="https://github.com/user-attachments/assets/75d6e46a-8b64-4dd1-b505-7cbc33e45d28" />
+
+### On-Demand Refreshing Active + Medium Active Cities
+<img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/4d7645c5-d93c-4dce-a983-973f29fb6f26" />
+<img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/22cc2d7c-8ef3-471a-9bf3-884a3b805036" />
+
+
+
+
+
+
+
+
