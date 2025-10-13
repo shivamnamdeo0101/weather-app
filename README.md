@@ -79,7 +79,6 @@ Built with microservices architecture, it implements rate limiting, cache-aside 
 - Performance Optimization – Hot/Medium/Cold segregation using LFU + LRU + Cache eviction strategies.
 - Rate Limiter: Implemented in weather-svc to allow 150 requests per minute.
 - 12-Factor App and HATEOAS Principles
-- 
 
 ## 5. Design Patterns
 - Strategy Pattern – Defines different refresh logics (HOT, MEDIUM, LOW) for cache management. 
