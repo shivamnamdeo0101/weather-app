@@ -17,7 +17,7 @@ Built with microservices architecture, it implements rate limiting, cache-aside 
 - LOW cities use TTL / on-demand fetch to save memory
 
 #### Load Constraints
-- 90% traffic from Most active cities only that is 1400 avg and 
+- 90% traffic from Most active cities only that is 1400 avg (40k / 3 City Category (based on tech adoptions/app uses/more constraints)) of 10 %.
 - City constraints basis 10%(140) req/per min will hit SVC  which we already refreshing through schedular and on-demand strategy.
 - On-Demand refresh + Periodic schedule for load reduction for User req + schedular calls
 - Scheduler thresholds: HOT ACTIVE ≥140 hits, MEDIUM ACTIVE ≥70 hits
