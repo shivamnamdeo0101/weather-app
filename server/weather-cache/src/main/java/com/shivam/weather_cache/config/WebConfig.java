@@ -14,7 +14,7 @@ public class WebConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")           // sab endpoints
-                        .allowedOrigins("http://localhost:3001")  // FE URL
+                        .allowedOrigins("http://localhost:3001","http://48.194.32.29:8081")  // FE URL
                         .allowedMethods("GET")
                         .allowedHeaders("*")
                         .allowCredentials(true);

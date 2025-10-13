@@ -24,9 +24,6 @@ export class WeatherApiService {
 
     const json = await response.json().catch(() => ({}));
 
-    // Defensive normalization: some server responses may wrap the actual array
-    // as `data.data` (e.g., upstream CustomResponse saved into the cache). If we
-    // see that pattern, unwrap it so FE always receives `data` as WeatherData[].
     try {
       if (json && typeof json === 'object' && json.data && typeof json.data === 'object') {
         let inner = json.data;
