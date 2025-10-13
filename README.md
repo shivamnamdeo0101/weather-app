@@ -57,7 +57,7 @@ Built with microservices architecture, it implements rate limiting, cache-aside 
 
 ### Diagrams
 
-<img width="2153" height="723" alt="AWS_ARCH-_Global_Weather_App__AWS_Multi_Region_Unified_Pod_Architecture" src="https://github.com/user-attachments/assets/ad002ad7-64b3-4fc9-947d-efacb57800dd" />
+<img width="2153" height="723" alt="AWS_ARCH-_Global_Weather_App__AWS_Multi_Region_Unified_Pod_Architecture" src="https://github.com/user-attachments/assets/44680b12-9249-486e-85e0-4722ec8a5c9b" />
 
 <img width="1261" height="1017" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/a57d5f2d-0696-465e-9e8a-8dd0e2f25bfe" />
 
