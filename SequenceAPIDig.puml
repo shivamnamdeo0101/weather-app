@@ -1,5 +1,5 @@
 @startuml
-title Weather Forecast Request Flow (with Rate Limiter + Status Codes)
+title Weather Forecast Request Flow (with Rate Limiter + Status Codes + On-Demand Refresh)
 
 actor User
 participant "Weather App" as app
@@ -13,6 +13,15 @@ app -> cache: Query cached data
 
 alt CACHE HIT
     cache -> app: Return cached data (HTTP 200)
+    note right of app
+        On-demand Refresh:
+        If Medium threshold crossed → increment hit by 1
+            and Update and Refresh Data by calling SVC
+        if High threshold crossed → reset hit 1 
+        Scheduler will handle refresh this will reduce the load for 
+        scheduler
+
+    end note
     app -> User: Display forecast
 else CACHE MISS
     cache -> svc: Request fresh data
