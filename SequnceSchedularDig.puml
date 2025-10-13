@@ -1,5 +1,5 @@
 @startuml
-title Weather Cache Scheduler — Virtual-Threaded Refresh & Retention Flow
+title Weather Cache Scheduler — Virtual-Threaded Refresh & Eviction Flow
 
 participant "WeatherCacheScheduler\n(@Component inside Weather-Cache)" as scheduler
 participant "Weather-Cache\n(Redis CRUD + Meta Ops)" as redis
@@ -7,17 +7,16 @@ participant "Weather-SVC\n(Calls Weather Open Weather API)" as svc
 
 == Strategy Overview ==
 note right of scheduler
-HOT KEYS (Most Requested Cities) - Refresh every 5 min
-MEDIUM KEYS (Medium Requested Cities) - Refresh every 15 min
-LOW_ACTIVE KEYS (Less Requested Cities) (Age >45 min) - Refresh every 30 min 
-retained for preload (not deleted)
+HOT KEYS (Most Requested Cities) - Refresh every 20 min
+MEDIUM KEYS (Medium Requested Cities) - Refresh every 30 min
+LOW_ACTIVE KEYS (Less Requested Cities) (Age >45 min) - Log if no last access in 1 hour then evict
 TTL - All keys auto-expire after 1h if lastAccess not updated
 LFU + LRU Hybrid: ensures active & semi-active cities stay warm
 end note
 
 == Scheduler Execution ==
 note right of scheduler
-Runs every 5 minutes:
+Runs every 15 minutes:
 - Refresh HOT / MEDIUM / LOW_ACTIVE cities asynchronously via virtual threads
 - LOW_ACTIVE cities refreshed (not evicted)
 - Staggered 0–500ms delay per city to prevent SVC burst
@@ -33,8 +32,8 @@ loop For each cityKey in cache (virtual thread)
     scheduler -> redis: getMeta(cityKey)
     redis --> scheduler: Return metadata (hits, lastAccess, lastRefresh)
 
-    alt HOT Cities (hits ≥ HOT_HIT_THRESHOLD)
-        scheduler -> scheduler: if now - lastRefresh ≥ HOT_REFRESH_INTERVAL
+    alt HOT Cities (hits >= HOT_HIT_THRESHOLD)
+        scheduler -> scheduler: if now - lastRefresh >= HOT_REFRESH_INTERVAL
         alt Refresh Required
             scheduler -> svc: fetchWeatherData(city)
             svc --> scheduler: Return weather data
@@ -44,12 +43,12 @@ loop For each cityKey in cache (virtual thread)
             scheduler -> scheduler: Skip refresh
         end
 
-    else MEDIUM Cities (hits ≥ MEDIUM_HIT_THRESHOLD)
-        scheduler -> scheduler: if now - lastRefresh ≥ MEDIUM_REFRESH_INTERVAL
+    else MEDIUM Cities (hits >= MEDIUM_HIT_THRESHOLD)
+        scheduler -> scheduler: if now - lastRefresh >= MEDIUM_REFRESH_INTERVAL
         alt Refresh Required
             scheduler -> svc: fetchWeatherData(city)
             svc --> scheduler: Return weather data
-            scheduler -> redis: saveWithMeta(cityKey, data, resetHits=true)
+            scheduler -> redis: saveWithMeta(cityKey, data, resetHits=false)
             scheduler -> scheduler: Log success (MEDIUM refreshed)
         else Not Due Yet
             scheduler -> scheduler: Skip refresh
@@ -58,15 +57,9 @@ loop For each cityKey in cache (virtual thread)
     else LOW_ACTIVE Cities (hits < MEDIUM_HIT_THRESHOLD)
         scheduler -> scheduler: if age > MAX_AGE (45 min)
         alt Age > 45 min (Still keep warm)
-            scheduler -> scheduler: if now - lastRefresh ≥ LOW_ACTIVE_REFRESH_INTERVAL (30 min)
+            scheduler -> scheduler: if now - lastRefresh >= LOW_ACTIVE_REFRESH_INTERVAL (30 min)
             alt Refresh Required
-                scheduler -> svc: fetchWeatherData(city)
-                svc --> scheduler: Return weather data
-                scheduler -> redis: saveWithMeta(cityKey, data, resetHits=true)
-                scheduler -> scheduler: Log success (LOW_ACTIVE refreshed)
-            else Not Due Yet
-                scheduler -> scheduler: Skip refresh
-            end
+                  scheduler -> scheduler: Log success (LOW_ACTIVE evicted if not accessed in 1h)
         else Recently Accessed (< 45 min)
             scheduler -> scheduler: Retain entry
         end
@@ -74,11 +67,11 @@ loop For each cityKey in cache (virtual thread)
 end
 
 == Summary Logging ==
-scheduler -> scheduler: Log HOT, MEDIUM & LOW_ACTIVE refreshed
+scheduler -> scheduler: Log HOT, MEDIUM refreshed
 scheduler -> scheduler: Scheduler completed all virtual-thread refreshes
 
 == Repeat Cycle ==
-scheduler -> scheduler: Run again every 5 minutes (fixedRate)
+scheduler -> scheduler: Run again every 15 minutes (fixedRate)
 
 
 
