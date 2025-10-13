@@ -1,344 +1,96 @@
-# 🌤 Weather App
-This project provides a high-performance, cache-enabled weather forecasting system. It uses **Spring Boot** for backend APIs, Redis for caching frequently ***(on-demand, periodic scheduled) eventually consistent*** accessed data, and the **OpenWeather API** for real-time weather information. Built with microservices architecture, it implements **rate limiting, cache-aside pattern, and LRU/LFU strategies** for optimal efficiency and scalability.
+# 🌦️ Weather Prediction Microservice – Reference
 
-# 💡Features
+## 1. Project Overview
+**Title:** Weather Prediction Microservice  
+**Objective:** This project provides a high-performance, cache-enabled weather forecasting system. It uses Spring Boot for backend APIs, 
+Redis for caching frequently (on-demand, periodically scheduled) eventually consistent accessed data, and the OpenWeather API for real-time weather information.
+Built with microservices architecture, it implements rate limiting, cache-aside pattern, and LRU/LFU strategies for optimal efficiency and scalability.
 
-- 🔍 Search weather by city
-- 📅 View 3-day forecast
-- ⏰ See 3 hourly updates
-- 🌡️ Temperature in °C
-- ☁️ Weather condition: clear, cloudy, or rain
-- 💨 Check wind speed & humidity
-- ⚠️ Receive friendly error messages
-- 📱 Fully mobile-responsive
-- 👀 Prediction / Advice for the user
+### CONSTRAINTS
 
-## 🧩 Diagrams
-<img width="1261" height="434" alt="AWS_ARCH-_Global_Weather_App__AWS_Multi_Region_Unified_Pod_Architecture" src="https://github.com/user-attachments/assets/c0502169-7b88-4b45-9978-ec60d712cfd5" />
-<img width="1261" height="1017" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/ca2af486-e7c6-4554-a489-29192c0774e4" />
-<img width="1261" height="1451" alt="image" src="https://github.com/user-attachments/assets/1e50204a-2330-41d6-8013-7d62fdbf9621" />
+#### Memory Constraints
+- Max cities globally: 200,000 (OPEN-WEATHER-API)
+- Per-city Redis size: 8 KB + 0.12 KB metadata
+- Total Redis memory (global): ~1.624 GB → rounded ~2 GB
+- Per-region Redis memory (6 regions): ~300–400 MB
+- HOT/Medium/Low city split per region (~40k cities)
+- LOW cities use TTL / on-demand fetch to save memory
 
+#### Load Constraints
+- 90% traffic from Most active cities only that is 1400 avg and 
+- City constraints basis 10%(140) req/per min will hit SVC  which we already refreshing through schedular and on-demand strategy.
+- On-Demand refresh + Periodic schedule for load reduction for User req + schedular calls
+- Scheduler thresholds: HOT ACTIVE ≥140 hits, MEDIUM ACTIVE ≥70 hits
+- Scheduler frequency: every 15 minutes
+- Backend SVC quota per region: 150 req/min
+- Avg SVC API call duration: 0.5 sec
+- Scheduler refresh load: 105 req/min → leaves 45 req/min for user requests
+- Cache hit target: ~90% from HOT city cache
+- Staggering, lastAccess, lastRefresh checks to avoid spikes
+- Locally tested with 500 req/sec throughput
 
+ 
+## 2. Features
+- Input city → get 3-day forecast  
+- Predictions:
+  - Rain → "Carry umbrella"  
+  - Temp >40°C → "Use sunscreen lotion"  
+  - Wind >10 mph → "Too windy!"  
+  - Thunderstorm → "Don't step out!"  
+- Offline mode / API fallback  
 
-## ⚙️ Tech Stack
+### Data Flow
 
-| **Frontend**                                           | **Backend**                                           | **DevOps / Infrastructure**                                           |
-| ------------------------------------------------------ | ----------------------------------------------------- | --------------------------------------------------------------------- |
-| **Framework:** Next.js                                 | **Framework:** Spring Boot (Java 21)                  | **Containerization:** Docker / Podman                                 |
-| **Language:** TypeScript                               | **Services:** `weather-cache`, `weather-svc`          | **Orchestration:** Docker Compose / Podman Compose                    |
-| **UI Styling:** Tailwind CSS                           | **Database:** Redis (for caching)                     | **Monitoring:** Spring Boot Actuator                                  |
-| **State Management:** React Hooks + Memoization        | **External API:** OpenWeather API                     | **Environment Management:** `.env` files per service                  |
-| **Networking:** Fetch API with `AbortSignal.timeout()` | **Patterns:** Cache-Aside, Strategy, Inflight Request | **Build Tools:** Maven, Shell scripts (`run.sh`, `build_all_jars.sh`) |
-| **Type Safety:** TypeScript strict mode                | **Rate Limiting:** Sliding Window (60 req/min)        | **Base Image:** `amazoncorretto:21`                                   |
-| **Routing:** App Router (`layout.tsx`, `page.tsx`)     | **Error Handling:** Custom 400/404/429/502/200 for OK | **Cache Strategy:** LRU, LFU, TTL combined                            |
-
-
-## 🚀 Services
-
-| Service         | Port | Description                                |
-| --------------- | ---- | ------------------------------------------ |
-| `weather-cache` | 8081 | Spring Boot caching service + Schedular    |
-| `weather-svc`   | 8080 | Backend API service fetching weather data  |
-| `redis-db`      | 6379 | Local Redis cache                          |
-| `weather-app`   | 3001 | Frontend entry point                       |
-
-
-
-
-## 🏆 Best Practices
-
-- **System Design Principles**
-  - BASE: Cache refresh is async, eventual sync with API data.
-  - SOLID / KISS / DRY / Separation of Concerns: Simple, maintainable, reusable, Cache, Scheduler, and Service layers have distinct responsibilities.
-  - Performance Optimization – Hot/Medium/Cold segregation using LFU + LRU strategies.
-  - Resilience & Fault Tolerance – Retry, Circuit Breaker, and fallback handling external failures.
-
-
-- **Design Patterns Used**
-  - Strategy Pattern – Defines different refresh logics (HOT, MEDIUM, LOW) for cache management.
-  - Factory Pattern – Selects and provides the correct refresh strategy based on city hits.
-  - Scheduler Pattern – Periodically triggers cache refresh to maintain data freshness.
-  - Template Method Pattern – Provides a common refresh algorithm skeleton reused by all strategies.
-  - Repository–Service Pattern – Abstracts Redis operations into a clean service layer.
-  - Facade Pattern – Simplifies Weather API interaction.
-
-### 🧩 Detailed Flow
-
-- **Basic Flow:**
+- **CAHCHE HIT/MISS Flow:**
   - Frontend ->  hits -> Weather-Cache service
   - Weather-Cache -checks Redis for city data
-    - ✅ If found → return data immediately
+    - ✅ If found → return data immediately and also check ON-DEMAND needed with abstract strategies then refresh from SVC
     - ❌ If not found → call Weather-SVC
   - Weather-SVC -> Check if (rate limiter allowed 60 calls per min) then calls external OpenWeather API, then SVC put the data into cache then return data on FE
-  
 
-- **Rate Limiter:**    
-  Implemented in `weather-svc` to allow **60 requests per minute per client**.  
-  - Excess requests are rejected with `429 Too Many Requests` 
-  - Ensures backend stability and prevents overload.  
-  - Designed to be extendable for configurable limits per endpoint or user type.
+- **SCHEDULAR Flow:**
+  - The **Weather Cache Scheduler** inside `weather-cache`  manages cached weather data in Redis efficiently, balancing **freshness** and **performance**. It monitors city-level cache entries using **hit counts** , **lastRefresh** and **last access time**.
+  - Scheduler runs **every 15 min** to evaluate all cities.
+  - **Hot(Most Active) Cities:** `hits ≥ 140` → Most active refreshed latest weather every 20 min and reset hits
+  - **Medium Active Cities:** `70 ≤ hits <= 140` → refreshed latest weather every 30 min and reset hits.
+  - **Low Cities**:** Eviction / remove record if no lastAccess in last 1 hour.
+
+## 3. Technical Details
+- **Backend:** Java/Spring Boot or Node.js  
+- **Frontend:** Next js
+- **API:** OpenWeatherMap forecast  
+- **BE Port:** 8081
+- **FE Port:** 3001
+- **Dockerized Images & Containers**
+- **Kubernetes AKS Cluster**
+- **GitHub Actions**
+
+## 4. System Design Principles
+- BASE: Cache refresh is async, eventually sync with API data.
+- SOLID / KISS / DRY / Separation of Concerns: Simple, maintainable, reusable, Cache, Scheduler, and Service layers have distinct responsibilities.
+- Performance Optimization – Hot/Medium/Cold segregation using LFU + LRU + Cache eviction strategies.
+- Rate Limiter: Implemented in weather-svc to allow 150 requests per minute.
+
+## 5. Design Patterns
+- Strategy Pattern – Defines different refresh logics (HOT, MEDIUM, LOW) for cache management. 
+- Factory Pattern – Selects and provides the correct refresh strategy based on city hits. 
+- Scheduler Pattern – Periodically triggers cache refresh to maintain data freshness. 
+- Template Method Pattern – Provides a common refresh algorithm skeleton reused by all strategies. 
+- Repository – Service Pattern – Abstracts Redis operations into a clean service layer. 
+- Facade Pattern – Simplifies Weather API interaction.
+
+## 6. Security & Performance
+- API key protected via env vars and secret in GitHub. 
+- Minimal API calls, caching offline data  
+- Refresh On-Demand and Periodic schedule based on Cities On-demand categories automations
+- Production ready: logging & error handling  
+
+## 7. Testing
+- BE-Unit (JUnit / Jest)
+- FE-@testing-library/react @testing-library/jest-dom babel-jest
+
+## 8. CI/CD & Deployment
+- GitHub Actions
+- Dockerized Services
+- Kubernetes Cluster Deployment with AKS(Azure)
 
-- **Facade Design Pattern:**    
-  `weather-cache` uses the **Cache-Aside pattern** to reduce direct calls to the backend service (`weather-svc`) / (`weather-api`).  
-  - On cache hit: returns cached data immediately, reducing backend load.  
-  - On cache miss: fetches fresh data from `weather-svc`, stores it in cache, then returns it.  
-  - This offloads `weather-svc`, improves response time, and optimizes system performance. 
-  - Can be extended to multi-level caching (e.g., global + regional caches).
-
-- **Weather Cache Scheduler:**
-  -The **Weather Cache Scheduler** inside `weather-cache`  manages cached weather data in Redis efficiently, balancing **freshness** and **performance**. It monitors city-level cache entries using **hit counts** , **lastRefresh** and **last access time**.
-
-  - **Cache Eviction Behavior:**  
-    - Scheduler runs **every 15 min** to evaluate all cities.
-    - 🔥 **Hot Cities:** `hits ≥ 140` → Most active refreshed latest weather every 20 min and reset hits
-    - 🌤 **Medium Cities:** `70 ≤ hits <= 140` → refreshed latest weather every 30 min and reset hits.
-    - ❄️ **Low Cities**:** Eviction / remove record if no lastAccess in last 1 hour.
-
-
-  - **Refreshes HOT/MEDIUM cities asynchronously via virtual threads.**
-    - Removes inactive cities.
-    - Staggered 0-500ms delay per city for SVC call so will be in limit.
-    - Logs summary **after all threads complete**.
-
-  - **Strategy Design Pattern:**  
-    - Uses a combination of **LFU, LRU, and TTL**:
-    - **Hot Keys:** LFU → keep frequently accessed data longer with latest data.
-    - **Cold Keys:** LRU → evict least recently used entries first.
-    - **Normal Keys:** TTL → 1 hour min standard refresh.
-    - This ensures **optimal cache usage**, reduces backend API calls, and keeps frequently used data updated in redis, while low-traffic keys aren’t removed immediately but   gradually evicted after inactivity.
- 
-
-- **Exception Handling:**  
-    Comprehensive error handling ensures proper responses for different scenarios:  
-
-    | HTTP Status| Scenario                       | Notes                                        |
-    |------------|--------------------------------|------------------------------------------------|
-    | 429        | Too Many Requests              | Triggered by the rate limiter                |
-    | 502        | Service Down                   | Returned when `weather-svc` is unreachable; can be handled with retry fallback mechanisms |
-    | 404        | City Not Found                 | Returned when an invalid city is requested   |
-    | 400        | Bad Request                    | Triggered for malformed or invalid query parameters |
-
-
-- **Cross-Origin Policy:**   
-  The cache service only accepts requests from the **frontend host**.  
-  - Prevents unauthorized access from other origins.  
-
-- **Other Enhancements / Future Considerations:**  
-    - Support **regional hotkeys & edge caching** for frequently accessed regions.  
-    - Enhance **logging and monitoring** for better observability and troubleshooting.  
-
-  - **Future Scope - Inflight Request Design Pattern:**  
-    - Handles multiple simultaneous requests for the same city within 1 minute:  
-    - Only **one request** is sent to `weather-svc`.  
-    - Other requests for the same city wait for the response and then receive the same data.  
-    - Implemented using **queue + ConcurrentHashMap** to track inflight requests.  
-    - Reduces redundant backend calls and avoids hitting rate limits. 
-    - For global - multi-region Redis replication (AWS Global Datastore).
-
-
-### 🧩 Frontend
-
-- **App Router and File-Based Structure (Next.js 15)**  
-  - Uses `app/` directory with `layout.tsx` and `page.tsx` for clear route and layout composition.
-  - Co-locates UI, hooks, and types under `src/` for discoverability.
-
-- **Separation of Concerns**  
-  - `services/weatherApi.ts` isolates network logic and error mapping from UI.
-  - `components/` are presentational and stateless where possible; `hooks/` hold view logic.
-
-- **Typed Contracts and Safety**  
-  - Central `types/weather.ts` defines request/response shapes.
-  - Strict TypeScript settings (`"strict": true`) to catch issues early.
-
-- **Declarative Data Flow with Custom Hooks**  
-  - `useWeatherSearch` manages async state (loading/error/data/city) with a simple API for pages.
-  - `useGroupedForecast`, `useFormattedForecastDate`, `useWeatherEmoji` encapsulate formatting and grouping logic.
-
-- **Memoization and Rendering Performance**  
-  - `React.memo` for pure components (`UnifiedWeatherCard`, `PredictionBadge`, etc.).
-  - `useMemo`/`useCallback` to stabilize derived values and handlers, reducing unnecessary re-renders.
-
-- **Composable, Small Components**  
-  - UI is decomposed into focused pieces (`AppHeader`, `SearchBar`, `WeatherTimeSlot`, `WeatherDetails`, etc.) for reuse and testability.
-
-- **Explicit Loading and Error States**  
-  - Dedicated components (`LoadingState`, `ErrorAlert`, `EmptyState`) improve UX and readability.
-
-- **Resilient Networking**  
-  - Centralized response handling with typed `WeatherError`.  
-  - Uses `AbortSignal.timeout(10000)` to avoid hanging requests and provide user feedback with max 3 retries.
-
-- **Styling Consistency**  
-  - Tailwind CSS with design tokens via CSS variables in `globals.css`.  
-  - Utility-first classes keep styles close to markup, reducing CSS drift.
-
-- **Accessibility and Semantics**  
-  - Interactive controls are proper `button`/`form` elements; labels, icons, and focusable elements adhere to expected semantics.
-
-- **Keying and List Stability**  
-  - Stable keys combining timestamps and indices for dynamic lists to prevent UI glitches.
-
-
-## 🛠️ Setup & Run  
-
-1. Clone the repository:
-
-```bash
-git clone <repo-url>
-cd weather-app
-```
-
-2. Build JARs for backend services:
-
-```bash
-Install Java21+ and Maven
-
-
-```bash
-# Backend
-chmod +x run.sh
-chmod +x build_all_jars.sh
-./run.sh
-
-# Frontend (client)
-cd client
-npm install -g yarn
-yarn install
-yarn run dev
-```
-
-3. (Optional) Start services using Docker Compose / Podman Compose:  
-
-```bash
-# Container UP
-podman-compose up --build -d
-# or
-docker-compose up --build -d
-
-# Container Down
-podman-compose down -v
-# or
-docker-compose down -v
-```
-
-4. Access services:  
-
-* `weather-svc`: `http://localhost:8080`
-* `weather-cache`: `http://localhost:8081`
-* `weather-app`: `http://localhost:3001`
-
----
-
-## ⚙️ Environment Variables 
-
-* **weather-cache/.env**  
-
-```text
-# Connects to the 'weather-svc' container within the Docker network
-WEATHER_SVC_URL=http://weather-svc:8080/api/weather-svc/forecast
-# Connects to the 'redis-db' service container
-REDIS_HOST=redis-db
-REDIS_PORT=6379
- #in REDIS_COMMAND_TIMEOUT Seconds
-REDIS_COMMAND_TIMEOUT=60
-#In Seconds REDIS_TTL 1-hours Min In Sec
-REDIS_TTL=3600000
-# Uses the specified credentials for the local Redis instance (if configured)
-REDIS_USERNAME=default
-REDIS_PASSWORD=0t*******YOUR_API_KEY**********3A
-# Sets the Spring profile
-SPRING_PROFILES_ACTIVE=prod
-#Rest Template
-#1 Min
-#in MILLISECONDS
-REST_CONNECT_TIMEOUT=200000
-REST_READ_TIMEOUT=200000
-
-#Schedular Configs
-HOT_HIT_THRESHOLD=140                  #hits count most hot/active/priority cities
-MEDIUM_HIT_THRESHOLD=70                #hits count mid  hot/active/priority cities
-
-HOT_REFRESH_INTERVAL_MS=1200000         #20 minutes
-MEDIUM_REFRESH_INTERVAL_MS=1800000      #30 minutes
-LOW_ACTIVE_REFRESH_INTERVAL_MS=2400000  #40 minutes
-MAX_AGE_MS=2700000                      #45 minutes
-
-
-
-```
-
-* **weather-svc/.env**  
-
-```text
-# Weather API config
-WEATHER_API_KEY=d2*************************e
-WEATHER_API_URL=http://api.openweathermap.org/data/2.5/forecast
-# Rate Limiter configuration
-RATE_LIMITER_MAX_REQ_PER_MIN=60
-RATE_LIMITER_MAX_WINDOW_SIZE_IN_SEC=60
-WEATHER_API_UNITS=metric
-WEATHER_API_CNT=24
-
-```
-
----
-
-## 🧪 API Testing (cURL Commands) 
-
-### 1️⃣ Weather Cache Service (`localhost:8081`)  
-
-**Fetch forecast via cache:**
-
-```bash
-curl --location 'http://localhost:8081/api/weather-cache/forecast?city=indore' \
---header 'accept: application/json' \
---header 'Content-Type: application/json'
-```
-
-**Health check:**
-
-```bash
-curl --location 'http://localhost:8081/actuator/health'
-```
-
----
-
-### 2️⃣ Weather Service (`localhost:8080`)  
-
-**Fetch forecast directly:**
-
-```bash
-curl --location 'http://localhost:8080/api/weather-svc/forecast?city=indore' \
---header 'accept: application/json' \
---header 'Content-Type: application/json' \
---data ''
-```
-
-**Health check:**
-
-```bash
-curl --location 'http://localhost:8080/actuator/health'
-```
-
----
-
-### 3️⃣ OpenWeather API (External)  
-
-```bash
-curl --location 'https://api.openweathermap.org/data/2.5/forecast?q=banaras&appid=YOUR_API_KEY&cnt=10&units=metric'
-```
-
-**Notes:**
-
-* `cnt=8` → returns total forecast blocks to be retured cnt=8 (return 8 forecast blocks forecast blocks per 3 hours window size)
-* `units=metric` → temperature in °C, wind speed in m/s
-* `/actuator/health` → checks service status
-
----
-
-## 📦 Docker Images 
-
-* `openjdk:21-jdk-slim` or `amazoncorretto:21` recommended for lightweight runtime.  
-* Build and run containers using `docker-compose` or `podman-compose`.  
-
----
