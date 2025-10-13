@@ -37,7 +37,7 @@ Built with microservices architecture, it implements rate limiting, cache-aside 
   - Temp >40°C → "Use sunscreen lotion"  
   - Wind >10 mph → "Too windy!"  
   - Thunderstorm → "Don't step out!"  
-- Offline mode / API fallback  
+- Offline mode / OpenweatherAPI fallback  - last 1 hours of redis data
 
 ### Data Flow
 
