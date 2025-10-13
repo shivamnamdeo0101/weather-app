@@ -13,9 +13,9 @@ public class WebConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")           // sab endpoints
-                        .allowedOrigins("http://localhost:3001","http://48.194.32.29:8081")  // FE URL
-                        .allowedMethods("GET")
+                registry.addMapping("/api/**")
+                        .allowedOrigins("http://57.152.95.75:3001")
+                        .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);
             }
