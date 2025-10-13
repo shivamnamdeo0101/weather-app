@@ -55,6 +55,11 @@ Built with microservices architecture, it implements rate limiting, cache-aside 
   - **Medium Active Cities:** `70 ≤ hits <= 140` → refreshed latest weather every 30 min and reset hits.
   - **Low Cities**:** Eviction / remove record if no lastAccess in last 1 hour.
 
+### Diagrams
+<img width="1261" height="1017" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/a57d5f2d-0696-465e-9e8a-8dd0e2f25bfe" />
+
+<img width="1007" height="1668" alt="SequnceSchedularDig-Weather_Cache_Scheduler__Virtual_Threaded_Refresh___Eviction_Flow" src="https://github.com/user-attachments/assets/c98ca4c5-8986-47f5-9cbb-1b1447c86c68" />
+
 ## 3. Technical Details
 - **Backend:** Java/Spring Boot or Node.js  
 - **Frontend:** Next js
