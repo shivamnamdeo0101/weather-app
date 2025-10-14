@@ -25,7 +25,10 @@ public class CacheRefreshStrategyFactory {
 
     public CacheRefreshStrategy getStrategy(String cityKey) {
         Map<Object, Object> meta = redisService.getMeta(cityKey);
-        long hits = meta.get("hits") == null ? 0 : Long.parseLong(meta.get("hits").toString());
+        long hits = 0;
+        if (meta != null) {
+            hits = meta.get("hits") == null ? 0 : Long.parseLong(meta.get("hits").toString());
+        }
 
         if (hits >= hotStrategy.getHitThreshold()) return hotStrategy;
         if (hits >= mediumStrategy.getHitThreshold()) return mediumStrategy;

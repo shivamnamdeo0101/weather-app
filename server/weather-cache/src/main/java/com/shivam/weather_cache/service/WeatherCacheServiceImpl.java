@@ -42,13 +42,9 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
                 log.info("Cache HIT for city: {}", key);
                 Map<String, Object> cachedMap = objectMapper.convertValue(cached, new TypeReference<>() {});
 
-                // Pick the correct strategy based on hits
                 CacheRefreshStrategy strategy = strategyFactory.getStrategy(key);
-                if (strategy != null) {
-                    boolean refreshed = strategy.refreshIfRequired(key);
-                    if (refreshed) {
-                        log.info("City {} refreshed on-demand via strategy {}", city, strategy.getClass().getSimpleName());
-                    }
+                if (strategy != null && strategy.refreshIfRequired(key)) {
+                    log.info("City {} refreshed on-demand via strategy {}", city, strategy.getClass().getSimpleName());
                 }
 
                 return new CacheResult(cachedMap, true);
@@ -57,7 +53,7 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
             log.warn("Redis read failed for key {}: {}", key, ex.getMessage());
         }
 
-        // Cache MISS → fetch from Weather SVC once
+        // Cache MISS → fetch from Weather SVC
         log.info("Cache MISS for city: {}. Calling Weather SVC...", city);
         try {
             Map<String, Object> data = weatherSvcClient.fetchWeatherData(city);
@@ -71,13 +67,16 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
 
             // Save in Redis
             try {
-                redisService.saveWithMeta(key, data, false,1);
+                redisService.saveWithMeta(key, data, false, 1L);
             } catch (Exception ex) {
                 log.warn("Redis save failed for key {}: {}", key, ex.getMessage());
             }
 
             return new CacheResult(data, false);
 
+        } catch (WeatherServiceException wse) {
+            // Preserve status like NO_CONTENT
+            throw wse;
         } catch (HttpStatusCodeException httpEx) {
             HttpStatus status = HttpStatus.resolve(httpEx.getStatusCode().value());
             if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;

@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,7 +27,7 @@ public class RedisConfig {
     @Value("${spring.redis.host}")
     private String host;
 
-    @Value("${spring.redis.username}")
+    @Value("${spring.redis.username:}")
     private String username;
 
     @Value("${spring.redis.port}")
@@ -52,20 +51,22 @@ public class RedisConfig {
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
         try {
-            log.info("Initializing LettuceConnectionFactory → host={}, port={}, timeout={}s", host, port, timeout);
+            log.info("Initializing Redis → host={}, port={}, timeout={}s", host, port, timeout);
 
+            // Redis server config
             RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
             config.setHostName(host);
-            config.setUsername(username);
             config.setPort(port);
+            if (!username.isBlank()) config.setUsername(username);
             config.setPassword(password);
 
-            // 🔹 Pool config
+            // Pool config
             GenericObjectPoolConfig<StatefulConnection<?, ?>> poolConfig = new GenericObjectPoolConfig<>();
             poolConfig.setMaxTotal(maxPoolActive);
             poolConfig.setMaxIdle(maxPoolIdle);
             poolConfig.setMinIdle(minPoolIdle);
 
+            // Lettuce client config
             LettucePoolingClientConfiguration clientConfig = LettucePoolingClientConfiguration.builder()
                     .commandTimeout(Duration.ofSeconds(timeout))
                     .poolConfig(poolConfig)
@@ -76,12 +77,10 @@ public class RedisConfig {
                             .build())
                     .build();
 
-
-
             LettuceConnectionFactory factory = new LettuceConnectionFactory(config, clientConfig);
             factory.afterPropertiesSet();
-            log.info("Successfully connected to Redis at {}:{}", host, port);
 
+            log.info("Successfully connected to Redis at {}:{}", host, port);
             return factory;
 
         } catch (RedisConnectionException | RedisConnectionFailureException ex) {
@@ -103,7 +102,7 @@ public class RedisConfig {
             template.setKeySerializer(new StringRedisSerializer());
             template.setHashKeySerializer(new StringRedisSerializer());
 
-            // Values as JSON (generic, no DTO needed)
+            // Values as JSON
             template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
             template.setHashValueSerializer(new GenericJackson2JsonRedisSerializer());
 

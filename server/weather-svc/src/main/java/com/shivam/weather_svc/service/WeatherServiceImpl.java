@@ -4,6 +4,7 @@ import com.shivam.weather_svc.dto.ForecastItemDTO;
 import com.shivam.weather_svc.dto.ForecastResponseDTO;
 import com.shivam.weather_svc.exception.ExternalApiException;
 import com.shivam.weather_svc.utils.WeatherPrediction;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class WeatherServiceImpl implements WeatherService {
 
     @Value("${weather.api.key}")
@@ -33,12 +35,8 @@ public class WeatherServiceImpl implements WeatherService {
     @Value("${weather.api.units}")
     private String units;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
     private final WeatherPrediction predictionService;
-
-    public WeatherServiceImpl(WeatherPrediction predictionService) {
-        this.predictionService = predictionService;
-    }
 
     public List<ForecastItemDTO> getThreeHourForecast(String cityName) {
         try {

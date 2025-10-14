@@ -1,5 +1,7 @@
 package com.shivam.weather_cache.utils;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
@@ -22,11 +25,13 @@ public class WeatherSvcClient {
     private String svcUrl;
 
     /**
-     * Calls the external Weather SVC and returns weather data
+     * Fetches weather data from external service with resilience.
+     * Uses retry and circuit breaker to handle transient failures.
      */
+    @Retry(name = "weatherServiceRetry", fallbackMethod = "fallbackWeatherData")
+    @CircuitBreaker(name = "weatherServiceCircuit", fallbackMethod = "fallbackWeatherData")
     public Map<String, Object> fetchWeatherData(String city) {
         try {
-            // Safe URL construction (handles encoding)
             String url = UriComponentsBuilder.fromUriString(svcUrl)
                     .queryParam("city", city)
                     .toUriString();
@@ -50,7 +55,14 @@ public class WeatherSvcClient {
         } catch (Exception ex) {
             log.error("Weather SVC network/timeout error for {}: {}", city, ex.getMessage());
             throw ex;
-
         }
+    }
+
+    /**
+     * Fallback method in case of failures.
+     */
+    public Map<String, Object> fallbackWeatherData(String city, Throwable ex) {
+        log.warn("Weather service unavailable for {}. Returning empty data. Cause: {}", city, ex.toString());
+        return Collections.emptyMap();
     }
 }
