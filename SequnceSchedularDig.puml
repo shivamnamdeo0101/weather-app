@@ -1,5 +1,5 @@
 @startuml
-title Weather Cache Scheduler — Virtual-Threaded Refresh & Eviction Flow
+title (Scheduler Sequence Dig.) Weather Cache Scheduler — Virtual-Threaded Refresh & Eviction Flow
 
 participant "WeatherCacheScheduler\n(@Component inside Weather-Cache)" as scheduler
 participant "Weather-Cache\n(Redis CRUD + Meta Ops)" as redis

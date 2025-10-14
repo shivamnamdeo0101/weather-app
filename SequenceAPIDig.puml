@@ -1,5 +1,5 @@
 @startuml
-title Weather Forecast Request Flow (with Rate Limiter + Status Codes + On-Demand Refresh)
+title (Sequence Flow Dig. REST API'S ) Weather Forecast Request Flow (with Rate Limiter + Status Codes + On-Demand Refresh)
 
 actor User
 participant "Weather App" as app

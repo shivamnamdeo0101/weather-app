@@ -1,0 +1,37 @@
+@startuml
+title (Logical View) Weather Prediction Microservice – Functional Logic Flow
+
+start
+
+:User requests /forecast(city);
+
+if (Is data in Redis Cache?) then (Yes)
+  :Return cached forecast;
+  :Check lastRefresh / hits;
+  if (Needs On-Demand Refresh?) then (Yes)
+    :Trigger async refresh from Weather-SVC;
+  endif
+else (No)
+  :Call Weather-SVC;
+  if (Within Rate Limit?) then (Yes)
+    :Fetch latest data from OpenWeather API;
+    :Store data in Redis Cache;
+    :Return forecast to user;
+  else (No)
+    :Return "Rate limit exceeded" error;
+  endif
+endif
+
+:Scheduler (every 15 min) runs;
+partition "Scheduler Logic" {
+  if (City hits ≥ 140) then (HOT)
+    :Refresh every 20 min;
+  elseif (70 ≤ hits < 140) then (MEDIUM)
+    :Refresh every 30 min;
+  else (LOW)
+    :Evict if idle > 1 hr;
+  endif
+}
+
+stop
+@enduml
