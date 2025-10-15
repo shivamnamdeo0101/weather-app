@@ -1,0 +1,19 @@
+@startuml
+title CI/CD Sequence - Docker & AKS
+
+actor Developer
+participant "GitHub Actions" as GH
+participant "Docker Hub" as DH
+participant "Azure Kubernetes Service (AKS)" as AKS
+
+Developer -> GH : Push to main branch
+GH -> GH : Checkout code
+GH -> GH : Login to Docker Hub (secrets)
+GH -> GH : Build Docker images\n(weather-client, weather-cache, weather-svc)
+GH -> DH : Push images
+GH -> AKS : Configure kubeconfig
+GH -> AKS : Apply Kubernetes manifests (kubectl apply)
+AKS -> DH : Pull images for pods
+AKS -> AKS : Deploy Pods\n(weather-client, weather-cache, weather-svc, redis-db)
+AKS -> GH : Deployment status / rollout success
+@enduml

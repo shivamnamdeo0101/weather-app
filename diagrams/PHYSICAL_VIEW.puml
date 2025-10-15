@@ -1,0 +1,39 @@
+@startuml
+title Weather Prediction Microservice - Physical HLD (Without Ingress)
+
+actor "User" as USER
+database "OpenWeather API" as API
+
+node "Azure Kubernetes Service (AKS)" {
+
+  frame "Frontend Pod" {
+    [Next.js Frontend Container] as FE
+  }
+
+  frame "Weather-Cache Pod" {
+    [Weather Cache Service] as CACHE
+    [Scheduler] as SCHED
+    [Redis] as REDIS
+  }
+
+  frame "Weather-SVC Pod" {
+    [Weather Service] as SVC
+    [Rate Limiter] as RL
+  }
+
+  frame "Infra & Secrets" {
+    [Azure Key Vault]
+    [Azure Monitor]
+  }
+}
+
+' ===== Connections =====
+USER --> FE : HTTPS (Public Port 3001, LoadBalancer)
+FE --> CACHE : HTTP (ClusterIP :8081)
+CACHE --> REDIS : TCP (Redis protocol)
+CACHE --> SVC : HTTP (Cluster DNS)
+SVC --> API : HTTPS (External network)
+SCHED --> REDIS : Periodic cache refresh
+CACHE --> FE : JSON response
+
+@enduml
