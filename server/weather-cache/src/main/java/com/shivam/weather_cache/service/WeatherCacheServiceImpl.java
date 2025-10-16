@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 
 import java.util.Map;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -28,20 +27,23 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
     @Override
     public CacheResult getWeather(String city) {
         if (city == null || city.isBlank()) {
+            log.warn("Received empty city parameter");
             throw new IllegalArgumentException("City parameter cannot be empty");
         }
 
         String key = "weather:" + city.toLowerCase();
         log.info("Fetching weather for city: {}", city);
 
-        // Try cache first
+        // --- Try cache first ---
         try {
             Object cached = redisService.getAndUpdateMeta(key);
 
             if (cached != null) {
-                log.info("Cache HIT for city: {}", key);
+                log.info("Cache HIT for city: {}", city);
+
                 Map<String, Object> cachedMap = objectMapper.convertValue(cached, new TypeReference<>() {});
 
+                // Optional refresh if strategy exists
                 CacheRefreshStrategy strategy = strategyFactory.getStrategy(key);
                 if (strategy != null && strategy.refreshIfRequired(key)) {
                     log.info("City {} refreshed on-demand via strategy {}", city, strategy.getClass().getSimpleName());
@@ -50,34 +52,30 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
                 return new CacheResult(cachedMap, true);
             }
         } catch (Exception ex) {
-            log.warn("Redis read failed for key {}: {}", key, ex.getMessage());
+            log.warn("Redis read failed for key '{}': {}", key, ex.toString());
         }
 
-        // Cache MISS → fetch from Weather SVC
+        // --- Cache MISS → call Weather SVC ---
         log.info("Cache MISS for city: {}. Calling Weather SVC...", city);
         try {
             Map<String, Object> data = weatherSvcClient.fetchWeatherData(city);
 
             if (data == null || data.isEmpty()) {
-                throw new WeatherServiceException(
-                        "Weather SVC returned empty data for " + city,
-                        HttpStatus.NO_CONTENT
-                );
+                log.warn("Weather SVC returned no data for city: {}", city);
+                throw new WeatherServiceException("City not found: " + city, HttpStatus.NOT_FOUND);
             }
 
-            // Save in Redis
+            // Save in Redis (best-effort)
             try {
                 redisService.saveWithMeta(key, data, false, 1L);
             } catch (Exception ex) {
-                log.warn("Redis save failed for key {}: {}", key, ex.getMessage());
+                log.warn("Redis save failed for key '{}': {}", key, ex.toString());
             }
 
             return new CacheResult(data, false);
 
-        } catch (WeatherServiceException wse) {
-            // Preserve status like NO_CONTENT
-            throw wse;
         } catch (HttpStatusCodeException httpEx) {
+            // Extract HTTP status from SVC
             HttpStatus status = HttpStatus.resolve(httpEx.getStatusCode().value());
             if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -89,9 +87,15 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
                 default -> "Unexpected HTTP error (" + status.value() + ") from Weather SVC.";
             };
 
+            log.error("Weather SVC HTTP exception for city '{}': {} - {}", city, status, httpEx.getResponseBodyAsString());
             throw new WeatherServiceException(msg, httpEx, status);
 
+        } catch (WeatherServiceException wse) {
+            log.warn("WeatherServiceException for city '{}': {}", city, wse.getMessage());
+            throw wse;
+
         } catch (Exception ex) {
+            log.error("Unexpected error fetching weather for city '{}': {}", city, ex.toString(), ex);
             throw new WeatherServiceException(
                     "Unexpected error fetching weather for " + city,
                     ex,
