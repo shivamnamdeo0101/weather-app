@@ -1,6 +1,8 @@
 import { WeatherApiResponse } from '@/types/weather';
 
 const API_BASE_URL = 'http://localhost:8081/api/weather-cache';
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1000; // initial delay 1s, doubles each retry
 
 export class WeatherError extends Error {
   public status?: number;
@@ -27,12 +29,10 @@ export class WeatherApiService {
     try {
       if (json && typeof json === 'object' && json.data && typeof json.data === 'object') {
         let inner = json.data;
-        // Unwrap nested `.data` layers until we hit an array or a non-object
         while (inner && typeof inner === 'object' && inner.data) {
           inner = inner.data;
         }
         if (Array.isArray(inner)) {
-          // return a normalized payload where `data` is the array
           return { ...json, data: inner } as unknown as T;
         }
       }
@@ -43,17 +43,34 @@ export class WeatherApiService {
     return json as T;
   }
 
+  private static async fetchWithRetry(url: string, options: RequestInit, retries = MAX_RETRIES): Promise<Response> {
+    let attempt = 0;
+    while (true) {
+      try {
+        return await fetch(url, options);
+      } catch (error) {
+        attempt++;
+        if (attempt > retries) throw error;
+        const delay = RETRY_DELAY_MS * 2 ** (attempt - 1);
+        console.warn(`Fetch failed (attempt ${attempt}/${retries}). Retrying in ${delay}ms...`);
+        await new Promise((res) => setTimeout(res, delay));
+      }
+    }
+  }
+
   static async getForecast(city: string): Promise<WeatherApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/forecast?city=${city}`, {
-        method: 'GET',
-        headers: {
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        // Add timeout to prevent hanging requests
-        signal: AbortSignal.timeout(10000), // 10 seconds timeout
-      });
+      const response = await this.fetchWithRetry(
+        `${API_BASE_URL}/forecast?city=${encodeURIComponent(city)}`,
+        {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          signal: AbortSignal.timeout(10000),
+        }
+      );
 
       return await this.handleResponse<WeatherApiResponse>(response);
     } catch (error) {
