@@ -117,11 +117,20 @@
 			<version>2.8.5</version> <!-- latest stable for Spring Boot 3.x -->
 		</dependency>
 
+		<!--HTTP Calls-->
 		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.14</version>
 		</dependency>
+
+		<!---Make Actuator metrics visible to Prometheus-->
+		<!---BLOG FOLLOWED - https://bell-sw.com/blog/spring-boot-monitoring-in-kubernetes-with-prometheus-and-grafana/-->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+
 
 
 		<dependency>
