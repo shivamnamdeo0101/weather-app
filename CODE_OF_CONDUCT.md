@@ -12,12 +12,17 @@
 <img width="1512"  alt="image" src="https://github.com/user-attachments/assets/1c560f84-e335-44f8-8262-30d9e9ab1709" />
 <img width="1512"  alt="image" src="https://github.com/user-attachments/assets/5333ae5d-7e34-47a8-9f85-7e578a22abaf" />
 
+### Fallback retry backoff 3 time on FE 
+<img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/14e13da1-be0c-46e9-87aa-7eae087c0f32" />
+
+
 ### No cities for schedular
 <img width="1512" height="45" alt="image" src="https://github.com/user-attachments/assets/75d6e46a-8b64-4dd1-b505-7cbc33e45d28" />
 
 ### On-Demand Refreshing Active + Medium Active Cities
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/4d7645c5-d93c-4dce-a983-973f29fb6f26" />
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/22cc2d7c-8ef3-471a-9bf3-884a3b805036" />
+
 
 
 
