@@ -1,9 +1,18 @@
 ### Frontend
 <img width="1512" height="812" alt="Screenshot 2025-10-05 at 4 55 32 PM" src="https://github.com/user-attachments/assets/836eeb98-6455-4595-9f14-951ea9a99165" />
-<img width="1502" height="801" alt="Screenshot 2025-10-05 at 4 54 53 PM" src="https://github.com/user-attachments/assets/2f34d711-e5b2-4f53-8d9c-78f0b468ee68" />
+<img width="1512" height="801" alt="Screenshot 2025-10-05 at 4 54 53 PM" src="https://github.com/user-attachments/assets/2f34d711-e5b2-4f53-8d9c-78f0b468ee68" />
 
 ### GitHub Workflow
 <img width="1512"  alt="image" src="https://github.com/user-attachments/assets/386e8487-d34d-48e1-ac90-bee0560cc136" />
+
+### FE Test cases and coverage
+<img width="1512" height="691" alt="Screenshot 2025-10-19 at 3 58 07 PM" src="https://github.com/user-attachments/assets/1b8fc9f1-207b-4700-afff-3825207deaeb" />
+
+### BE Test cases and coverage
+<img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/b9aec3da-d44f-4c8e-bf97-a7b0eb5622a1" />
+<img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/7973f484-06d4-4eaf-a67e-14b42d498280" />
+
+
 
 ### JMeter Testing - Throughput
 <img width="1512" alt="image" src="https://github.com/user-attachments/assets/27bde42e-ab6e-4802-8d91-9c0cd2608620" />
@@ -22,6 +31,8 @@
 ### On-Demand Refreshing Active + Medium Active Cities
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/4d7645c5-d93c-4dce-a983-973f29fb6f26" />
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/22cc2d7c-8ef3-471a-9bf3-884a3b805036" />
+
+
 
 
 
