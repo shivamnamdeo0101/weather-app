@@ -12,18 +12,18 @@ const PredictionBadge = memo<PredictionBadgeProps>(({ prediction, className = ''
   const getPredictionIcon = (prediction: string) => {
     const lowerPrediction = prediction.toLowerCase();
     if (lowerPrediction.includes('umbrella') || lowerPrediction.includes('rain')) {
-      return <Umbrella className="h-4 w-4 text-blue-400" />;
+      return <Umbrella data-testid="prediction-icon" className="h-4 w-4 text-blue-400" />;
     }
     if (lowerPrediction.includes('sun') || lowerPrediction.includes('clear')) {
-      return <Sun className="h-4 w-4 text-yellow-400" />;
+      return <Sun data-testid="prediction-icon" className="h-4 w-4 text-yellow-400" />;
     }
     if (lowerPrediction.includes('cloud')) {
-      return <Cloud className="h-4 w-4 text-gray-400" />;
+      return <Cloud data-testid="prediction-icon" className="h-4 w-4 text-gray-400" />;
     }
     if (lowerPrediction.includes('storm') || lowerPrediction.includes('thunder')) {
-      return <CloudRain className="h-4 w-4 text-purple-400" />;
+      return <CloudRain data-testid="prediction-icon" className="h-4 w-4 text-purple-400" />;
     }
-    return <AlertTriangle className="h-4 w-4 text-orange-400" />;
+    return <AlertTriangle data-testid="prediction-icon" className="h-4 w-4 text-orange-400" />;
   };
 
   const getPredictionColor = (prediction: string) => {
