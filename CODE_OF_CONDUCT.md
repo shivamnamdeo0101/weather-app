@@ -5,6 +5,9 @@
 ### GitHub Workflow
 <img width="1512"  alt="image" src="https://github.com/user-attachments/assets/386e8487-d34d-48e1-ac90-bee0560cc136" />
 
+### FE Test cases and coverage
+<img width="1512" height="691" alt="Screenshot 2025-10-19 at 3 58 07 PM" src="https://github.com/user-attachments/assets/1b8fc9f1-207b-4700-afff-3825207deaeb" />
+
 ### JMeter Testing - Throughput
 <img width="1512" alt="image" src="https://github.com/user-attachments/assets/27bde42e-ab6e-4802-8d91-9c0cd2608620" />
 
@@ -22,6 +25,7 @@
 ### On-Demand Refreshing Active + Medium Active Cities
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/4d7645c5-d93c-4dce-a983-973f29fb6f26" />
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/22cc2d7c-8ef3-471a-9bf3-884a3b805036" />
+
 
 
 
