@@ -18,20 +18,6 @@ clear articulation, manage situations on feet independently, alternate solutions
 15. Demonstrates technology breadth & depth
 
 
-lookfront : {
-    "daily" : 1,
-    "weekly" : 7,
-    "month" : 30,
-    "quarter": 90,
-}
-lookfront : {
-    "daily" : 1,
-    "weekly" : 7,
-    "month" : 30,
-    "quarter": 90,
-}
-
-
 # Code review against questions -  (from live casestudy or project sources or innersource/opensource/tools contributions) (in the sequence)
 
 **1. Is the end user able to view results by changing the input parameters?**  
@@ -81,7 +67,21 @@ Yes – Docker containers deployed on AKS with environment-specific manifests.
 Yes – deployed on Azure AKS, managed secrets, secure API access.
 
 **16. Is hands-on with 12 Factor Apps?**  
-Yes – externalized configs, stateless services, console logging, separate environments.
+Yes — in the weather app project, all 12 Factor App principles are practically followed as:
+
+1. **Codebase** – Single Git repository holds both frontend (Next.js) and backend (Spring Boot) code. ✅
+2. **Dependencies** – Explicitly declared in `package.json` for FE and `pom.xml` for BE. ✅
+3. **Config** – Externalized via `application-{dev/prod}.properties` and environment variables for endpoints, API keys, and toggles. ✅
+4. **Backing Services** – Redis cache used as an attached stateless service for weather data. ✅
+5. **Build, Release, Run** – Docker images separate the build/runtime environment; same image can be deployed across dev/test/prod. ✅
+6. **Processes** – Stateless Spring Boot app with virtual threads for async cache refresh; no in-memory state tied to requests. ✅
+7. **Port Binding** – Backend exposes REST APIs via HTTP; frontend runs on a configurable port (Next.js dev server). ✅
+8. **Concurrency** – Multiple stateless processes/containers can run concurrently on AKS cluster, supporting scale-out. ✅
+9. **Disposability** – App starts and shuts down quickly; scheduler and cache refresh tasks are managed safely. ✅
+10. **Dev/Prod Parity** – Separate property files, environment variables, and Docker manifests ensure parity. ✅
+11. **Logs** – All logs printed to console for aggregation in Kubernetes/AKS logging. ✅
+12. **Admin Processes** – Cache refresh, scheduler, and other maintenance tasks run as separate one-off processes (or background jobs). ✅
+
 
 **17. Is hands-on with TDD, Unit tests, Mocks & E2E + Test Reports (JUnit/TestNG)?**  
 Yes – unit & integration tests with JUnit and Mockito, coverage reports generated.
@@ -124,10 +124,24 @@ Yes – backward compatible API endpoints docker image version controlled, old c
 REMAINING - Traceability
 
 **30. Is hands-on with SOLID & Other Principles?**  
-Yes – Single Responsibility, Open/Closed, Dependency Inversion, Strategy Pattern used in Weather Cache app.
+Yes – The weather app project demonstrates hands-on application of SOLID and other clean code principles:
+
+- **Single Responsibility Principle (SRP):** Each class has a clear responsibility, e.g., `WeatherCacheServiceImpl` handles caching logic, `WeatherSvcClient` handles API calls.
+- **Open/Closed Principle (OCP):** System is easily extendable without modifying existing code; e.g., new cache refresh strategies can be added via `CacheRefreshStrategyFactory`.
+- **Liskov Substitution Principle (LSP):** Subclasses or implementations of `CacheRefreshStrategy` (LRU, LFU) can replace the abstract type without breaking behavior.
+- **Interface Segregation Principle (ISP):** Interfaces are small and specific; classes implement only relevant methods.
+- **Dependency Inversion Principle (DIP):** High-level modules depend on abstractions (interfaces), not concrete implementations, allowing easy swapping of cache strategies or API clients.
+
+The code also follows **DRY**, **KISS**, and modular design for readability, maintainability, and robust engineering practices.
 
 **31. Is able to demonstrate IDE Fluency & Tooling?**  
 Yes – Git integration, Lombok, Actuator, build automation, test coverage runs.
 
 **32. Is hands-on with Design Patterns (Creational, Structural, Behavioral)?**  
-Yes – Creational (Singleton), Structural (Facade), Behavioral (Strategy for LRU/LFU, Observer for Scheduler).
+Yes – the project implements multiple design patterns:
+- **Creational (Singleton):** `WeatherCacheServiceImpl` and `SlidingWindowRateLimiter` use Singleton-like behavior to ensure single instance management.
+- **Structural (Facade):** The Weather Cache app hides complexity of external API and caching behind a simple service interface.
+- **Behavioral (Strategy & Observer):**
+    - **Strategy:** Different cache refresh strategies (LRU, LFU) are selected via `CacheRefreshStrategyFactory`.
+    - **Observer:** Scheduler notifies services to refresh cached data automatically.
+- Patterns ensure modularity, extensibility, and maintainability in code structure.
