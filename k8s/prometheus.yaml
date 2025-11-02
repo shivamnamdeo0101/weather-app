@@ -2,6 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: prometheus-config
+  namespace: NAMESPACE_PLACEHOLDER
+  labels:
+    app: prometheus
+    environment: NAMESPACE_PLACEHOLDER
 data:
   prometheus.yml: |
     global:
@@ -16,6 +20,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: prometheus
+  namespace: NAMESPACE_PLACEHOLDER
+  labels:
+    app: prometheus
+    environment: NAMESPACE_PLACEHOLDER
 spec:
   replicas: 1
   selector:
@@ -45,10 +53,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name: prometheus
+  namespace: NAMESPACE_PLACEHOLDER
+  labels:
+    app: prometheus
+    environment: NAMESPACE_PLACEHOLDER
 spec:
   type: NodePort
   ports:
     - port: 9090
-      nodePort: 30901
+      nodePort: 30900  # Replaced per environment: dev=30900, test=30901, prod=30902
   selector:
     app: prometheus

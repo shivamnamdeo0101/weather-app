@@ -118,6 +118,16 @@ jobs:
           sed -i "s|ENV_PLACEHOLDER|${{ env.GITHUB_REF_NAME }}|g" k8s/*.yaml
           sed -i "s|NAMESPACE_PLACEHOLDER|${{ env.GITHUB_REF_NAME }}|g" k8s/*.yaml
           
+          # Replace Prometheus nodePort based on environment (dev: 30900, test: 30901, prod: 30902)
+          if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
+            PROMETHEUS_PORT=30900
+          elif [[ "${GITHUB_REF_NAME}" == "test" ]]; then
+            PROMETHEUS_PORT=30901
+          else
+            PROMETHEUS_PORT=30902
+          fi
+          sed -i "s|nodePort: 30900.*|nodePort: ${PROMETHEUS_PORT}|g" k8s/prometheus.yaml
+          
           # Apply Kubernetes manifests to environment-specific namespace
           kubectl apply -f k8s/ -n ${{ env.GITHUB_REF_NAME }}
 
