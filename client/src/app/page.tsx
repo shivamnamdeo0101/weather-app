@@ -9,23 +9,42 @@ import ErrorAlert from '@/components/ErrorAlert';
 import LoadingState from '@/components/LoadingState';
 import EmptyState from '@/components/EmptyState';
 import { useWeatherSearch } from '@/hooks/useWeatherSearch';
+import { useOfflineMode } from '@/hooks/useOfflineMode';
 
 export default function Home() {
+  const {
+    isOfflineMode,
+    setIsOfflineMode,
+    cachedCitiesCount,
+    updateCachedCount,
+  } = useOfflineMode();
+
   const {
     weatherData,
     currentCity,
     isLoading,
     error,
     searchingCity,
-    handleSearch,
+    handleSearch: handleSearchOriginal,
     clearError,
   } = useWeatherSearch();
+
+  // Wrap handleSearch to include offline mode
+  const handleSearch = async (city: string) => {
+    await handleSearchOriginal(city, isOfflineMode);
+    // Update cached count after successful search
+    updateCachedCount();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <AppHeader />
+        <AppHeader 
+          isOfflineMode={isOfflineMode}
+          onOfflineModeToggle={setIsOfflineMode}
+          cachedCitiesCount={cachedCitiesCount}
+        />
 
         {/* Search Bar */}
         <div className="mb-8">
