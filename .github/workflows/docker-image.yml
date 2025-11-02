@@ -110,8 +110,9 @@ jobs:
           echo "🚀 Deploying to environment: ${{ env.GITHUB_REF_NAME }}"
           echo "🔖 Image tag: ${{ env.IMAGE_TAG }}"
           
-          # Replace image tags dynamically inside manifests
+          # Replace image tags and environment placeholders dynamically inside manifests
           sed -i "s|IMAGE_TAG_PLACEHOLDER|${{ env.IMAGE_TAG }}|g" k8s/*.yaml
+          sed -i "s|ENV_PLACEHOLDER|${{ env.GITHUB_REF_NAME }}|g" k8s/*.yaml
           
           # Apply Kubernetes manifests
           kubectl apply -f k8s/
