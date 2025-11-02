@@ -2,13 +2,23 @@
 
 import React from 'react';
 import { Cloud } from 'lucide-react';
+import OfflineToggle from './OfflineToggle';
 
 interface AppHeaderProps {
   readonly title?: string;
   readonly subtitle?: string;
+  readonly isOfflineMode?: boolean;
+  readonly onOfflineModeToggle?: (enabled: boolean) => void;
+  readonly cachedCitiesCount?: number;
 }
 
-export default function AppHeader({ title = 'Weather Forecast', subtitle = 'Get detailed weather forecasts and predictions for any city' }: AppHeaderProps) {
+export default function AppHeader({ 
+  title = 'Weather Forecast', 
+  subtitle = 'Get detailed weather forecasts and predictions for any city',
+  isOfflineMode = false,
+  onOfflineModeToggle,
+  cachedCitiesCount = 0
+}: AppHeaderProps) {
   return (
     <header className="text-center mb-12 px-4 sm:px-0" role="banner">
       <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
@@ -17,9 +27,18 @@ export default function AppHeader({ title = 'Weather Forecast', subtitle = 'Get 
           {title}
         </h1>
       </div>
-      <p className="text-gray-400 text-sm sm:text-lg max-w-xl mx-auto px-2">
+      <p className="text-gray-400 text-sm sm:text-lg max-w-xl mx-auto px-2 mb-4">
         {subtitle}
       </p>
+      {onOfflineModeToggle && (
+        <div className="flex justify-center mt-4">
+          <OfflineToggle
+            isOfflineMode={isOfflineMode}
+            onToggle={onOfflineModeToggle}
+            cachedCitiesCount={cachedCitiesCount}
+          />
+        </div>
+      )}
     </header>
   );
 }

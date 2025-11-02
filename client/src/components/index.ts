@@ -5,6 +5,7 @@ export { default as AppHeader } from './AppHeader';
 export { default as ErrorAlert } from './ErrorAlert';
 export { default as LoadingState } from './LoadingState';
 export { default as EmptyState } from './EmptyState';
+export { default as OfflineToggle } from './OfflineToggle';
 
 // Sub-components
 export { default as WeatherIcon } from './WeatherIcon';
