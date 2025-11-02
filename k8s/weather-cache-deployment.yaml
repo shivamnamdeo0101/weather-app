@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: weather-cache
-          image: docker.io/shivamnamdeo0101/weather-cache:latest
+          image: docker.io/shivamnamdeo0101/weather-cache:IMAGE_TAG_PLACEHOLDER
           ports:
             - containerPort: 8081
           envFrom:

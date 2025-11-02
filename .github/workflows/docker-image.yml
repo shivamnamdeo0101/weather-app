@@ -106,7 +106,7 @@ jobs:
           kubectl apply -f k8s/
 
           # Verify rollout for each service
-          kubectl rollout status deployment/weather-client
+          kubectl rollout status deployment/weather-app
           kubectl rollout status deployment/weather-cache
           kubectl rollout status deployment/weather-svc
 

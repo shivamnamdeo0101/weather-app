@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: weather-svc
-          image: docker.io/shivamnamdeo0101/weather-svc:latest
+          image: docker.io/shivamnamdeo0101/weather-svc:IMAGE_TAG_PLACEHOLDER
           ports:
             - containerPort: 8080
           envFrom:
