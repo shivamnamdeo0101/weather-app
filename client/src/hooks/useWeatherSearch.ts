@@ -8,9 +8,55 @@ import { WeatherApiService, WeatherError } from '@/services/weatherApi';
  * Convert error to user-friendly message
  */
 function getUserFriendlyErrorMessage(err: unknown, requestedCity: string): string {
+  // Check if it's a WeatherError (handle both instanceof and duck typing for tests)
+  // When errors are passed through Jest mocks, instanceof might not work, so check for data property
   if (err instanceof WeatherError) {
-    const status = err.data.status;
-    const serverMsg = err.message.trim();
+    const weatherErr = err as WeatherError;
+    const status = weatherErr.data?.status;
+    const serverMsg = weatherErr.message.trim();
+    
+    // Handle specific HTTP status codes
+    if (status) {
+      switch (status) {
+        case 400:
+          return serverMsg || 'Invalid request. Please check your city name and try again.';
+        
+        case 401:
+          return serverMsg || 'Unauthorized to access weather provider.';
+        
+        case 404:
+          // Check if server message indicates city not found
+          if (serverMsg.toLowerCase().includes('city not found') || 
+              serverMsg.toLowerCase().includes('not found')) {
+            return `City "${requestedCity}" not found. Please check the spelling and try again.`;
+          }
+          return serverMsg || `No weather forecast found for "${requestedCity}". Please try a different city.`;
+        
+        case 429:
+          return serverMsg || 'Too many requests. Please wait a moment before trying again.';
+        
+        case 502:
+        case 503:
+        case 504:
+          return serverMsg || 'Weather service is temporarily unavailable. Please try again later.';
+        
+        case 500:
+          return serverMsg || 'Server error occurred. Please try again later.';
+        
+        default:
+          return serverMsg || 'An unexpected server error occurred. Please try again.';
+      }
+    }
+
+    // No HTTP status - likely network/timeout/cache error
+    return serverMsg || 'Network error. Please check your connection and try again.';
+  }
+  
+  // Check for duck-typed WeatherError (for Jest mocks)
+  if (err && typeof err === 'object' && err !== null && 'data' in err) {
+    const weatherErr = err as any;
+    const status = weatherErr.data?.status;
+    const serverMsg = (weatherErr.message || weatherErr.data?.message || '').trim();
 
     // Handle specific HTTP status codes
     if (status) {

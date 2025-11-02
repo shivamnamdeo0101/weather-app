@@ -96,15 +96,19 @@ export function useOfflineMode() {
 
   // Set offline mode and persist to localStorage
   const setIsOfflineMode = useCallback((enabled: boolean) => {
+    // Always update state first
+    setIsOfflineModeState(enabled);
+    
+    // Try to persist to localStorage
     try {
       if (typeof globalThis.window !== 'undefined') {
         // Mark that user has explicitly set a preference
         globalThis.window.localStorage.setItem(USER_PREFERENCE_SET_KEY, 'true');
         globalThis.window.localStorage.setItem(OFFLINE_MODE_KEY, enabled.toString());
       }
-      setIsOfflineModeState(enabled);
     } catch (error) {
       Logger.error('Failed to save offline mode preference', error);
+      // State is already updated, so continue even if localStorage fails
     }
   }, []);
 
