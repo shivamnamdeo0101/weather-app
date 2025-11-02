@@ -1,7 +1,6 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useOfflineMode } from '../useOfflineMode';
 import { OfflineCacheService } from '@/services/offlineCache';
-import { Logger } from '@/utils/LogLevel';
 
 jest.mock('@/services/offlineCache');
 jest.mock('@/utils/LogLevel');
@@ -60,7 +59,9 @@ const mockRemoveEventListener = jest.fn((event: string, handler: () => void) => 
 });
 
 // Use a different approach - extend existing window or create new if doesn't exist
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 if (typeof (global as any).window === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).window = {
     addEventListener: mockAddEventListener,
     removeEventListener: mockRemoveEventListener,
@@ -68,6 +69,7 @@ if (typeof (global as any).window === 'undefined') {
   };
 } else {
   // Spy on existing window methods instead of replacing
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const originalWindow = (global as any).window;
   originalWindow.addEventListener = mockAddEventListener;
   originalWindow.removeEventListener = mockRemoveEventListener;
@@ -75,7 +77,9 @@ if (typeof (global as any).window === 'undefined') {
 }
 
 // Also set globalThis
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 if (typeof (global as any).globalThis === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).globalThis = global as any;
 }
 

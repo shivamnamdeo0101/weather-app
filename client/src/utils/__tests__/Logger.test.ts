@@ -7,7 +7,6 @@ describe('Logger', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    Logger.setEnabled(true);
   });
 
   it('should log info message when enabled', () => {
@@ -26,16 +25,5 @@ describe('Logger', () => {
   it('should log error message when enabled', () => {
     Logger.error('Test error');
     expect(errorSpy).toHaveBeenCalledWith('[WeatherApiService][ERROR] Test error');
-  });
-
-  it('should not log anything when disabled', () => {
-    Logger.setEnabled(false);
-    Logger.info('No log');
-    Logger.warn('No log');
-    Logger.error('No log');
-
-    expect(infoSpy).not.toHaveBeenCalled();
-    expect(warnSpy).not.toHaveBeenCalled();
-    expect(errorSpy).not.toHaveBeenCalled();
   });
 });

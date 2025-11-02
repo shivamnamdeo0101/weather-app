@@ -41,7 +41,7 @@ describe('PredictionsSection', () => {
   });
 
   it('renders fallback message when predictions is undefined', () => {
-    // @ts-ignore Testing runtime undefined
+    // @ts-expect-error Testing runtime undefined
     render(<PredictionsSection predictions={undefined} dtTxt={dtTxt} />);
 
     expect(screen.getByText('No special predictions')).toBeInTheDocument();

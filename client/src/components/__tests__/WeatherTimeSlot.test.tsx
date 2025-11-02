@@ -7,7 +7,7 @@ import { WeatherData } from '@/types/weather';
 // Mock child components
 jest.mock('../TimeSlotHeader', () => ({
   __esModule: true,
-  default: ({ date, time, iconCode, tempC, feelsLikeC }: any) => (
+  default: ({ date, time, iconCode, tempC, feelsLikeC }: { date: string; time: string; iconCode: string; tempC: number; feelsLikeC: number }) => (
     <div data-testid="time-slot-header">
       {date}-{time}-{iconCode}-{tempC}-{feelsLikeC}
     </div>
@@ -16,12 +16,12 @@ jest.mock('../TimeSlotHeader', () => ({
 
 jest.mock('../WeatherDetails', () => ({
   __esModule: true,
-  default: (props: any) => <div data-testid="weather-details">{props.description}</div>,
+  default: ({ description }: { description: string }) => <div data-testid="weather-details">{description}</div>,
 }));
 
 jest.mock('../PredictionsSection', () => ({
   __esModule: true,
-  default: ({ predictions }: any) => (
+  default: ({ predictions }: { predictions: string[] }) => (
     <div data-testid="predictions-section">{predictions.join(',')}</div>
   ),
 }));

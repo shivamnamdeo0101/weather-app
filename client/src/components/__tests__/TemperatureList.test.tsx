@@ -11,7 +11,7 @@ jest.mock('../TemperatureDayHeader', () => ({
 
 jest.mock('../TemperatureItemCard', () => ({
   __esModule: true,
-  default: (props: any) => <div data-testid="item-card">{props.emoji}</div>,
+  default: ({ emoji }: { emoji: string }) => <div data-testid="item-card">{emoji}</div>,
 }));
 
 // Mock hooks
@@ -23,7 +23,7 @@ jest.mock('@/hooks/useFormattedForecastDate', () => ({
 }));
 
 jest.mock('@/hooks/useWeatherEmoji', () => ({
-  useWeatherEmoji: () => (_icon: string) => '☀️',
+  useWeatherEmoji: () => () => '☀️',
 }));
 
 describe('TemperatureList', () => {

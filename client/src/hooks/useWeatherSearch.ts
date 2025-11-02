@@ -11,9 +11,8 @@ function getUserFriendlyErrorMessage(err: unknown, requestedCity: string): strin
   // Check if it's a WeatherError (handle both instanceof and duck typing for tests)
   // When errors are passed through Jest mocks, instanceof might not work, so check for data property
   if (err instanceof WeatherError) {
-    const weatherErr = err as WeatherError;
-    const status = weatherErr.data?.status;
-    const serverMsg = weatherErr.message.trim();
+    const status = err.data?.status;
+    const serverMsg = err.message.trim();
     
     // Handle specific HTTP status codes
     if (status) {
@@ -54,6 +53,7 @@ function getUserFriendlyErrorMessage(err: unknown, requestedCity: string): strin
   
   // Check for duck-typed WeatherError (for Jest mocks)
   if (err && typeof err === 'object' && err !== null && 'data' in err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const weatherErr = err as any;
     const status = weatherErr.data?.status;
     const serverMsg = (weatherErr.message || weatherErr.data?.message || '').trim();

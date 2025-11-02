@@ -1,9 +1,10 @@
 // src/components/__tests__/LoadingState.test.tsx
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import LoadingState from '../LoadingState';
 
 jest.mock('lucide-react', () => ({
-  Loader2: (props: any) => <svg data-testid="loader-icon" {...props} />,
+  Loader2: (props: React.ComponentProps<'svg'>) => <svg data-testid="loader-icon" {...props} />,
 }));
 
 describe('LoadingState', () => {

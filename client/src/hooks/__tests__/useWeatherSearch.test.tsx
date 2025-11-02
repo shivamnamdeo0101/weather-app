@@ -215,7 +215,7 @@ describe('useWeatherSearch hook', () => {
   });
 
   it('should set loading state during search', async () => {
-    let resolvePromise: (value: any) => void;
+    let resolvePromise: (value: { success: boolean; message: string; data: WeatherData[] | null }) => void;
     const promise = new Promise(resolve => {
       resolvePromise = resolve;
     });

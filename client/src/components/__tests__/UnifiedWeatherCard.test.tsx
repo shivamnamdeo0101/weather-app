@@ -19,7 +19,7 @@ jest.mock('../DayHeader', () => ({
 
 jest.mock('../WeatherTimeSlot', () => ({
   __esModule: true,
-  default: ({ weatherData }: { weatherData: any }) => (
+  default: ({ weatherData }: { weatherData: WeatherData }) => (
     <div data-testid="time-slot">{weatherData.dt_txt}</div>
   ),
 }));
