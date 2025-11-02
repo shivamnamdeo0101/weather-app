@@ -116,13 +116,62 @@ jobs:
           # Apply Kubernetes manifests
           kubectl apply -f k8s/
 
-          # Verify rollout for each service
-          kubectl rollout status deployment/weather-app
-          kubectl rollout status deployment/weather-cache
-          kubectl rollout status deployment/weather-svc
+      # ------------------------------------------------------
+      # 8️⃣ Wait for deployments with timeout and debugging
+      # ------------------------------------------------------
+      - name: Wait for redis-db rollout (dependency)
+        run: |
+          kubectl rollout status deployment/redis-db --timeout=2m || {
+            echo "❌ Rollout timeout or failed for redis-db"
+            kubectl get pods -l app=redis-db
+            kubectl logs -l app=redis-db --tail=50 || true
+            kubectl describe pods -l app=redis-db || true
+            exit 1
+          }
+
+      - name: Wait for weather-app rollout
+        run: |
+          kubectl rollout status deployment/weather-app --timeout=3m || {
+            echo "❌ Rollout timeout or failed for weather-app"
+            echo "📋 Pod status:"
+            kubectl get pods -l app=weather-app
+            echo "📜 Pod logs (latest):"
+            kubectl logs -l app=weather-app --tail=50 || true
+            echo "🔍 Describe pods:"
+            kubectl describe pods -l app=weather-app || true
+            exit 1
+          }
+
+      - name: Wait for weather-cache rollout
+        run: |
+          kubectl rollout status deployment/weather-cache --timeout=5m || {
+            echo "❌ Rollout timeout or failed for weather-cache"
+            echo "📋 Pod status:"
+            kubectl get pods -l app=weather-cache
+            echo "📜 Pod logs (latest):"
+            kubectl logs -l app=weather-cache --tail=50 || true
+            echo "🔍 Describe pods:"
+            kubectl describe pods -l app=weather-cache || true
+            exit 1
+          }
+
+      - name: Wait for weather-svc rollout
+        run: |
+          kubectl rollout status deployment/weather-svc --timeout=5m || {
+            echo "❌ Rollout timeout or failed for weather-svc"
+            echo "📋 Pod status:"
+            kubectl get pods -l app=weather-svc
+            echo "📜 Pod logs (latest):"
+            kubectl logs -l app=weather-svc --tail=50 || true
+            echo "🔍 Describe pods:"
+            kubectl describe pods -l app=weather-svc || true
+            echo "📊 Recent events for weather-svc:"
+            kubectl get events --field-selector involvedObject.kind=Pod --sort-by='.lastTimestamp' | grep weather-svc | tail -20 || true
+            exit 1
+          }
 
       # ------------------------------------------------------
-      # 8️⃣ (Optional) Show status summary
+      # 9️⃣ Show status summary
       # ------------------------------------------------------
       - name: Verify all pods and services
         run: |
