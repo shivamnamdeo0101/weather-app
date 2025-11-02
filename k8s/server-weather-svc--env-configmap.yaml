@@ -2,8 +2,10 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: server-weather-svc--env
+  namespace: NAMESPACE_PLACEHOLDER
   labels:
     app: weather-svc
+    environment: NAMESPACE_PLACEHOLDER
 data:
   SPRING_PROFILES_ACTIVE: ENV_PLACEHOLDER
   RATE_LIMITER_MAX_REQ_PER_MIN: "60"

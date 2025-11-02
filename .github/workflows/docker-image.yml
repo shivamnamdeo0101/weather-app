@@ -103,71 +103,75 @@ jobs:
           echo "${{ env.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
 
       # ------------------------------------------------------
-      # 7️⃣ Update images and apply manifests
+      # 7️⃣ Create namespace and deploy to environment-specific namespace
       # ------------------------------------------------------
       - name: Deploy to AKS
         run: |
           echo "🚀 Deploying to environment: ${{ env.GITHUB_REF_NAME }}"
           echo "🔖 Image tag: ${{ env.IMAGE_TAG }}"
           
-          # Replace image tags and environment placeholders dynamically inside manifests
+          # Create namespace if it doesn't exist
+          kubectl create namespace ${{ env.GITHUB_REF_NAME }} --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Replace image tags, environment placeholders, and namespace dynamically inside manifests
           sed -i "s|IMAGE_TAG_PLACEHOLDER|${{ env.IMAGE_TAG }}|g" k8s/*.yaml
           sed -i "s|ENV_PLACEHOLDER|${{ env.GITHUB_REF_NAME }}|g" k8s/*.yaml
+          sed -i "s|NAMESPACE_PLACEHOLDER|${{ env.GITHUB_REF_NAME }}|g" k8s/*.yaml
           
-          # Apply Kubernetes manifests
-          kubectl apply -f k8s/
+          # Apply Kubernetes manifests to environment-specific namespace
+          kubectl apply -f k8s/ -n ${{ env.GITHUB_REF_NAME }}
 
       # ------------------------------------------------------
       # 8️⃣ Wait for deployments with timeout and debugging
       # ------------------------------------------------------
       - name: Wait for redis-db rollout (dependency)
         run: |
-          kubectl rollout status deployment/redis-db --timeout=2m || {
+          kubectl rollout status deployment/redis-db --timeout=2m -n ${{ env.GITHUB_REF_NAME }} || {
             echo "❌ Rollout timeout or failed for redis-db"
-            kubectl get pods -l app=redis-db
-            kubectl logs -l app=redis-db --tail=50 || true
-            kubectl describe pods -l app=redis-db || true
+            kubectl get pods -l app=redis-db -n ${{ env.GITHUB_REF_NAME }}
+            kubectl logs -l app=redis-db --tail=50 -n ${{ env.GITHUB_REF_NAME }} || true
+            kubectl describe pods -l app=redis-db -n ${{ env.GITHUB_REF_NAME }} || true
             exit 1
           }
 
       - name: Wait for weather-app rollout
         run: |
-          kubectl rollout status deployment/weather-app --timeout=3m || {
+          kubectl rollout status deployment/weather-app --timeout=3m -n ${{ env.GITHUB_REF_NAME }} || {
             echo "❌ Rollout timeout or failed for weather-app"
             echo "📋 Pod status:"
-            kubectl get pods -l app=weather-app
+            kubectl get pods -l app=weather-app -n ${{ env.GITHUB_REF_NAME }}
             echo "📜 Pod logs (latest):"
-            kubectl logs -l app=weather-app --tail=50 || true
+            kubectl logs -l app=weather-app --tail=50 -n ${{ env.GITHUB_REF_NAME }} || true
             echo "🔍 Describe pods:"
-            kubectl describe pods -l app=weather-app || true
+            kubectl describe pods -l app=weather-app -n ${{ env.GITHUB_REF_NAME }} || true
             exit 1
           }
 
       - name: Wait for weather-cache rollout
         run: |
-          kubectl rollout status deployment/weather-cache --timeout=5m || {
+          kubectl rollout status deployment/weather-cache --timeout=5m -n ${{ env.GITHUB_REF_NAME }} || {
             echo "❌ Rollout timeout or failed for weather-cache"
             echo "📋 Pod status:"
-            kubectl get pods -l app=weather-cache
+            kubectl get pods -l app=weather-cache -n ${{ env.GITHUB_REF_NAME }}
             echo "📜 Pod logs (latest):"
-            kubectl logs -l app=weather-cache --tail=50 || true
+            kubectl logs -l app=weather-cache --tail=50 -n ${{ env.GITHUB_REF_NAME }} || true
             echo "🔍 Describe pods:"
-            kubectl describe pods -l app=weather-cache || true
+            kubectl describe pods -l app=weather-cache -n ${{ env.GITHUB_REF_NAME }} || true
             exit 1
           }
 
       - name: Wait for weather-svc rollout
         run: |
-          kubectl rollout status deployment/weather-svc --timeout=5m || {
+          kubectl rollout status deployment/weather-svc --timeout=5m -n ${{ env.GITHUB_REF_NAME }} || {
             echo "❌ Rollout timeout or failed for weather-svc"
             echo "📋 Pod status:"
-            kubectl get pods -l app=weather-svc
+            kubectl get pods -l app=weather-svc -n ${{ env.GITHUB_REF_NAME }}
             echo "📜 Pod logs (latest):"
-            kubectl logs -l app=weather-svc --tail=50 || true
+            kubectl logs -l app=weather-svc --tail=50 -n ${{ env.GITHUB_REF_NAME }} || true
             echo "🔍 Describe pods:"
-            kubectl describe pods -l app=weather-svc || true
+            kubectl describe pods -l app=weather-svc -n ${{ env.GITHUB_REF_NAME }} || true
             echo "📊 Recent events for weather-svc:"
-            kubectl get events --field-selector involvedObject.kind=Pod --sort-by='.lastTimestamp' | grep weather-svc | tail -20 || true
+            kubectl get events --field-selector involvedObject.kind=Pod --sort-by='.lastTimestamp' -n ${{ env.GITHUB_REF_NAME }} | grep weather-svc | tail -20 || true
             exit 1
           }
 
@@ -176,8 +180,8 @@ jobs:
       # ------------------------------------------------------
       - name: Verify all pods and services
         run: |
-          echo "🔍 Checking current cluster status..."
-          kubectl get pods -o wide
-          kubectl get svc -o wide
-          kubectl get deployments
-          kubectl get replicasets
+          echo "🔍 Checking current cluster status for namespace: ${{ env.GITHUB_REF_NAME }}..."
+          kubectl get pods -o wide -n ${{ env.GITHUB_REF_NAME }}
+          kubectl get svc -o wide -n ${{ env.GITHUB_REF_NAME }}
+          kubectl get deployments -n ${{ env.GITHUB_REF_NAME }}
+          kubectl get replicasets -n ${{ env.GITHUB_REF_NAME }}

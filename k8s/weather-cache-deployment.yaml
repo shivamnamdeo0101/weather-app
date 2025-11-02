@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: weather-cache
+  namespace: NAMESPACE_PLACEHOLDER
   labels:
     app: weather-cache
+    environment: NAMESPACE_PLACEHOLDER
 spec:
   replicas: 2
   strategy:

@@ -1,9 +1,11 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
+  name: redis-data
+  namespace: NAMESPACE_PLACEHOLDER
   labels:
     io.kompose.service: redis-data
-  name: redis-data
+    environment: NAMESPACE_PLACEHOLDER
 spec:
   accessModes:
     - ReadWriteOnce

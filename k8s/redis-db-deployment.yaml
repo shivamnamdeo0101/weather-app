@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis-db
+  namespace: NAMESPACE_PLACEHOLDER
   labels:
     app: redis-db
+    environment: NAMESPACE_PLACEHOLDER
 spec:
   replicas: 1
   selector:

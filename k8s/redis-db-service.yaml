@@ -2,6 +2,10 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis-db
+  namespace: NAMESPACE_PLACEHOLDER
+  labels:
+    app: redis-db
+    environment: NAMESPACE_PLACEHOLDER
 spec:
   selector:
     app: redis-db

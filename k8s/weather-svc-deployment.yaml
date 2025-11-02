@@ -2,8 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: weather-svc
+  namespace: NAMESPACE_PLACEHOLDER
   labels:
     app: weather-svc
+    environment: NAMESPACE_PLACEHOLDER
 spec:
   replicas: 2
   strategy:
