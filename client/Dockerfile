@@ -18,7 +18,11 @@ RUN npm ci && npm cache clean --force
 # Copy app source
 COPY . .
 
-# Build the Next.js app
+# Accept build argument for API URL and set as environment variable for Next.js build
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+
+# Build the Next.js app (env var will be embedded at build time)
 RUN npm run build
 
 # Set environment variables

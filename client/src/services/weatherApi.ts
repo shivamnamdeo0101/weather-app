@@ -2,7 +2,8 @@ import { WeatherApiResponse } from '@/types/weather';
 import { Logger } from '@/utils/LogLevel';
 import { OfflineCacheService } from './offlineCache';
 
-const API_BASE_URL = 'http://localhost:8081/api/weather-cache';
+// Use environment-specific API URL (set at build time) or fallback to localhost for local dev
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8081/api/weather-cache';
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000; // 1s base delay (exponential)
 
