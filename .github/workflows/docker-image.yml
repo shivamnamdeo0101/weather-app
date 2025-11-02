@@ -1,4 +1,4 @@
-# ============================================================
+ # ============================================================
 # 🐳 Docker CI & ☸️ Kubernetes CD Pipeline
 # ------------------------------------------------------------
 # Builds Docker images for each microservice and deploys
@@ -52,21 +52,6 @@ jobs:
       # 3️⃣ Build Docker images for all microservices
       # ------------------------------------------------------
       - name: Build weather-client image
-        run: docker build . -t shivamnamdeo0101/weather-client:${{ env.IMAGE_TAG }}
-        working-directory: ./client
-
-      - name: Build weather-cache image
-        run: docker build . -t shivamnamdeo0101/weather-cache:${{ env.IMAGE_TAG }}
-        working-directory: ./server/weather-cache
-
-      - name: Build weather-svc image
-        run: docker build . -t shivamnamdeo0101/weather-svc:${{ env.IMAGE_TAG }}
-        working-directory: ./server/weather-svc
-
-      # ------------------------------------------------------
-      # 4️⃣ Push all Docker images
-      # ------------------------------------------------------
-      - name: Build weather-client image
         run: |
           if [[ "${GITHUB_REF_NAME}" == "dev" ]]; then
             URL="${{ secrets.DEV_API_URL }}"
@@ -81,6 +66,19 @@ jobs:
             -t shivamnamdeo0101/weather-client:${{ env.IMAGE_TAG }} .
         working-directory: ./client
 
+      - name: Build weather-cache image
+        run: docker build . -t shivamnamdeo0101/weather-cache:${{ env.IMAGE_TAG }}
+        working-directory: ./server/weather-cache
+
+      - name: Build weather-svc image
+        run: docker build . -t shivamnamdeo0101/weather-svc:${{ env.IMAGE_TAG }}
+        working-directory: ./server/weather-svc
+
+      # ------------------------------------------------------
+      # 4️⃣ Push all Docker images
+      # ------------------------------------------------------
+      - name: Push weather-client image
+        run: docker push shivamnamdeo0101/weather-client:${{ env.IMAGE_TAG }}
 
       - name: Push weather-cache image
         run: docker push shivamnamdeo0101/weather-cache:${{ env.IMAGE_TAG }}
