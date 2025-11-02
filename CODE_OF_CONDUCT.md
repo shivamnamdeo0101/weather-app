@@ -15,7 +15,12 @@
 
 
 ### JMeter Testing - Throughput
-<img width="1512" alt="image" src="https://github.com/user-attachments/assets/27bde42e-ab6e-4802-8d91-9c0cd2608620" />
+<img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/27bde42e-ab6e-4802-8d91-9c0cd2608620" />
+<img width="1512" height="auto" alt="Screenshot 2025-11-02 at 2 31 46 PM" src="https://github.com/user-attachments/assets/9f039d41-9321-4e29-9292-300d85649cf6" />
+
+### Response Headers
+
+<img width="1512" height="auto" alt="Screenshot 2025-11-02 at 2 31 02 PM" src="https://github.com/user-attachments/assets/671c0ba7-8ddd-4d57-bb6f-710e7c2688b2" />
 
 ### Schedular refreshing HOT/Medium active cities
 <img width="1512"  alt="image" src="https://github.com/user-attachments/assets/1c560f84-e335-44f8-8262-30d9e9ab1709" />
@@ -31,6 +36,7 @@
 ### On-Demand Refreshing Active + Medium Active Cities
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/4d7645c5-d93c-4dce-a983-973f29fb6f26" />
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/22cc2d7c-8ef3-471a-9bf3-884a3b805036" />
+
 
 
 
