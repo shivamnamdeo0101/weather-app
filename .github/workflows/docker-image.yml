@@ -2,10 +2,9 @@ name: Docker CI & Kubernetes Deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev", "test", "prod" ]
   pull_request:
-    branches: [ "main" ]
-
+    branches: [ "dev", "test", "prod" ]
 env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -14,7 +13,9 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    env:
+      SPRING_PROFILES_ACTIVE: "${{ github.ref == 'refs/heads/prod' && 'prod' || github.ref == 'refs/heads/test' && 'test' || github.ref == 'refs/heads/dev' && 'dev' || 'dev' }}"
+      IMAGE_TAG: "${{ (github.ref == 'refs/heads/prod' && 'prod' || github.ref == 'refs/heads/test' && 'test' || github.ref == 'refs/heads/dev' && 'dev' || 'dev') }}-${{ github.run_number }}"
     steps:
     # 1️⃣ Checkout code
     - name: Checkout code
