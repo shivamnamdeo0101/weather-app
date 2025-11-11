@@ -17,6 +17,7 @@ Built with microservices architecture, it implements rate limiting, cache-aside 
 - LOW cities use TTL / on-demand fetch to save memory
 
 #### Load / Traffic Constraints
+
 - 90% traffic from Most active cities only that is 1400 avg (40k / 3 City Category (based on tech adoptions/app uses/more constraints)) of 10 %.
 - City constraints basis 10%(140) req/per min will hit SVC  which we already refreshing through schedular and on-demand strategy.
 - On-Demand refresh + Periodic schedule for load reduction for User req + schedular calls
@@ -28,6 +29,92 @@ Built with microservices architecture, it implements rate limiting, cache-aside 
 - Cache hit target: ~90% from HOT city cache
 - Staggering, lastAccess, lastRefresh checks to avoid spikes
 - Locally tested with 500 req/sec throughput
+
+## 1.1 Installation & Setup
+
+### Prerequisites
+- Docker & Docker Compose
+- Node.js 18+ (for frontend)
+- Java 17+ (for backend)
+- Redis
+
+### Quick Start
+
+**Clone & Install:**
+```bash
+git clone https://github.com/shivamnamdeo0101/weather-app.git
+cd weather-app
+```
+
+**Using Docker Compose (Recommended):**
+```bash
+docker-compose up -d
+# Frontend: http://localhost:3001
+# Backend APIs: http://localhost:8081
+```
+
+**Manual Setup:**
+```bash
+# Backend
+cd server/weather-svc && ./mvnw spring-boot:run
+cd server/weather-cache && ./mvnw spring-boot:run
+
+# Frontend
+cd client && npm install && npm run dev
+```
+
+**Environment Variables:**
+
+Create `.env` files in each service:
+
+**Backend (`server/weather-svc/.env`):**
+```
+# Connects to the 'weather-svc' container within the Docker network
+WEATHER_SVC_URL=http://weather-svc:8080/api/weather-svc/forecast
+# Connects to the 'redis-db' service container
+REDIS_HOST=redis-db
+REDIS_PORT=6379
+ #in REDIS_COMMAND_TIMEOUT Seconds
+REDIS_COMMAND_TIMEOUT=60
+#In Seconds REDIS_TTL 1-hours Min In Sec
+REDIS_TTL=3600000
+# Uses the specified credentials for the local Redis instance (if configured)
+REDIS_USERNAME=default
+REDIS_PASSWORD=0t*******YOUR_API_KEY**********3A
+# Sets the Spring profile
+SPRING_PROFILES_ACTIVE=prod
+#Rest Template
+#1 Min
+#in MILLISECONDS
+REST_CONNECT_TIMEOUT=200000
+REST_READ_TIMEOUT=200000
+
+#Schedular Configs
+HOT_HIT_THRESHOLD=140                  #hits count most hot/active/priority cities
+MEDIUM_HIT_THRESHOLD=70                #hits count mid  hot/active/priority cities
+
+HOT_REFRESH_INTERVAL_MS=1200000         #20 minutes
+MEDIUM_REFRESH_INTERVAL_MS=1800000      #30 minutes
+LOW_ACTIVE_REFRESH_INTERVAL_MS=2400000  #40 minutes
+MAX_AGE_MS=2700000                      #45 minutes
+
+```
+**Cache Service (`server/weather-cache/.env`):**
+```
+# Weather API config
+WEATHER_API_KEY=d2*************************e
+WEATHER_API_URL=http://api.openweathermap.org/data/2.5/forecast
+# Rate Limiter configuration
+RATE_LIMITER_MAX_REQ_PER_MIN=60
+RATE_LIMITER_MAX_WINDOW_SIZE_IN_SEC=60
+WEATHER_API_UNITS=metric
+WEATHER_API_CNT=24
+
+```
+**Get OpenWeather API Key:**
+1. Sign up at [openweathermap.org](https://openweathermap.org/api)
+2. Generate API key from account settings
+3. Add to respective `.env` files
 
  
 ## 2. Features
