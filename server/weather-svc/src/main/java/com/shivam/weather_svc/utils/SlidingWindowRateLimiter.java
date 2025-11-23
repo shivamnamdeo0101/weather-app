@@ -18,9 +18,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class SlidingWindowRateLimiter {
 
     @Value("${rate_limiter_max_req_per_min}")
-    private int maxRequestsPerMinute = 10;
+    private int maxRequestsPerMinute;
     @Value("${rate_limiter_max_window_size_in_sec}")
-    private long windowSizeSeconds = 10;
+    private long windowSizeSeconds;
 
     @PostConstruct
     public void init() {
