@@ -1,5 +1,6 @@
 package com.shivam.weather_svc.utils;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,14 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 public class SlidingWindowRateLimiter {
 
     @Value("${rate_limiter_max_req_per_min}")
-    private int maxRequestsPerMinute;
+    private int maxRequestsPerMinute = 10;
     @Value("${rate_limiter_max_window_size_in_sec}")
-    private long windowSizeSeconds;
+    private long windowSizeSeconds = 10;
+
+    @PostConstruct
+    public void init() {
+        log.info("Rate Limiter initialized: maxRequestsPerMinute={}, windowSizeSeconds={}", maxRequestsPerMinute, windowSizeSeconds);
+    }
 
     // Thread-safe deque to store timestamps of requests
     private final Deque<Long> requestTimestamps = new ConcurrentLinkedDeque<>();
