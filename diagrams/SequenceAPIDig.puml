@@ -15,17 +15,18 @@ alt CACHE HIT
     cache -> app: Return cached data (HTTP 200)
     note right of app
         On-demand Refresh:
-        If Medium threshold crossed → increment hit by 1
+        If Medium threshold crossed same hit = hit + 1 
             and Update and Refresh Data by calling SVC
-        if High threshold crossed → reset hit 1 
-        Scheduler will handle refresh this will reduce the load for 
-        scheduler
+        if High threshold crossed same hit = 1 
+            and Update and Refresh Data by calling SVC
+        
+        On Demand Refresh reduce the load for scheduler
 
     end note
     app -> User: Display forecast
 else CACHE MISS
     cache -> svc: Request fresh data
-    svc -> limiter: Validate request quota (60 req/min per client)
+    svc -> limiter: Validate request quota (150 req/min per client)
 
     alt WITHIN LIMIT
         limiter -> svc: Allow request (HTTP 200)

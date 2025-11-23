@@ -40,7 +40,7 @@ public abstract class AbstractCityRefreshStrategy implements CacheRefreshStrateg
         String city = cityKey.split(":")[1];
         Object result = weatherSvcClient.fetchWeatherData(city);
 
-        long updatedHits = hits >= hotHitThreshold ? 1 : hits; // reset only if HOT threshold crossed
+        long updatedHits = hits >= hotHitThreshold ? 1 : hits + 1; // reset only if HOT threshold crossed
         redisService.saveWithMeta(cityKey, result, true, updatedHits);
 
         return true;

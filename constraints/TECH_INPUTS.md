@@ -25,13 +25,13 @@ Yes – pass the city name in search bar to see dynamic results.
 
 **2. Is the service ready to be released to production or live environment?**  
 Yes – weather-cache service is production-ready with configuration, error handling, caching, and scheduler.
-REMAINING  - prod/dev/test env setup with each env variables/tokens
+Yes  - prod/dev/test env setup with each env variables/tokens
 
 **3. Is the service accessible via web browser or Postman (or using JS frameworks, HTML, or JSON)?**  
 Yes – accessible via Postman or any HTTP client, returning JSON responses.
 
 **4. Is the solution support offline mode with toggles?**  
-REMAINING – toggle to force offline on frontend.
+Yes – toggle to force offline on frontend.
 
 **5. Is the service returning relevant results even if dependencies (Public API) are unavailable?**  
 Yes – returns cached data when upstream API is unavailable with X-Cache HIT/MISS info.
