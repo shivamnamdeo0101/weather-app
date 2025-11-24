@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: weather-svc
-          image: docker.io/shivamnamdeo0101/weather-svc:dev-94
+          image: docker.io/shivamnamdeo0101/weather-svc:dev-99
           ports:
             - containerPort: 8080
           envFrom:

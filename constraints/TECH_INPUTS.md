@@ -72,7 +72,7 @@ Yes — in the weather app project, all 12 Factor App principles are practically
 1. **Codebase** – Single Git repository holds both frontend (Next.js) and backend (Spring Boot) code. ✅
 2. **Dependencies** – Explicitly declared in `package.json` for FE and `pom.xml` for BE. ✅
 3. **Config** – Externalized via `application-{dev/prod}.properties` and environment variables for endpoints, API keys, and toggles. ✅
-4. **Backing Services** – Redis cache used as an attached stateless service for weather data. ✅
+4. **Backing Services** – weather cache used as an attached stateless service for weather data. ✅
 5. **Build, Release, Run** – Docker images separate the build/runtime environment; same image can be deployed across dev/test/prod. ✅
 6. **Processes** – Stateless Spring Boot app with virtual threads for async cache refresh; no in-memory state tied to requests. ✅
 7. **Port Binding** – Backend exposes REST APIs via HTTP; frontend runs on a configurable port (Next.js dev server). ✅
