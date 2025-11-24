@@ -6,6 +6,7 @@ import com.shivam.weather_cache.dto.CacheResult;
 import com.shivam.weather_cache.exception.WeatherServiceException;
 import com.shivam.weather_cache.strategy.CacheRefreshStrategy;
 import com.shivam.weather_cache.strategy.CacheRefreshStrategyFactory;
+import com.shivam.weather_cache.utils.AppConstants;
 import com.shivam.weather_cache.utils.WeatherSvcClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
             throw new IllegalArgumentException("City parameter cannot be empty");
         }
 
-        String key = "weather:" + city.toLowerCase();
+        String key = AppConstants.Cache.WEATHER_KEY_PREFIX + city.toLowerCase();
         log.info("Fetching weather for city: {}", city);
 
         // --- Try cache first ---
@@ -62,7 +63,10 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
 
             if (data == null || data.isEmpty()) {
                 log.warn("Weather SVC returned no data for city: {}", city);
-                throw new WeatherServiceException("City not found: " + city, HttpStatus.NOT_FOUND);
+                throw new WeatherServiceException(
+                        String.format(AppConstants.Messages.ClientError.CITY_NOT_FOUND_TEMPLATE, city),
+                        HttpStatus.NOT_FOUND
+                );
             }
 
             // Save in Redis (best-effort)
@@ -80,11 +84,14 @@ public class WeatherCacheServiceImpl implements WeatherCacheService {
             if (status == null) status = HttpStatus.INTERNAL_SERVER_ERROR;
 
             String msg = switch (status) {
-                case NOT_FOUND -> "City not found: " + city;
-                case TOO_MANY_REQUESTS -> "Weather SVC rate limit exceeded. Try again later.";
-                case BAD_REQUEST -> "Invalid city name or request format.";
-                case BAD_GATEWAY, SERVICE_UNAVAILABLE -> "Weather SVC temporarily unavailable. Please retry later.";
-                default -> "Unexpected HTTP error (" + status.value() + ") from Weather SVC.";
+                case NOT_FOUND -> String.format(AppConstants.Messages.ClientError.CITY_NOT_FOUND_TEMPLATE, city);
+                case TOO_MANY_REQUESTS -> AppConstants.Messages.ClientError.RATE_LIMIT_EXCEEDED;
+                case BAD_REQUEST -> AppConstants.Messages.ClientError.BAD_REQUEST;
+                case BAD_GATEWAY, SERVICE_UNAVAILABLE -> AppConstants.Messages.ServerError.SERVICE_UNAVAILABLE;
+                default -> String.format(
+                        AppConstants.Messages.ServerError.DOWNSTREAM_UNEXPECTED_TEMPLATE,
+                        status.value()
+                );
             };
 
             log.error("Weather SVC HTTP exception for city '{}': {} - {}", city, status, httpEx.getResponseBodyAsString());

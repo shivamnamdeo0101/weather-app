@@ -10,6 +10,14 @@ import lombok.experimental.UtilityClass;
 public class AppConstants {
 
     // ===========================
+    // Cache-specific constants
+    // ===========================
+    public final class Cache {
+        private Cache() {}
+        public static final String WEATHER_KEY_PREFIX = "weather:";
+    }
+
+    // ===========================
     // Error Codes
     // ===========================
     public final class ErrorCodes {
@@ -34,11 +42,12 @@ public class AppConstants {
         // --- 4XX CLIENT ERRORS ---
         public final class ClientError {
             private ClientError() {}
-            public static final String BAD_REQUEST = "Invalid input provided."; // 400
+            public static final String BAD_REQUEST = "Invalid city name or request format."; // 400
             public static final String OPENWEATHER_API_UNAUTHORIZED = "Unauthorized access to OpenWeather API."; // 401
-            public static final String CITY_NOT_FOUND = "City not found:"; // 404 (For specific application logic/messages)
-            public static final String FORECAST_NOT_FOUND = "No forecast data found for "; // 404 (Specific to forecast data availability)
+            public static final String CITY_NOT_FOUND_TEMPLATE = "City not found: %s"; // 404 (For specific application logic/messages)
+            public static final String FORECAST_NOT_FOUND_TEMPLATE = "No forecast data found for %s"; // 404 (Specific to forecast data availability)
             public static final String TOO_MANY_REQUEST = "Too many requests. Please wait before retrying."; // 429
+            public static final String RATE_LIMIT_EXCEEDED = "Weather SVC rate limit exceeded. Try again later."; // 429 (Downstream limiter)
         }
 
         // --- 5XX SERVER ERRORS ---
@@ -46,6 +55,7 @@ public class AppConstants {
             private ServerError() {}
             public static final String SERVICE_UNAVAILABLE = "Weather service is temporarily unavailable. Please try again later."; // 502 / 503
             public static final String INTERNAL_SERVER_ERROR = "Internal server error occurred."; // 500
+            public static final String DOWNSTREAM_UNEXPECTED_TEMPLATE = "Unexpected HTTP error (%s) from Weather SVC."; // Fallback for other HTTP errors
         }
     }
 

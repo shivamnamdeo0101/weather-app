@@ -2,6 +2,7 @@ package com.shivam.weather_cache.controller;
 
 import com.shivam.weather_cache.dto.CacheResult;
 import com.shivam.weather_cache.service.WeatherCacheService;
+import com.shivam.weather_cache.utils.AppConstants;
 import com.shivam.weather_cache.utils.WeatherUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,10 +36,10 @@ public class WeatherCacheController {
         String trimmed = WeatherUtils.validateAndTrimCity(city);
 
         CacheResult result = cacheService.getWeather(trimmed);
-        String headerValue = result.isCacheHit() ? "HIT" : "MISS";
+        String headerValue = result.isCacheHit() ? AppConstants.Headers.CACHE_HIT : AppConstants.Headers.CACHE_MISS;
 
         return ResponseEntity.ok()
-                .header("X-Cache", headerValue)
+                .header(AppConstants.Headers.X_CACHE, headerValue)
                 .body(result.getData());
     }
 }
