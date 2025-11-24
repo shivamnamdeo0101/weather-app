@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-svc
+  namespace: dev
+  labels:
+    app: weather-svc
+    environment: dev
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: weather-svc
+  template:
+    metadata:
+      labels:
+        app: weather-svc
+    spec:
+      containers:
+        - name: weather-svc
+          image: docker.io/shivamnamdeo0101/weather-svc:dev-94
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: server-weather-svc--env
+      restartPolicy: Always
+

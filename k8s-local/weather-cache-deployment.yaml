@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-cache
+  namespace: dev
+  labels:
+    app: weather-cache
+    environment: dev
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: weather-cache
+  template:
+    metadata:
+      labels:
+        app: weather-cache
+    spec:
+      containers:
+        - name: weather-cache
+          image: docker.io/shivamnamdeo0101/weather-cache:dev-94
+          ports:
+            - containerPort: 8081
+          envFrom:
+            - configMapRef:
+                name: server-weather-cache--env
+      restartPolicy: Always
+

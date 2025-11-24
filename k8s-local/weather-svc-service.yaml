@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: weather-svc
+  namespace: dev
+  labels:
+    app: weather-svc
+    environment: dev
+spec:
+  selector:
+    app: weather-svc
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP

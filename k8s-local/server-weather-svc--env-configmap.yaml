@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-weather-svc--env
+  namespace: dev
+  labels:
+    app: weather-svc
+    environment: dev
+data:
+  SPRING_PROFILES_ACTIVE: dev
+  RATE_LIMITER_MAX_REQ_PER_MIN: "60"
+  RATE_LIMITER_MAX_WINDOW_SIZE_IN_SEC: "60"
+  WEATHER_API_CNT: "24"
+  WEATHER_API_KEY: d2929e9483efc82c82c32ee7e02d563e
+  WEATHER_API_UNITS: metric
+  WEATHER_API_URL: http://api.openweathermap.org/data/2.5/forecast

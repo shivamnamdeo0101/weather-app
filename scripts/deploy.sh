@@ -22,7 +22,7 @@ NAMESPACE="$1"
 IMAGE_TAG="$2"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-K8S_DIR="$ROOT_DIR/k8s"
+K8S_DIR="$ROOT_DIR/k8s-local"
 TEMP_DIR=$(mktemp -d)
 trap "rm -rf $TEMP_DIR" EXIT
 

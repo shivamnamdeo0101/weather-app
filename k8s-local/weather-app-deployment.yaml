@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weather-app
+  namespace: dev
+  labels:
+    app: weather-app
+    environment: dev
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: weather-app
+  template:
+    metadata:
+      labels:
+        app: weather-app
+    spec:
+      containers:
+        - name: weather-app
+          image: docker.io/shivamnamdeo0101/weather-client:dev-94
+          ports:
+            - containerPort: 3001
+          env:
+            - name: NEXT_TELEMETRY_DISABLED
+              value: "1"
+            - name: NODE_ENV
+              value: production
+      restartPolicy: Always
+
