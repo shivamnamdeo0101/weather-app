@@ -7,6 +7,11 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 const MAX_RETRIES = 3;
 const RETRY_DELAY_MS = 1000; // 1s base delay (exponential)
 
+/**
+ * Custom error class for weather API errors
+ * Extends the standard Error class to include HTTP status codes and structured error data
+ * Used throughout the weather service to provide consistent error handling
+ */
 export class WeatherError extends Error {
   constructor(public readonly data: { message: string; status?: number }) {
     super(data.message);
@@ -15,6 +20,17 @@ export class WeatherError extends Error {
 }
 
 export class WeatherApiService {
+  /**
+   * Handles HTTP response from the weather API
+   * - Checks if response is OK (status 200-299)
+   * - Parses error responses and extracts error messages
+   * - Parses successful JSON responses
+   * - Normalizes nested data structures (handles cases where API returns data)
+   * - Throws WeatherError for any failures
+   * @param response - The fetch Response object
+   * @returns Parsed and normalized response data
+   * @throws WeatherError if response is not OK or cannot be parsed
+   */
   private static async handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
       let body: { message?: string; error?: string } = {};
@@ -55,6 +71,17 @@ export class WeatherApiService {
     return (Array.isArray(inner) ? { ...(data as object), data: inner } : data) as T;
   }
 
+  /**
+   * Fetches data from the API with automatic retry logic
+   * - Attempts to fetch up to MAX_RETRIES times (default: 3)
+   * - Uses exponential backoff delay between retries (1s, 2s, 4s)
+   * - Logs each attempt and retry for debugging
+   * - Throws WeatherError if all retry attempts fail
+   * @param url - The API endpoint URL to fetch from
+   * @param options - Fetch options (method, headers, signal, etc.)
+   * @returns Response object if fetch succeeds
+   * @throws WeatherError if all retry attempts fail
+   */
   private static async fetchWithRetry(url: string, options: RequestInit): Promise<Response> {
     let lastError: Error | null = null;
     
@@ -84,10 +111,23 @@ export class WeatherApiService {
   }
 
   /**
-   * Get forecast with offline mode support
+   * Get weather forecast for a city with offline mode support and automatic cache fallback
+   * 
+   * Behavior:
+   * - Offline mode: Only checks cache, throws error if no cached data available
+   * - Online mode: 
+   *   1. Attempts to fetch from API with retry logic
+   *   2. Caches successful responses for offline use
+   *   3. Falls back to cache if API fails (except for 404 errors)
+   *   4. Handles timeouts, network errors, and other exceptions gracefully
+   * 
    * @param city - City name to fetch forecast for
    * @param offlineMode - If true, only use cached data. If false, try API first, fallback to cache on error.
-   * @returns WeatherApiResponse
+   * @returns WeatherApiResponse with forecast data
+   * @throws WeatherError if:
+   *   - Offline mode and no cached data available
+   *   - API fails and no cached data available
+   *   - 404 error (city not found) - does not fallback to cache
    */
   static async getForecast(city: string, offlineMode: boolean = false): Promise<WeatherApiResponse> {
     // If offline mode is enabled, check cache first
