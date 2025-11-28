@@ -22,17 +22,17 @@ node "Azure Kubernetes Service (AKS)" {
   }
 
   frame "Infra & Secrets" {
-    [Azure Key Vault]
-    [Azure Monitor]
+    [K8S ENV VAR]
   }
 }
 
 ' ===== Connections =====
 USER --> FE : HTTPS (Public Port 3001, LoadBalancer)
 FE --> CACHE : HTTP (ClusterIP :8081)
-CACHE --> REDIS : TCP (Redis protocol)
-CACHE --> SVC : HTTP (Cluster DNS)
+CACHE --> REDIS : CACHE HIT - TCP Connection
+CACHE --> SVC : CACHE MISS - HTTP (Cluster DNS)
 SVC --> API : HTTPS (External network)
+SVC --> RL : HTTPS (Check Rate Limit 150 req / min)
 SCHED --> REDIS : Periodic cache refresh
 CACHE --> FE : JSON response
 

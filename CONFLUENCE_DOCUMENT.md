@@ -197,13 +197,13 @@
 
 ### 3. **Performance Optimizations**
 
-| Optimization | Implementation | Why |
-|--------------|---------------|-----|
-| **Tiered Caching** | HOT/MEDIUM/LOW classification | 90% of traffic from 1,400 cities served from cache. Memory-efficient for 200K cities. |
+| Optimization | Implementation                       | Why |
+|--------------|--------------------------------------|-----|
+| **Tiered Caching** | HOT/MEDIUM/LOW classification        | 90% of traffic from 1,400 cities served from cache. Memory-efficient for 200K cities. |
 | **Virtual Threads** | Java 21 virtual threads for scheduler | Handles 210 concurrent refreshes without blocking. Reduces thread overhead vs traditional threads. |
-| **Staggering** | 0-500ms random delay per refresh | Prevents API spike. Distributes 210 refreshes over 2 minutes, staying within 150 req/min limit. |
-| **On-Demand Refresh** | Threshold-based async refresh | Reduces scheduler load. Only refreshes when city crosses threshold, not on every scheduler run. |
-| **Rate Limiting** | Sliding window (60 req/min) | Protects external API from overload. Prevents quota exhaustion and 429 errors. |
+| **Staggering** | 0-500ms random delay per refresh     | Prevents API spike. Distributes 210 refreshes over 2 minutes, staying within 150 req/min limit. |
+| **On-Demand Refresh** | Threshold-based async refresh        | Reduces scheduler load. Only refreshes when city crosses threshold, not on every scheduler run. |
+| **Rate Limiting** | Sliding window (150 req/min)         | Protects external API from overload. Prevents quota exhaustion and 429 errors. |
 
 ---
 
