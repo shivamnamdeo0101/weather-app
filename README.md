@@ -133,7 +133,7 @@ WEATHER_API_CNT=24
   - Weather-Cache -checks Redis for city data
     - ✅ If found → return data immediately and also check ON-DEMAND needed with abstract strategies then refresh from SVC
     - ❌ If not found → call Weather-SVC
-  - Weather-SVC -> Check if (rate limiter allowed 60 calls per min) then calls external OpenWeather API, then SVC put the data into cache then return data on FE
+  - Weather-SVC -> Check if (rate limiter allowed 150 calls per min) then calls external OpenWeather API, then SVC put the data into cache then return data on FE
 
 - **SCHEDULAR Flow:**
   - The **Weather Cache Scheduler** inside `weather-cache`  manages cached weather data in Redis efficiently, balancing **freshness** and **performance**. It monitors city-level cache entries using **hit counts** , **lastRefresh** and **last access time**.
