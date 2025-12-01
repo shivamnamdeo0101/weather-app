@@ -1,3 +1,6 @@
+### AWS Multi-Region Architecture
+<img width="1512" height="812" alt="AWS_ARCH" src="https://github.com/user-attachments/assets/8bae2fa5-cf49-4f7a-bdc4-1fa3b7801141" />
+
 ### Frontend
 <img width="1512" height="812" alt="Screenshot 2025-10-05 at 4 55 32 PM" src="https://github.com/user-attachments/assets/836eeb98-6455-4595-9f14-951ea9a99165" />
 <img width="1512" height="801" alt="Screenshot 2025-10-05 at 4 54 53 PM" src="https://github.com/user-attachments/assets/2f34d711-e5b2-4f53-8d9c-78f0b468ee68" />
@@ -35,6 +38,7 @@
 ### On-Demand Refreshing Active + Medium Active Cities
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/4d7645c5-d93c-4dce-a983-973f29fb6f26" />
 <img width="1512" height="auto" alt="image" src="https://github.com/user-attachments/assets/22cc2d7c-8ef3-471a-9bf3-884a3b805036" />
+
 
 
 
