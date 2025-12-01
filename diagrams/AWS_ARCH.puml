@@ -1,88 +1,54 @@
 @startuml
-title 🌍 Global Weather App — AWS Multi-Region Unified Pod Architecture
+title 🌍 Global Weather App — Simplified Multi-Region Architecture
 
-' --- Layout Settings ---
-skinparam packagePadding 15
+skinparam packagePadding 10
 skinparam rectangle {
-    Shadowing false
-    RoundCorner 10
-    Padding 8
-    MinWidth 180
-}
-skinparam database {
-    Shadowing false
-    RoundCorner 10
-    Padding 8
-    MinWidth 160
+    RoundCorner 8
+    Padding 6
 }
 skinparam cloud {
-    Shadowing false
+    RoundCorner 10
 }
 
 actor USER
+cloud CF as "CloudFront (CDN)\n• Serves Frontend (Static Assets)"
+rectangle R53 as "Route 53\nLatency-Based Routing"
 cloud OPENWEATHER as "OpenWeather API"
 
 ' ===========================
-' AWS GLOBAL INFRASTRUCTURE
+' GLOBAL INFRASTRUCTURE
 ' ===========================
 package "AWS Global Infrastructure" {
 
-    ' -------- ASIA REGION --------
-    package "Region: Asia (Singapore - ap-southeast-1)" {
-        rectangle POD_ASIA as "Weather Service Pod\n(Frontend + API + Scheduler + Redis)"
+    package "Asia (Singapore)" {
+        rectangle POD_ASIA as "Weather Pod\nAPI + Scheduler + Redis"
     }
 
-    ' -------- EUROPE REGION --------
-    package "Region: Europe (Frankfurt - eu-central-1)" {
-        rectangle POD_EU as "Weather Service Pod\n(Frontend + API + Scheduler + Redis)"
+    package "Europe (Frankfurt)" {
+        rectangle POD_EU as "Weather Pod\nAPI + Scheduler + Redis"
     }
 
-    ' -------- AFRICA REGION --------
-    package "Region: Africa (South Africa - af-south-1)" {
-        rectangle POD_AF as "Weather Service Pod\n(Frontend + API + Scheduler + Redis)"
+    package "Africa (South Africa)" {
+        rectangle POD_AF as "Weather Pod\nAPI + Scheduler + Redis"
     }
 
-    ' -------- AMERICAS REGION --------
-    package "Region: Americas (US East + São Paulo)" {
-        rectangle POD_US as "Weather Service Pod — US East (us-east-1)\n(Frontend + API + Scheduler + Redis)"
-        rectangle POD_SA as "Weather Service Pod — São Paulo (sa-east-1)\n(Frontend + API + Scheduler + Redis)"
+    package "Americas (US + São Paulo)" {
+        rectangle POD_US as "Weather Pod — US East"
+        rectangle POD_SA as "Weather Pod — São Paulo"
     }
 
-    ' -------- OCEANIA REGION --------
-    package "Region: Oceania (Sydney - ap-southeast-2)" {
-        rectangle POD_OC as "Weather Service Pod\n(Frontend + API + Scheduler + Redis)"
+    package "Oceania (Sydney)" {
+        rectangle POD_OC as "Weather Pod\nAPI + Scheduler + Redis"
     }
 }
 
 ' ===========================
-' GLOBAL SERVICES
+' USER → SYSTEM FLOW
 ' ===========================
-cloud CF as "Amazon CloudFront (CDN)"
+USER --> CF : Load Website (Static Assets)
+USER --> R53 : API Calls
 
-note top of CF
--Cache Static Assets (Images / Video Assets)
--Static assets related to weather
-end note
-
-
-rectangle R53 as "Route 53 (Latency-Based Routing)"
-
-' ===========================
-' GLOBAL CONNECTION FLOW
-' ===========================
-
-USER --> CF : Initial Page Load (Static Assets)
-USER --> R53 : API Endpoint (Latency-Based DNS)
-
-' CloudFront → Regional Pods (Frontend)
-CF --> POD_ASIA
-CF --> POD_EU
-CF --> POD_AF
-CF --> POD_US
-CF --> POD_SA
-CF --> POD_OC
-
-' Route 53 → Regional Pods (API Traffic)
+' CDN → Backends
 R53 --> POD_ASIA
 R53 --> POD_EU
 R53 --> POD_AF
@@ -91,25 +57,13 @@ R53 --> POD_SA
 R53 --> POD_OC
 
 ' ===========================
-' REGIONAL DATA FLOW
+' REGIONAL WEATHER FETCH
 ' ===========================
-
-POD_ASIA --> OPENWEATHER : Fetch Forecast / Current Weather
+POD_ASIA --> OPENWEATHER
 POD_EU --> OPENWEATHER
 POD_AF --> OPENWEATHER
 POD_US --> OPENWEATHER
 POD_SA --> OPENWEATHER
 POD_OC --> OPENWEATHER
-
-' ===========================
-' SYSTEM CONSTRAINTS
-' ===========================
-note bottom of OPENWEATHER
-<b>CONSTRAINTS:</b>
-- MAX_CITIES_OPEN_WEATHER = 200,000
-- PER_CITY_DATA_SIZE_IN_REDIS = 8 KB DATA + .12KB META DATA
-- MAX_REDIS_MEMORY = 1.624 GB -rounded ~2GB GLOBALLY
-- PER_REGION_REDIS_MEMORY ≈ ~300–400 MB (FOR 6 REGIONS)
-end note
 
 @enduml
