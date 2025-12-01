@@ -144,7 +144,7 @@ WEATHER_API_CNT=24
 
 ### Diagrams
 
-<img width="2153" height="723" alt="AWS_ARCH-_Global_Weather_App__AWS_Multi_Region_Unified_Pod_Architecture" src="https://github.com/user-attachments/assets/44680b12-9249-486e-85e0-4722ec8a5c9b" />
+<img width="1164" height="464" alt="image" src="https://github.com/user-attachments/assets/a65b7865-c8e5-4674-935e-1c5e0f759c0e" />
 
 <img width="1261" height="1017" alt="SequenceAPIDig-Weather_Forecast_Request_Flow__with_Rate_Limiter___Status_Codes_" src="https://github.com/user-attachments/assets/a57d5f2d-0696-465e-9e8a-8dd0e2f25bfe" />
 
